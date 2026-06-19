@@ -7,13 +7,15 @@ import os
 import sys
 import json
 import secrets
+import hashlib
 from pathlib import Path
 from typing import Optional, List
 
 import pandas as pd
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header, Request, Form
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
 import uvicorn
 
@@ -30,7 +32,45 @@ from analytics.engine import (
     ConcorrenteAnalytics, AtlasTSEAnalytics, EstrategistaAnalytics,
 )
 
+# ── Autenticação ──────────────────────────────────────────────────────────────
+
+APP_USER     = os.environ.get("QUOLIS_USER", "quolis")
+APP_PASSWORD = os.environ.get("QUOLIS_PASSWORD", "")
+# Token de sessão: derivado de user+password+secret para invalidar ao trocar senha
+_SESSION_SECRET = os.environ.get("QUOLIS_SESSION_SECRET", secrets.token_hex(32))
+
+def _make_session_token() -> str:
+    raw = f"{APP_USER}:{APP_PASSWORD}:{_SESSION_SECRET}"
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+VALID_TOKEN = _make_session_token()
+
+# Rotas que NÃO precisam de autenticação
+_PUBLIC_PATHS = {"/auth/login", "/auth/logout", "/favicon.ico"}
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Webhooks de integração externa usam API key — não cookie
+        if request.url.path.startswith("/api/integracao"):
+            return await call_next(request)
+        # Rotas públicas
+        if request.url.path in _PUBLIC_PATHS:
+            return await call_next(request)
+        # Sem senha configurada → acesso livre (dev local)
+        if not APP_PASSWORD:
+            return await call_next(request)
+        # Verifica cookie de sessão
+        token = request.cookies.get("qs_session", "")
+        if not secrets.compare_digest(token, VALID_TOKEN):
+            # APIs retornam 401; páginas redirecionam para login
+            if request.url.path.startswith("/api/"):
+                return JSONResponse({"detail": "Não autenticado."}, status_code=401)
+            return RedirectResponse("/auth/login", status_code=302)
+        return await call_next(request)
+
+
 app = FastAPI(title="Quolis — Inteligência Eleitoral AM", version="2.0")
+app.add_middleware(AuthMiddleware)
 
 if (BASE_DIR / "static").exists():
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -49,12 +89,90 @@ def _ensure_init():
     finally:
         db.close()
 
-# Inicializa imediatamente ao importar (funciona no Vercel/serverless)
 _ensure_init()
 
 @app.on_event("startup")
 def startup():
     _ensure_init()
+
+
+# ── Login / Logout ─────────────────────────────────────────────────────────────
+
+_LOGIN_HTML = """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Quolis — Acesso</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#0c1f14;font-family:'Inter',system-ui,sans-serif}
+.card{background:#fff;border-radius:18px;padding:44px 40px;width:100%;max-width:380px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.logo{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#0f172a;margin-bottom:4px}
+.logo span{color:#16a34a}
+.sub{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:32px}
+label{display:block;font-size:11px;font-weight:700;color:#64748b;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;
+  font-size:14px;font-family:inherit;color:#0f172a;outline:none;
+  transition:border-color .15s;margin-bottom:16px}
+input:focus{border-color:#16a34a}
+button{width:100%;padding:13px;background:#16a34a;color:#fff;border:none;
+  border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:background .15s;margin-top:4px}
+button:hover{background:#15803d}
+.err{background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px 14px;
+  font-size:12px;margin-bottom:16px;border:1px solid #fca5a5}
+.footer{text-align:center;font-size:10px;color:#cbd5e1;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Q<span>UOLIS</span></div>
+  <div class="sub">Inteligência Eleitoral · AM 2026</div>
+  {error}
+  <form method="post" action="/auth/login">
+    <label>Usuário</label>
+    <input type="text" name="username" autocomplete="username" autofocus required/>
+    <label>Senha</label>
+    <input type="password" name="password" autocomplete="current-password" required/>
+    <button type="submit">Entrar</button>
+  </form>
+  <div class="footer">Acesso restrito à equipe de campanha</div>
+</div>
+</body>
+</html>"""
+
+@app.get("/auth/login", response_class=HTMLResponse)
+async def login_page():
+    return _LOGIN_HTML.replace("{error}", "")
+
+@app.post("/auth/login")
+async def login_submit(
+    username: str = Form(...),
+    password: str = Form(...),
+):
+    if (secrets.compare_digest(username.strip(), APP_USER) and
+            secrets.compare_digest(password, APP_PASSWORD)):
+        resp = RedirectResponse("/", status_code=302)
+        resp.set_cookie(
+            "qs_session", VALID_TOKEN,
+            httponly=True, samesite="lax",
+            max_age=60 * 60 * 24 * 30,   # 30 dias
+            secure=os.environ.get("DATABASE_URL", "") != "",  # secure só em prod
+        )
+        return resp
+    error_html = '<div class="err">Usuário ou senha incorretos.</div>'
+    return HTMLResponse(_LOGIN_HTML.replace("{error}", error_html), status_code=401)
+
+@app.get("/auth/logout")
+async def logout():
+    resp = RedirectResponse("/auth/login", status_code=302)
+    resp.delete_cookie("qs_session")
+    return resp
 
 
 # ── Frontend ───────────────────────────────────────────────────────────────────
