@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BMATH — Inteligência Eleitoral AM 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --surface3: #1e2d45;
+  --border: #1e3a5f;
+  --accent: #3b82f6;
+  --accent2: #6366f1;
+  --gold: #f59e0b;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f97316;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --sidebar-w: 240px;
+  --header-h: 60px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;display:flex;min-height:100vh;overflow-x:hidden}
+
+/* Sidebar */
+#sidebar{
+  width:var(--sidebar-w);min-height:100vh;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;z-index:100;
+}
+.logo{padding:20px 16px;border-bottom:1px solid var(--border)}
+.logo-title{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff}
+.logo-title span{color:var(--accent)}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav-section{padding:8px 16px 4px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;
+  cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;
+  border-left:3px solid transparent;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--surface2);color:var(--accent);border-left-color:var(--accent)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Main */
+#main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+#header{
+  height:var(--header-h);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+  position:sticky;top:0;z-index:50;
+}
+.header-title{font-size:16px;font-weight:600;color:var(--text)}
+.header-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.header-right{display:flex;align-items:center;gap:12px}
+.badge{
+  padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;
+  background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3)
+}
+.badge.gold{background:rgba(245,158,11,.15);color:var(--gold);border-color:rgba(245,158,11,.3)}
+
+#content{padding:24px;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* Grid / Cards */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g12{grid-template-columns:1fr 2fr}
+.g21{grid-template-columns:2fr 1fr}
+@media(max-width:900px){.g2,.g3,.g4,.g12,.g21{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-sm{padding:14px 16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.card-badge{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--text2)}
+
+/* KPI */
+.kpi-val{font-size:32px;font-weight:800;color:#fff;line-height:1;margin:4px 0}
+.kpi-val.accent{color:var(--accent)}
+.kpi-val.gold{color:var(--gold)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.red{color:var(--red)}
+.kpi-label{font-size:12px;color:var(--text2)}
+.kpi-delta{font-size:12px;margin-top:6px}
+.kpi-delta.up{color:var(--green)}
+.kpi-delta.down{color:var(--red)}
+.kpi-delta.warn{color:var(--gold)}
+
+/* Progress bar */
+.progress-wrap{margin:8px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px}
+.progress-bar{height:8px;background:var(--surface3);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.progress-fill.blue{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.progress-fill.gold{background:linear-gradient(90deg,var(--gold),#fbbf24)}
+.progress-fill.green{background:linear-gradient(90deg,var(--green),#4ade80)}
+.progress-fill.red{background:linear-gradient(90deg,var(--red),#f87171)}
+
+/* Cenário tabs */
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:8px}
+.tab{
+  flex:1;padding:6px 12px;border-radius:6px;text-align:center;
+  font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s;
+}
+.tab.active{background:var(--accent);color:#fff}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:hover td{background:var(--surface2)}
+.pri-tag{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.pri-urgente{background:rgba(239,68,68,.15);color:var(--red)}
+.pri-alta{background:rgba(249,115,22,.15);color:var(--orange)}
+.pri-media{background:rgba(245,158,11,.15);color:var(--gold)}
+.pri-baixa{background:rgba(34,197,94,.15);color:var(--green)}
+
+/* Rec cards */
+.rec-card{background:var(--surface2);border-radius:10px;padding:14px 16px;border-left:4px solid var(--accent);margin-bottom:10px}
+.rec-card.urgente{border-left-color:var(--red)}
+.rec-card.alta{border-left-color:var(--orange)}
+.rec-card.media{border-left-color:var(--gold)}
+.rec-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.rec-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.rec-impact{font-size:11px;color:var(--green);margin-top:6px;font-weight:600}
+
+/* Score gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0}
+.gauge-val{font-size:48px;font-weight:800;margin-top:8px}
+.gauge-label{font-size:14px;font-weight:700;letter-spacing:1px;margin-top:4px}
+.gauge-sub{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* Upload */
+.upload-area{
+  border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;
+  cursor:pointer;transition:all .2s;background:var(--surface2);
+}
+.upload-area:hover,.upload-area.drag{border-color:var(--accent);background:rgba(59,130,246,.06)}
+.upload-icon{font-size:40px;margin-bottom:12px}
+.upload-title{font-size:16px;font-weight:600;color:#fff}
+.upload-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+input[type=file]{display:none}
+
+/* Scenario compare */
+.scenario-box{background:var(--surface2);border-radius:10px;padding:16px;text-align:center}
+.scenario-box .val{font-size:28px;font-weight:800;margin:6px 0}
+.scenario-box .lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.scenario-box .sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* Spinner */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Notification */
+#notif{
+  position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px
+}
+.notif-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px;font-size:13px;color:var(--text);min-width:260px;
+  animation:slideIn .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.notif-item.success{border-left:3px solid var(--green)}
+.notif-item.error{border-left:3px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Page header */
+.page-header{margin-bottom:24px}
+.page-title{font-size:22px;font-weight:800;color:#fff}
+.page-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* Histogram */
+.hist-bar-row{display:flex;align-items:center;gap:8px;margin:2px 0}
+.hist-label{font-size:10px;color:var(--text3);width:60px;text-align:right;flex-shrink:0}
+.hist-bar-wrap{flex:1;height:14px;background:var(--surface2);border-radius:3px;overflow:hidden;position:relative}
+.hist-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s}
+.hist-bar-fill.above{background:linear-gradient(90deg,var(--green),#4ade80)}
+
+/* Chip */
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;margin:2px}
+.chip-a{background:rgba(34,197,94,.15);color:var(--green)}
+.chip-b{background:rgba(59,130,246,.15);color:var(--accent)}
+.chip-c{background:rgba(245,158,11,.15);color:var(--gold)}
+.chip-d{background:rgba(239,68,68,.15);color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <div class="logo-title">B<span>MATH</span></div>
+    <div class="logo-sub">Inteligência Eleitoral AM</div>
+  </div>
+  <div class="nav">
+    <div class="nav-section">Análise</div>
+    <div class="nav-item active" data-page="painel" onclick="nav(this)">
+      <span class="icon">⚡</span> Painel Geral
+    </div>
+    <div class="nav-item" data-page="projecao" onclick="nav(this)">
+      <span class="icon">📊</span> Projeção de Votos
+    </div>
+    <div class="nav-item" data-page="montecarlo" onclick="nav(this)">
+      <span class="icon">🎲</span> Simulação Monte Carlo
+    </div>
+    <div class="nav-section">Território</div>
+    <div class="nav-item" data-page="territorial" onclick="nav(this)">
+      <span class="icon">🗺️</span> Mapa Territorial
+    </div>
+    <div class="nav-item" data-page="zonas" onclick="nav(this)">
+      <span class="icon">📍</span> Zonas Eleitorais
+    </div>
+    <div class="nav-section">Eleitorado</div>
+    <div class="nav-item" data-page="perfil" onclick="nav(this)">
+      <span class="icon">👥</span> Perfil do Eleitor
+    </div>
+    <div class="nav-item" data-page="crescimento" onclick="nav(this)">
+      <span class="icon">📈</span> Crescimento & Metas
+    </div>
+    <div class="nav-section">Estratégia</div>
+    <div class="nav-item" data-page="recomendacoes" onclick="nav(this)">
+      <span class="icon">🎯</span> Recomendações
+    </div>
+    <div class="nav-item" data-page="tse" onclick="nav(this)">
+      <span class="icon">🏛️</span> Dados TSE
+    </div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" data-page="importar" onclick="nav(this)">
+      <span class="icon">⬆️</span> Importar Dados
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <span class="status-dot"></span>Sistema online · AM 2026
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="header">
+    <div>
+      <div class="header-title" id="header-title">Painel Geral</div>
+      <div class="header-sub" id="header-sub">Visão consolidada da campanha</div>
+    </div>
+    <div class="header-right">
+      <div class="badge gold">Dep. Estadual · ALEAM 2026</div>
+      <div class="badge" id="header-badge">Carregando...</div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ═══════════════ PAINEL GERAL ═══════════════ -->
+    <div class="page active" id="page-painel">
+      <div class="page-header">
+        <div class="page-title">⚡ Painel Geral</div>
+        <div class="page-sub">Diagnóstico completo em tempo real · Eleição 2026 · Deputado Estadual AM</div>
+      </div>
+
+      <!-- KPIs linha 1 -->
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="card card-sm">
+          <div class="kpi-label">Total Cadastros</div>
+          <div class="kpi-val accent" id="kpi-total">—</div>
+          <div class="kpi-delta" id="kpi-total-d"></div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">Votos Estimados (Realista)</div>
+          <div class="kpi-val gold" id="kpi-votos">—</div>
+          <div class="kpi-delta" id="kpi-votos-d"></div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">% do Quociente Eleitoral</div>
+          <div class="kpi-val" id="kpi-pct">—</div>
+          <div class="kpi-delta warn">Quociente est. 2026: ~52.500</div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">Prob. de Eleição (Monte Carlo)</div>
+          <div class="kpi-val" id="kpi-prob">—</div>
+          <div class="kpi-delta" id="kpi-prob-d"></div>
+        </div>
+      </div>
+
+      <!-- Score + Progresso + Cenários -->
+      <div class="grid g3" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Score de Viabilidade</div><div class="card-badge">0–100</div></div>
+          <div class="gauge-wrap">
+            <canvas id="chart-gauge" width="180" height="100"></canvas>
+            <div class="gauge-val" id="gauge-val">—</div>
+            <div class="gauge-label" id="gauge-class">—</div>
+            <div class="gauge-sub" id="gauge-sub">—</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Progresso às Metas</div></div>
+          <div id="progress-section" style="margin-top:4px">
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Quociente Eleitoral (52.500)</span><span id="p-quoc">—</span></div>
+              <div class="progress-bar"><div class="progress-fill blue" id="pb-quoc" style="width:0%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Meta Segura (45.000)</span><span id="p-seg">—</span></div>
+              <div class="progress-bar"><div class="progress-fill green" id="pb-seg" style="width:0%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Meta Mínima (30.000)</span><span id="p-min">—</span></div>
+              <div class="progress-bar"><div class="progress-fill gold" id="pb-min" style="width:0%"></div></div>
+            </div>
+            <div class="divider"></div>
+            <div style="font-size:12px;color:var(--text2)">
+              <div>Bairros cobertos: <strong id="kpi-bairros">—</strong></div>
+              <div style="margin-top:6px">Zonas cobertas: <strong id="kpi-zonas">—</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">3 Cenários de Votos</div></div>
+          <div class="grid" style="gap:10px;margin-top:4px">
+            <div class="scenario-box">
+              <div class="lbl">😟 Pessimista</div>
+              <div class="val red" id="sc-pess">—</div>
+              <div class="sub" id="sc-pess-p">—</div>
+            </div>
+            <div class="scenario-box">
+              <div class="lbl">📊 Realista</div>
+              <div class="val gold" id="sc-real">—</div>
+              <div class="sub" id="sc-real-p">—</div>
+            </div>
+            <div class="scenario-box">
+              <div class="lbl">🚀 Otimista</div>
+              <div class="val green" id="sc-otim">—</div>
+              <div class="sub" id="sc-otim-p">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts linha -->
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top 10 Bairros por Cadastros</div></div>
+          <canvas id="chart-bairros" height="220"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Distribuição por Gênero vs. Eleitorado AM</div></div>
+          <canvas id="chart-genero" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PROJEÇÃO DE VOTOS ═══════════════ -->
+    <div class="page" id="page-projecao">
+      <div class="page-header">
+        <div class="page-title">📊 Projeção de Votos</div>
+        <div class="page-sub">Modelo matemático de conversão cadastro → voto nos 3 cenários</div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="setCenario('pessimista',this)">😟 Pessimista</div>
+        <div class="tab" onclick="setCenario('realista',this)">📊 Realista</div>
+        <div class="tab" onclick="setCenario('otimista',this)">🚀 Otimista</div>
+      </div>
+
+      <div class="grid g4" style="margin-bottom:16px" id="proj-kpis">
+        <div class="card card-sm"><div class="kpi-label">Taxa de Conversão</div><div class="kpi-val accent" id="pj-conv">—</div><div class="kpi-delta">cadastro → voto</div></div>
+        <div class="card card-sm"><div class="kpi-label">Votos Diretos</div><div class="kpi-val" id="pj-dir">—</div><div class="kpi-delta">apoiadores que votam</div></div>
+        <div class="card card-sm"><div class="kpi-label">Votos Indiretos</div><div class="kpi-val gold" id="pj-ind">—</div><div class="kpi-delta">efeito multiplicador</div></div>
+        <div class="card card-sm"><div class="kpi-label">Total Projetado</div><div class="kpi-val green" id="pj-tot">—</div><div class="kpi-delta" id="pj-tot-d"></div></div>
+      </div>
+
+      <div class="grid g12" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Funil de Conversão</div></div>
+          <canvas id="chart-funil" height="280"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Fórmula do Modelo</div></div>
+          <div id="formula-box" style="font-size:13px;color:var(--text2);line-height:1.9">
+            <div style="background:var(--surface2);border-radius:8px;padding:14px;font-family:monospace;font-size:12px;color:var(--accent);margin-bottom:12px">
+              Votos = (Cadastros × Taxa_Conv × (1 − Abstenção))<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + Diretos × (Mult − 1) × Eficiência
+            </div>
+            <div><strong>Multiplicador médio:</strong> <span id="pj-mult">—</span></div>
+            <div><strong>Abstinência projetada:</strong> 28,5%</div>
+            <div><strong>Quociente estimado 2026:</strong> 52.500</div>
+            <div><strong>Déficit atual:</strong> <span id="pj-deficit" style="color:var(--red)">—</span></div>
+            <div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:8px">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px">PROGRESSO AO QUOCIENTE</div>
+              <div class="progress-bar"><div class="progress-fill blue" id="pb-proj" style="width:0%"></div></div>
+              <div style="font-size:12px;color:var(--text2);margin-top:4px" id="pj-pct-label">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Comparativo dos 3 Cenários</div></div>
+        <canvas id="chart-cenarios" height="180"></canvas>
+      </div>
+    </div>
+
+    <!-- ═══════════════ MONTE CARLO ═══════════════ -->
+    <div class="page" id="page-montecarlo">
+      <div class="page-header">
+        <div class="page-title">🎲 Simulação Monte Carlo</div>
+        <div class="page-sub">10.000 simulações com variáveis aleatórias distribuídas — intervalo de confiança real</div>
+      </div>
+
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="card card-sm"><div class="kpi-label">Probabilidade de Eleição</div><div class="kpi-val green" id="mc-prob">—</div><div class="kpi-delta">das 10.000 simulações</div></div>
+        <div class="card card-sm"><div class="kpi-label">Mediana das Simulações</div><div class="kpi-val accent" id="mc-med">—</div><div class="kpi-delta">valor central</div></div>
+        <div class="card card-sm"><div class="kpi-label">Intervalo 90% (mín)</div><div class="kpi-val" id="mc-ic-min">—</div><div class="kpi-delta">cenário desfavorável</div></div>
+        <div class="card card-sm"><div class="kpi-label">Intervalo 90% (máx)</div><div class="kpi-val" id="mc-ic-max">—</div><div class="kpi-delta">cenário favorável</div></div>
+      </div>
+
+      <div class="grid g21" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Distribuição de Resultados (histograma)</div><div class="card-badge">10.000 simulações</div></div>
+          <div id="histograma-wrap" style="padding:8px 0;max-height:340px;overflow-y:auto"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Percentis</div></div>
+          <div id="percentis-box" style="font-size:13px"></div>
+          <div class="divider"></div>
+          <div style="font-size:12px;color:var(--text2);line-height:2">
+            <div><strong>Variáveis simuladas:</strong></div>
+            <div>• Taxa de conversão (Beta α=7, β=3.5)</div>
+            <div>• Abstenção (Beta α=5, β=13)</div>
+            <div>• Multiplicador boca-a-boca (Normal μ=2.2)</div>
+            <div>• Eficiência do multiplicador (Beta α=3, β=5)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TERRITORIAL ═══════════════ -->
+    <div class="page" id="page-territorial">
+      <div class="page-header">
+        <div class="page-title">🗺️ Mapa Territorial</div>
+        <div class="page-sub">Presença por bairro · penetração · potencial inexplorado · ROI estratégico</div>
+      </div>
+
+      <div class="grid g3" style="margin-bottom:16px">
+        <div class="card card-sm"><div class="kpi-label">Bairros Cobertos</div><div class="kpi-val accent" id="terr-cobertos">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Cobertura Total</div><div class="kpi-val gold" id="terr-cobertura">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Bairros Sem Presença</div><div class="kpi-val red" id="terr-zero">—</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top 10 por Penetração (%)</div></div>
+          <canvas id="chart-penetracao" height="240"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top 10 por ROI Estratégico</div></div>
+          <canvas id="chart-roi" height="240"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tabela Completa de Bairros</div><div class="card-badge" id="terr-count">—</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Bairro</th><th>Cadastros</th><th>Eleitores Est.</th>
+              <th>Penetração</th><th>Classe</th><th>Densidade</th><th>ROI</th>
+            </tr></thead>
+            <tbody id="terr-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ZONAS ═══════════════ -->
+    <div class="page" id="page-zonas">
+      <div class="page-header">
+        <div class="page-title">📍 Zonas Eleitorais</div>
+        <div class="page-sub">Análise por zona eleitoral · votos estimados · contribuição à meta · priorização</div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-title">Votos Estimados por Zona</div></div>
+        <canvas id="chart-zonas" height="220"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Detalhamento por Zona</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Zona</th><th>Cadastros</th><th>Eleitores</th>
+              <th>Penetração</th><th>Votos Est.</th><th>% da Meta</th><th>Prioridade</th>
+            </tr></thead>
+            <tbody id="zonas-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PERFIL ═══════════════ -->
+    <div class="page" id="page-perfil">
+      <div class="page-header">
+        <div class="page-title">👥 Perfil do Eleitor</div>
+        <div class="page-sub">Análise demográfica da base · comparativo com eleitorado amazonense</div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div>
+          <canvas id="chart-genero2" height="240"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Faixa Etária · Base vs. Eleitorado AM</div></div>
+          <canvas id="chart-faixa" height="240"></canvas>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Taxa de Conversão por Perfil Etário</div></div>
+          <canvas id="chart-conv-faixa" height="220"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Elasticidade Eleitoral por Segmento</div></div>
+          <div id="elasticidade-box" style="font-size:13px;color:var(--text2);line-height:2.2;padding:8px 0">
+            <div>👴 <strong>60+ anos</strong> — Fidelidade: <span style="color:var(--green)">83%</span> · Menor volatilidade</div>
+            <div>🧑 <strong>45–59 anos</strong> — Fidelidade: <span style="color:var(--green)">78%</span> · Alta influência comunitária</div>
+            <div>🧑‍💼 <strong>25–44 anos</strong> — Fidelidade: <span style="color:var(--gold)">72%</span> · Maior potencial multiplicador</div>
+            <div>🧑‍🎓 <strong>18–24 anos</strong> — Fidelidade: <span style="color:var(--red)">61%</span> · Alto alcance em redes sociais</div>
+            <div class="divider"></div>
+            <div>🏘️ <strong>Periferia alta densidade</strong> — Mult: <span style="color:var(--accent)">2.8×</span></div>
+            <div>🏘️ <strong>Periferia média</strong> — Mult: <span style="color:var(--accent)">2.2×</span></div>
+            <div>🏢 <strong>Zona Sul / Classe Média</strong> — Mult: <span style="color:var(--accent)">1.6×</span></div>
+            <div>🌿 <strong>Interior AM</strong> — Mult: <span style="color:var(--green)">3.1×</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ CRESCIMENTO ═══════════════ -->
+    <div class="page" id="page-crescimento">
+      <div class="page-header">
+        <div class="page-title">📈 Crescimento & Metas</div>
+        <div class="page-sub">Projeção mensal de cadastros e votos · trajetória até eleição 2026</div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><div class="card-title">Projeção Acumulada de Votos (Set/25 → Jun/26)</div></div>
+        <canvas id="chart-crescimento" height="220"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Calendário de Metas Mensais</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Mês</th><th>Novos Cadastros</th><th>Acumulado</th>
+              <th>Votos Estimados</th><th>% da Meta</th><th>Status</th>
+            </tr></thead>
+            <tbody id="cresc-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ RECOMENDAÇÕES ═══════════════ -->
+    <div class="page" id="page-recomendacoes">
+      <div class="page-header">
+        <div class="page-title">🎯 Recomendações Estratégicas</div>
+        <div class="page-sub">Direcionamentos prioritários baseados na análise matemática da campanha</div>
+      </div>
+
+      <div id="rec-list" style="margin-bottom:24px"></div>
+
+      <!-- Padrões comportamentais -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Efeito de Presença por Tipo de Ação</div></div>
+        <canvas id="chart-acoes" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TSE ═══════════════ -->
+    <div class="page" id="page-tse">
+      <div class="page-header">
+        <div class="page-title">🏛️ Dados TSE · Histórico ALEAM</div>
+        <div class="page-sub">Resultados eleitorais históricos · projeção 2026 · perfil do eleitorado amazonense</div>
+      </div>
+
+      <div class="grid g4" style="margin-bottom:16px">
+        <div class="card card-sm"><div class="kpi-label">Quociente Eleitoral 2022</div><div class="kpi-val gold">49.559</div></div>
+        <div class="card card-sm"><div class="kpi-label">Menor Votado Eleito (2022)</div><div class="kpi-val accent">28.340</div></div>
+        <div class="card card-sm"><div class="kpi-label">Quociente Projetado 2026</div><div class="kpi-val">52.500</div></div>
+        <div class="card card-sm"><div class="kpi-label">Total Eleitores Manaus</div><div class="kpi-val">1,42M</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Quociente Eleitoral Histórico</div></div>
+          <canvas id="chart-hist-quoc" height="220"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Perfil do Eleitorado AM (TSE 2024)</div></div>
+          <canvas id="chart-perfil-am" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Escolaridade do Eleitorado AM</div></div>
+          <canvas id="chart-escol" height="220"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Parâmetros da Eleição 2026</div></div>
+          <div id="params-2026" style="font-size:13px;color:var(--text2);line-height:2.2;padding:8px 0">
+            <div>📊 <strong>Total eleitores estimado (Manaus):</strong> 1.480.000</div>
+            <div>📊 <strong>Crescimento do eleitorado:</strong> +4,1%</div>
+            <div>📊 <strong>Abstenção projetada:</strong> 29%</div>
+            <div>📊 <strong>Votos nulos/brancos:</strong> ~4,5%</div>
+            <div>📊 <strong>Total votos válidos est.:</strong> ~1.260.000</div>
+            <div>📊 <strong>Vagas ALEAM:</strong> 24</div>
+            <div>📊 <strong>Quociente eleitoral est.:</strong> 52.500</div>
+            <div>📊 <strong>Meta segura:</strong> 45.000</div>
+            <div>📊 <strong>Meta mínima histórica:</strong> 30.000</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ IMPORTAR ═══════════════ -->
+    <div class="page" id="page-importar">
+      <div class="page-header">
+        <div class="page-title">⬆️ Importar Dados</div>
+        <div class="page-sub">Carregue sua planilha de cadastros em CSV — o sistema atualiza todas as análises automaticamente</div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Upload de Arquivo</div></div>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()"
+               ondragover="event.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="handleDrop(event)">
+            <div class="upload-icon">📂</div>
+            <div class="upload-title">Arraste seu CSV aqui</div>
+            <div class="upload-sub">ou clique para selecionar o arquivo</div>
+            <div style="margin-top:16px">
+              <span class="badge">CSV</span>
+              <span class="badge" style="margin-left:6px">XLSX (em breve)</span>
+            </div>
+          </div>
+          <input type="file" id="file-input" accept=".csv" onchange="uploadFile(this.files[0])"/>
+          <div id="upload-status" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Formato Esperado</div></div>
+          <div style="font-size:13px;color:var(--text2);line-height:2">
+            <div>O arquivo CSV deve conter colunas com os dados abaixo.</div>
+            <div style="background:var(--surface2);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;margin:10px 0;color:var(--accent)">
+              nome,bairro,zona,genero,idade,telefone<br>
+              João Silva,Cidade Nova,02,M,34,92 99999-0000<br>
+              Maria Souza,Compensa,06,F,28,92 98888-1111
+            </div>
+            <div>✅ <strong>nome</strong> — nome do eleitor (qualquer variação)</div>
+            <div>✅ <strong>bairro</strong> — bairro de residência</div>
+            <div>✅ <strong>zona</strong> — número da zona eleitoral</div>
+            <div>✅ <strong>genero</strong> — M/F ou Masculino/Feminino</div>
+            <div>✅ <strong>idade</strong> — idade ou data de nascimento</div>
+            <div>✅ <strong>telefone</strong> — contato (opcional)</div>
+            <div style="margin-top:8px;color:var(--text3)">Colunas não reconhecidas são ignoradas. O sistema detecta variações nos nomes automaticamente.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="upload-preview-card" style="display:none">
+        <div class="card-header"><div class="card-title">Preview dos Dados Importados</div><div class="card-badge" id="upload-count">—</div></div>
+        <div class="table-wrap"><table><thead id="prev-head"></thead><tbody id="prev-body"></tbody></table></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div id="notif"></div>
+
+<script>
+// ──────────────────────────────────────────────
+// NAVEGAÇÃO
+// ──────────────────────────────────────────────
+const pageInfo = {
+  painel:       {title:"Painel Geral",        sub:"Visão consolidada da campanha"},
+  projecao:     {title:"Projeção de Votos",   sub:"Modelo matemático de conversão"},
+  montecarlo:   {title:"Simulação Monte Carlo",sub:"10.000 simulações probabilísticas"},
+  territorial:  {title:"Mapa Territorial",    sub:"Cobertura por bairro e ROI estratégico"},
+  zonas:        {title:"Zonas Eleitorais",    sub:"Análise por zona · contribuição à meta"},
+  perfil:       {title:"Perfil do Eleitor",   sub:"Análise demográfica da base cadastral"},
+  crescimento:  {title:"Crescimento & Metas", sub:"Projeção mensal até eleição 2026"},
+  recomendacoes:{title:"Recomendações",       sub:"Direcionamentos estratégicos prioritários"},
+  tse:          {title:"Dados TSE",           sub:"Histórico ALEAM · perfil eleitorado AM"},
+  importar:     {title:"Importar Dados",      sub:"Upload CSV · atualização em tempo real"},
+};
+
+let currentPage = "painel";
+const loadedPages = new Set();
+
+function nav(el) {
+  const page = el.dataset.page;
+  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  currentPage = page;
+  const info = pageInfo[page] || {};
+  document.getElementById("header-title").textContent = info.title || page;
+  document.getElementById("header-sub").textContent = info.sub || "";
+  if (!loadedPages.has(page)) { loadPage(page); }
+}
+
+// ──────────────────────────────────────────────
+// CHART.JS CONFIG
+// ──────────────────────────────────────────────
+Chart.defaults.color = "#94a3b8";
+Chart.defaults.borderColor = "#1e3a5f";
+Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+const chartInstances = {};
+
+function getOrCreate(id, type, data, options) {
+  if (chartInstances[id]) chartInstances[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  chartInstances[id] = new Chart(ctx, {type, data, options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: "#111827", borderColor: "#1e3a5f", borderWidth: 1, titleColor: "#e2e8f0", bodyColor: "#94a3b8" } },
+    ...options
+  }});
+  return chartInstances[id];
+}
+
+function fmtN(n){ return n != null ? Number(n).toLocaleString("pt-BR") : "—" }
+function fmtPct(n){ return n != null ? Number(n).toFixed(1)+"%" : "—" }
+
+// ──────────────────────────────────────────────
+// NOTIFICAÇÕES
+// ──────────────────────────────────────────────
+function notify(msg, type="success") {
+  const div = document.createElement("div");
+  div.className = `notif-item ${type}`;
+  div.textContent = msg;
+  document.getElementById("notif").appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
+// ──────────────────────────────────────────────
+// LOAD PAGES
+// ──────────────────────────────────────────────
+async function loadPage(page) {
+  loadedPages.add(page);
+  const handlers = {
+    painel: loadPainel,
+    projecao: loadProjecao,
+    montecarlo: loadMonteCarlo,
+    territorial: loadTerritorial,
+    zonas: loadZonas,
+    perfil: loadPerfil,
+    crescimento: loadCrescimento,
+    recomendacoes: loadRecomendacoes,
+    tse: loadTSE,
+  };
+  if (handlers[page]) await handlers[page]();
+}
+
+// ──────────────────────────────────────────────
+// PAINEL GERAL
+// ──────────────────────────────────────────────
+async function loadPainel() {
+  const [resumo, score, cenarios, mc] = await Promise.all([
+    fetch("/api/resumo").then(r=>r.json()),
+    fetch("/api/score").then(r=>r.json()),
+    fetch("/api/todos-cenarios").then(r=>r.json()),
+    fetch("/api/monte-carlo").then(r=>r.json()),
+  ]);
+
+  // KPIs
+  document.getElementById("kpi-total").textContent = fmtN(resumo.total_cadastros);
+  document.getElementById("header-badge").textContent = fmtN(resumo.total_cadastros)+" cadastros";
+
+  const real = cenarios.realista;
+  document.getElementById("kpi-votos").textContent = fmtN(real.total_votos_estimado);
+  document.getElementById("kpi-pct").textContent = fmtPct(real.pct_quociente_atingido);
+  const pctNum = real.pct_quociente_atingido;
+  document.getElementById("kpi-pct").className = "kpi-val " + (pctNum>=100?"green":pctNum>=70?"gold":"red");
+
+  document.getElementById("kpi-prob").textContent = fmtPct(mc.prob_eleicao_pct);
+  document.getElementById("kpi-prob").className = "kpi-val " + (mc.prob_eleicao_pct>=60?"green":mc.prob_eleicao_pct>=35?"gold":"red");
+  document.getElementById("kpi-prob-d").textContent = "Monte Carlo · 10.000 simulações";
+
+  // Score gauge
+  document.getElementById("gauge-val").textContent = score.score_total;
+  document.getElementById("gauge-val").style.color = score.cor;
+  document.getElementById("gauge-class").textContent = score.classificacao;
+  document.getElementById("gauge-class").style.color = score.cor;
+  document.getElementById("gauge-sub").textContent =
+    `Territorial: ${score.componentes.dispersao_territorial} · Volume: ${score.componentes.volume_cadastral} · Prob: ${score.componentes.probabilidade_matematica}`;
+
+  // Progress bars
+  const q = real.quociente_eleitoral_2026;
+  const v = real.total_votos_estimado;
+  const pqset = pct => Math.min(pct, 100);
+
+  document.getElementById("p-quoc").textContent = fmtN(v)+" / "+fmtN(q);
+  document.getElementById("pb-quoc").style.width = pqset(v/q*100)+"%";
+  document.getElementById("p-seg").textContent = fmtN(v)+" / 45.000";
+  document.getElementById("pb-seg").style.width = pqset(v/45000*100)+"%";
+  document.getElementById("p-min").textContent = fmtN(v)+" / 30.000";
+  document.getElementById("pb-min").style.width = pqset(v/30000*100)+"%";
+
+  document.getElementById("kpi-bairros").textContent = resumo.bairros_distintos+" bairros";
+  document.getElementById("kpi-zonas").textContent = resumo.zonas_distintas+" zonas";
+
+  // 3 cenários
+  const cn = {
+    pessimista: {el:"pess", color:"red"},
+    realista: {el:"real", color:"gold"},
+    otimista: {el:"otim", color:"green"},
+  };
+  for (const [key, cfg] of Object.entries(cn)) {
+    const d = cenarios[key];
+    document.getElementById(`sc-${cfg.el}`).textContent = fmtN(d.total_votos_estimado);
+    document.getElementById(`sc-${cfg.el}`).className = "val "+cfg.color;
+    document.getElementById(`sc-${cfg.el}-p`).textContent = fmtPct(d.pct_quociente_atingido)+" do quociente";
+  }
+
+  // Chart bairros
+  const bairros = Object.entries(resumo.por_bairro||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  getOrCreate("chart-bairros","bar",{
+    labels: bairros.map(b=>b[0]),
+    datasets:[{data:bairros.map(b=>b[1]),backgroundColor:"rgba(59,130,246,.7)",borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:30,minRotation:30}}},maintainAspectRatio:false});
+
+  // Chart gênero
+  const gen = resumo.por_genero || {};
+  const total_gen = (gen.Masculino||0)+(gen.Feminino||0);
+  const pct_masc = total_gen ? gen.Masculino/total_gen*100 : 46;
+  const pct_fem = total_gen ? gen.Feminino/total_gen*100 : 54;
+  getOrCreate("chart-genero","bar",{
+    labels:["Masculino","Feminino"],
+    datasets:[
+      {label:"Sua Base",data:[pct_masc,pct_fem],backgroundColor:"rgba(59,130,246,.7)",borderRadius:6,borderSkipped:false},
+      {label:"Eleitorado AM",data:[47.5,52.5],backgroundColor:"rgba(245,158,11,.5)",borderRadius:6,borderSkipped:false},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{max:70,grid:{color:"#1e3a5f"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}},maintainAspectRatio:false});
+}
+
+// ──────────────────────────────────────────────
+// PROJEÇÃO
+// ──────────────────────────────────────────────
+let currentCenario = "pessimista";
+async function loadProjecao() {
+  const cenarios = await fetch("/api/todos-cenarios").then(r=>r.json());
+  window._cenarios = cenarios;
+  renderProjecao("pessimista");
+}
+
+function setCenario(c, el) {
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  currentCenario = c;
+  renderProjecao(c);
+}
+
+function renderProjecao(c) {
+  if (!window._cenarios) return;
+  const d = window._cenarios[c];
+  const colors = {pessimista:"#ef4444",realista:"#f59e0b",otimista:"#22c55e"};
+  const color = colors[c];
+
+  document.getElementById("pj-conv").textContent = (d.taxa_conversao*100).toFixed(0)+"%";
+  document.getElementById("pj-dir").textContent = fmtN(d.votos_diretos_estimados);
+  document.getElementById("pj-ind").textContent = fmtN(d.votos_indiretos_estimados);
+  document.getElementById("pj-tot").textContent = fmtN(d.total_votos_estimado);
+  document.getElementById("pj-tot").style.color = color;
+  document.getElementById("pj-deficit").textContent = fmtN(d.deficit_para_quociente) + " votos";
+  document.getElementById("pj-mult").textContent = d.multiplicador_medio+"×";
+  document.getElementById("pj-pct-label").textContent = fmtPct(d.pct_quociente_atingido)+" do quociente eleitoral";
+  document.getElementById("pb-proj").style.width = Math.min(d.pct_quociente_atingido,100)+"%";
+
+  // Funil
+  getOrCreate("chart-funil","bar",{
+    labels:["Cadastros","Votantes Ativos","Votos Diretos","Votos Indiretos","Total Final"],
+    datasets:[{
+      data:[d.total_cadastros, Math.round(d.total_cadastros*0.715), d.votos_diretos_estimados, d.votos_indiretos_estimados, d.total_votos_estimado],
+      backgroundColor:["rgba(99,102,241,.7)","rgba(59,130,246,.7)","rgba(245,158,11,.7)","rgba(34,197,94,.7)",color+"cc"],
+      borderRadius:6,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  // Comparativo
+  const cn = window._cenarios;
+  getOrCreate("chart-cenarios","bar",{
+    labels:["Pessimista","Realista","Otimista","Meta Mínima","Meta Segura","Quociente"],
+    datasets:[{
+      data:[cn.pessimista.total_votos_estimado,cn.realista.total_votos_estimado,cn.otimista.total_votos_estimado,30000,45000,52500],
+      backgroundColor:["rgba(239,68,68,.7)","rgba(245,158,11,.7)","rgba(34,197,94,.7)","rgba(99,102,241,.4)","rgba(99,102,241,.6)","rgba(99,102,241,.9)"],
+      borderRadius:6,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}},maintainAspectRatio:false});
+}
+
+// ──────────────────────────────────────────────
+// MONTE CARLO
+// ──────────────────────────────────────────────
+async function loadMonteCarlo() {
+  const mc = await fetch("/api/monte-carlo").then(r=>r.json());
+
+  document.getElementById("mc-prob").textContent = fmtPct(mc.prob_eleicao_pct);
+  document.getElementById("mc-prob").className = "kpi-val "+(mc.prob_eleicao_pct>=60?"green":mc.prob_eleicao_pct>=35?"gold":"red");
+  document.getElementById("mc-med").textContent = fmtN(mc.mediana_votos);
+  document.getElementById("mc-ic-min").textContent = fmtN(mc.intervalo_confianca_90.min);
+  document.getElementById("mc-ic-max").textContent = fmtN(mc.intervalo_confianca_90.max);
+
+  // Percentis
+  const p = mc.percentis;
+  const pbx = document.getElementById("percentis-box");
+  const rows = [
+    ["P5 (muito ruim)", p.p5, "#ef4444"],
+    ["P10", p.p10, "#f97316"],
+    ["P25 (quartil inferior)", p.p25, "#f59e0b"],
+    ["P50 (mediana)", p.p50, "#94a3b8"],
+    ["P75 (quartil superior)", p.p75, "#22c55e"],
+    ["P90", p.p90, "#4ade80"],
+    ["P95 (muito bom)", p.p95, "#86efac"],
+  ];
+  pbx.innerHTML = rows.map(([lbl,val,color])=>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+       <span style="color:var(--text2)">${lbl}</span>
+       <span style="color:${color};font-weight:700">${fmtN(val)}</span>
+     </div>`
+  ).join("");
+
+  // Histograma
+  const hw = document.getElementById("histograma-wrap");
+  const quoc = mc.quociente_referencia;
+  const maxFreq = Math.max(...mc.histograma.map(h=>h.freq));
+  hw.innerHTML = mc.histograma.map(h=>{
+    const mid = (h.bin_inicio+h.bin_fim)/2;
+    const above = mid >= quoc;
+    const pct = (h.freq/maxFreq*100).toFixed(1);
+    return `<div class="hist-bar-row">
+      <div class="hist-label">${fmtN(Math.round(mid))}</div>
+      <div class="hist-bar-wrap">
+        <div class="hist-bar-fill ${above?'above':''}" style="width:${pct}%"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);width:36px;text-align:right">${h.freq}</div>
+    </div>`;
+  }).join("");
+}
+
+// ──────────────────────────────────────────────
+// TERRITORIAL
+// ──────────────────────────────────────────────
+async function loadTerritorial() {
+  const data = await fetch("/api/territorial").then(r=>r.json());
+  const bairros = data.por_bairro || {};
+  const sem = data.bairros_sem_presenca || [];
+
+  document.getElementById("terr-cobertos").textContent = Object.keys(bairros).length;
+  document.getElementById("terr-cobertura").textContent = fmtPct(data.cobertura_total_pct);
+  document.getElementById("terr-zero").textContent = sem.length;
+  document.getElementById("terr-count").textContent = Object.keys(bairros).length+" bairros";
+
+  const sorted = Object.entries(bairros).sort((a,b)=>b[1].penetracao_pct-a[1].penetracao_pct);
+  const top10pen = sorted.slice(0,10);
+
+  getOrCreate("chart-penetracao","bar",{
+    labels:top10pen.map(b=>b[0]),
+    datasets:[{data:top10pen.map(b=>b[1].penetracao_pct),backgroundColor:"rgba(99,102,241,.7)",borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}},maintainAspectRatio:false});
+
+  const sortedROI = Object.entries(bairros).sort((a,b)=>b[1].roi_potencial-a[1].roi_potencial).slice(0,10);
+  getOrCreate("chart-roi","bar",{
+    labels:sortedROI.map(b=>b[0]),
+    datasets:[{data:sortedROI.map(b=>b[1].roi_potencial),backgroundColor:"rgba(245,158,11,.7)",borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{grid:{color:"#1e3a5f"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}},maintainAspectRatio:false});
+
+  const tbody = document.getElementById("terr-table");
+  const classeColor = {"A/B":"chip-a","B/C":"chip-b","C":"chip-b","C/D":"chip-c","D/E":"chip-d"};
+  tbody.innerHTML = sorted.map(([b,d])=>`
+    <tr>
+      <td><strong>${b}</strong></td>
+      <td>${fmtN(d.cadastros)}</td>
+      <td>${fmtN(d.eleitores_estimados)}</td>
+      <td>${fmtPct(d.penetracao_pct)}</td>
+      <td><span class="chip ${classeColor[d.classe_social]||'chip-c'}">${d.classe_social}</span></td>
+      <td>${d.densidade}</td>
+      <td>${d.roi_potencial}</td>
+    </tr>`).join("");
+}
+
+// ──────────────────────────────────────────────
+// ZONAS
+// ──────────────────────────────────────────────
+async function loadZonas() {
+  const data = await fetch("/api/zonas").then(r=>r.json());
+  const zonas = Object.entries(data);
+
+  getOrCreate("chart-zonas","bar",{
+    labels:zonas.map(([,z])=>z.nome.replace("Zona ","Z")),
+    datasets:[
+      {label:"Votos Est. Candidato",data:zonas.map(([,z])=>z.votos_estimados_candidato),backgroundColor:"rgba(59,130,246,.7)",borderRadius:4,borderSkipped:false},
+      {label:"Cadastros",data:zonas.map(([,z])=>z.cadastros),backgroundColor:"rgba(99,102,241,.4)",borderRadius:4,borderSkipped:false},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  const priorColor = {ALTA:"pri-alta",MEDIA:"pri-media",BAIXA:"pri-baixa"};
+  document.getElementById("zonas-table").innerHTML = zonas.map(([id,z])=>`
+    <tr>
+      <td><strong>${z.nome}</strong></td>
+      <td>${fmtN(z.cadastros)}</td>
+      <td>${fmtN(z.eleitores_totais)}</td>
+      <td>${fmtPct(z.penetracao_pct)}</td>
+      <td>${fmtN(z.votos_estimados_candidato)}</td>
+      <td>${fmtPct(z.contribuicao_meta_pct)}</td>
+      <td><span class="pri-tag ${priorColor[z.prioridade]||''}">${z.prioridade}</span></td>
+    </tr>`).join("");
+}
+
+// ──────────────────────────────────────────────
+// PERFIL
+// ──────────────────────────────────────────────
+async function loadPerfil() {
+  const resumo = await fetch("/api/resumo").then(r=>r.json());
+  const gen = resumo.por_genero || {};
+  const total_gen = (gen.Masculino||0)+(gen.Feminino||0);
+  const pct_masc = total_gen ? gen.Masculino/total_gen*100 : 46;
+  const pct_fem = total_gen ? gen.Feminino/total_gen*100 : 54;
+
+  getOrCreate("chart-genero2","bar",{
+    labels:["Masculino","Feminino"],
+    datasets:[
+      {label:"Sua Base (%)",data:[pct_masc,pct_fem],backgroundColor:"rgba(59,130,246,.8)",borderRadius:6,borderSkipped:false},
+      {label:"Eleitorado AM (%)",data:[47.5,52.5],backgroundColor:"rgba(245,158,11,.6)",borderRadius:6,borderSkipped:false},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{max:70,grid:{color:"#1e3a5f"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  const faixas_am = {
+    "16-17":1.8,"18-24":13.8,"25-34":22.1,"35-44":19.8,"45-59":23.1,"60-69":11.4,"70+":8.0
+  };
+  const faixa_base = resumo.por_faixa_etaria || {};
+  const total_faixa = Object.values(faixa_base).reduce((a,b)=>a+b,0)||1;
+  const labels_f = ["18-24","25-34","35-44","45-59","60-69","70+"];
+  const base_pcts = labels_f.map(l=>(faixa_base[l]||0)/total_faixa*100);
+  const am_pcts = labels_f.map(l=>faixas_am[l]||0);
+
+  getOrCreate("chart-faixa","bar",{
+    labels:labels_f,
+    datasets:[
+      {label:"Sua Base (%)",data:base_pcts,backgroundColor:"rgba(99,102,241,.8)",borderRadius:6,borderSkipped:false},
+      {label:"Eleitorado AM (%)",data:am_pcts,backgroundColor:"rgba(245,158,11,.5)",borderRadius:6,borderSkipped:false},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>v.toFixed(0)+"%"}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  const fid = [0.61,0.72,0.72,0.78,0.83,0.83];
+  getOrCreate("chart-conv-faixa","bar",{
+    labels:labels_f,
+    datasets:[{data:fid.map(v=>v*100),backgroundColor:fid.map(v=>v>=0.78?"rgba(34,197,94,.7)":v>=0.68?"rgba(245,158,11,.7)":"rgba(239,68,68,.7)"),borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{min:40,max:95,grid:{color:"#1e3a5f"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}},maintainAspectRatio:false});
+}
+
+// ──────────────────────────────────────────────
+// CRESCIMENTO
+// ──────────────────────────────────────────────
+async function loadCrescimento() {
+  const data = await fetch("/api/crescimento").then(r=>r.json());
+  const proj = data.projecao_mensal;
+  const quoc = 52500;
+
+  getOrCreate("chart-crescimento","line",{
+    labels:proj.map(p=>p.mes),
+    datasets:[
+      {label:"Votos Estimados",data:proj.map(p=>p.votos_estimados),borderColor:"#3b82f6",backgroundColor:"rgba(59,130,246,.1)",fill:true,tension:.4,pointRadius:4,pointBackgroundColor:"#3b82f6"},
+      {label:"Quociente Eleitoral",data:proj.map(()=>quoc),borderColor:"#f59e0b",borderDash:[6,4],pointRadius:0,tension:0},
+      {label:"Meta Segura",data:proj.map(()=>45000),borderColor:"#22c55e",borderDash:[4,4],pointRadius:0,tension:0},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  document.getElementById("cresc-table").innerHTML = proj.map(p=>{
+    const status = p.pct_meta>=100?"🟢 Eleito":p.pct_meta>=85?"🟡 Provável":p.pct_meta>=60?"🟠 Em disputa":"🔴 Risco";
+    return `<tr>
+      <td><strong>${p.mes}</strong></td>
+      <td>+${fmtN(p.cadastros_novos)}</td>
+      <td>${fmtN(p.cadastros_acumulados)}</td>
+      <td>${fmtN(p.votos_estimados)}</td>
+      <td>${fmtPct(p.pct_meta)}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ──────────────────────────────────────────────
+// RECOMENDAÇÕES
+// ──────────────────────────────────────────────
+async function loadRecomendacoes() {
+  const recs = await fetch("/api/recomendacoes").then(r=>r.json());
+  const cores = {URGENTE:"urgente",ALTA:"alta",MEDIA:"media",BAIXA:"baixa"};
+  const icons = {URGENTE:"🚨",ALTA:"⚠️",MEDIA:"💡",BAIXA:"ℹ️"};
+
+  document.getElementById("rec-list").innerHTML = recs.map(r=>`
+    <div class="rec-card ${cores[r.prioridade]||''}">
+      <div class="rec-title">${icons[r.prioridade]||''} ${r.titulo} <span class="pri-tag pri-${r.prioridade.toLowerCase()}" style="margin-left:8px">${r.prioridade}</span></div>
+      <div class="rec-desc">${r.descricao}</div>
+      ${r.bairros ? `<div style="margin-top:6px">${r.bairros.map(b=>`<span class="chip chip-c">${b}</span>`).join("")}</div>` : ""}
+      ${r.impacto_estimado ? `<div class="rec-impact">↗ Impacto estimado: +${fmtN(r.impacto_estimado)} votos</div>` : ""}
+    </div>
+  `).join("");
+
+  getOrCreate("chart-acoes","bar",{
+    labels:["Visita Porta a Porta","Evento Comunitário","Redes Sociais","Panfletagem"],
+    datasets:[{data:[18,12,7,4],backgroundColor:["rgba(34,197,94,.8)","rgba(59,130,246,.8)","rgba(99,102,241,.8)","rgba(245,158,11,.6)"],borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>"+"+v+"%"}},x:{grid:{display:false}}},maintainAspectRatio:false});
+}
+
+// ──────────────────────────────────────────────
+// TSE
+// ──────────────────────────────────────────────
+async function loadTSE() {
+  const perfil = await fetch("/api/tse/perfil-eleitorado").then(r=>r.json());
+
+  getOrCreate("chart-hist-quoc","bar",{
+    labels:["2014","2018","2022","2026 (proj.)"],
+    datasets:[
+      {label:"Quociente Eleitoral",data:[43696,45929,49559,52500],backgroundColor:["rgba(59,130,246,.7)","rgba(59,130,246,.7)","rgba(59,130,246,.7)","rgba(245,158,11,.8)"],borderRadius:6,borderSkipped:false},
+      {label:"Menor Eleito",data:[22800,24100,28340,30000],backgroundColor:["rgba(34,197,94,.5)","rgba(34,197,94,.5)","rgba(34,197,94,.5)","rgba(34,197,94,.8)"],borderRadius:6,borderSkipped:false},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#94a3b8",boxWidth:12}}},scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}},maintainAspectRatio:false});
+
+  const faixas = perfil.por_faixa_etaria;
+  getOrCreate("chart-perfil-am","doughnut",{
+    labels:Object.keys(faixas),
+    datasets:[{data:Object.values(faixas).map(v=>(v*100).toFixed(1)),backgroundColor:["#3b82f6","#6366f1","#8b5cf6","#a855f7","#f59e0b","#22c55e","#ef4444"],borderWidth:2,borderColor:"#111827"}]
+  },{plugins:{legend:{display:true,position:"right",labels:{color:"#94a3b8",boxWidth:12,padding:8}}},cutout:"60%",maintainAspectRatio:false});
+
+  const escol = perfil.por_escolaridade;
+  const labels_e = {"analfabeto":"Analf.","fundamental_incompleto":"Fund. Inc.","fundamental_completo":"Fund. Comp.","medio_incompleto":"Médio Inc.","medio_completo":"Médio Comp.","superior_incompleto":"Sup. Inc.","superior_completo":"Sup. Comp."};
+  getOrCreate("chart-escol","bar",{
+    labels:Object.keys(escol).map(k=>labels_e[k]||k),
+    datasets:[{data:Object.values(escol).map(v=>(v*100).toFixed(1)),backgroundColor:"rgba(99,102,241,.7)",borderRadius:6,borderSkipped:false}]
+  },{scales:{y:{grid:{color:"#1e3a5f"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}},maintainAspectRatio:false});
+}
+
+// ──────────────────────────────────────────────
+// UPLOAD
+// ──────────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("upload-area").classList.remove("drag");
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+}
+
+async function uploadFile(file) {
+  if (!file) return;
+  document.getElementById("upload-status").innerHTML = '<span class="spinner"></span> Enviando...';
+  const fd = new FormData();
+  fd.append("file", file);
+  try {
+    const res = await fetch("/api/upload", {method:"POST", body:fd});
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById("upload-status").innerHTML =
+        `✅ <strong>${fmtN(data.registros)}</strong> registros importados · Colunas: ${data.colunas.join(", ")}`;
+      notify(`✅ ${fmtN(data.registros)} cadastros importados com sucesso!`);
+      loadedPages.clear();
+      loadPage(currentPage);
+      loadPreview(file);
+    }
+  } catch(e) {
+    document.getElementById("upload-status").innerHTML = "❌ Erro ao importar arquivo.";
+    notify("Erro ao importar arquivo.", "error");
+  }
+}
+
+async function loadPreview(file) {
+  const text = await file.text();
+  const lines = text.trim().split("\n").slice(0,6);
+  const headers = lines[0].split(",").map(h=>h.trim());
+  document.getElementById("prev-head").innerHTML = "<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+  document.getElementById("prev-body").innerHTML = lines.slice(1).map(l=>
+    "<tr>"+l.split(",").map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>"
+  ).join("");
+  document.getElementById("upload-preview-card").style.display = "block";
+  document.getElementById("upload-count").textContent = "primeiras 5 linhas";
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  loadPage("painel");
+});
+</script>
+</body>
+</html>
