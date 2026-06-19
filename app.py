@@ -3,14 +3,16 @@ API Backend — Sistema de Inteligência Eleitoral AM 2026
 FastAPI + SQLAlchemy + Motor Analítico Multicamada
 """
 import io
+import os
 import sys
 import json
+import secrets
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import pandas as pd
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import uvicorn
@@ -269,6 +271,119 @@ def estrategista_analisar(foco: str = "geral", db: Session = Depends(get_db)):
 @app.get("/api/estrategista/analisar")
 def estrategista_analisar_get(foco: str = "geral", db: Session = Depends(get_db)):
     return EstrategistaAnalytics(db).analisar(foco=foco)
+
+
+# ── Integração externa — webhook e sync ──────────────────────────────────────
+
+WEBHOOK_SECRET = os.environ.get("QUOLIS_WEBHOOK_SECRET", "")
+
+def _check_key(x_api_key: str = Header(default="")):
+    """Valida API key nos endpoints de integração."""
+    if not WEBHOOK_SECRET:
+        raise HTTPException(503, "QUOLIS_WEBHOOK_SECRET não configurado no servidor.")
+    if not secrets.compare_digest(x_api_key, WEBHOOK_SECRET):
+        raise HTTPException(401, "API key inválida.")
+
+
+@app.post("/api/integracao/cadastro")
+def integracao_cadastro_unico(
+    payload: dict,
+    db: Session = Depends(get_db),
+    _: None = Depends(_check_key),
+):
+    """
+    Recebe um único cadastro do sistema externo.
+    Campos aceitos: nome, bairro, zona, genero, idade, telefone,
+                    escolaridade, profissao, origem, data_cadastro
+    Header obrigatório: X-Api-Key: <QUOLIS_WEBHOOK_SECRET>
+    """
+    import pandas as pd
+    df = pd.DataFrame([payload])
+    ingestor = CadastroIngestion(db)
+    result = ingestor.ingest(df, nome_arquivo="webhook_unico", origem=payload.get("origem", "sistema_externo"))
+    return {"ok": True, **result}
+
+
+@app.post("/api/integracao/cadastros/lote")
+def integracao_cadastro_lote(
+    payload: dict,
+    db: Session = Depends(get_db),
+    _: None = Depends(_check_key),
+):
+    """
+    Recebe lote de cadastros do sistema externo.
+    Body: {"cadastros": [...], "origem": "meu_sistema"}
+    Cada item: {nome, bairro, zona, genero, idade, telefone, ...}
+    Header obrigatório: X-Api-Key: <QUOLIS_WEBHOOK_SECRET>
+    """
+    cadastros = payload.get("cadastros", [])
+    if not cadastros:
+        raise HTTPException(400, "Campo 'cadastros' ausente ou vazio.")
+    if len(cadastros) > 5000:
+        raise HTTPException(400, "Máximo de 5.000 registros por lote.")
+
+    import pandas as pd
+    df = pd.DataFrame(cadastros)
+    origem = payload.get("origem", "sistema_externo")
+    ingestor = CadastroIngestion(db)
+    result = ingestor.ingest(df, nome_arquivo=f"lote_{origem}", origem=origem)
+    return {"ok": True, **result}
+
+
+@app.get("/api/integracao/status")
+def integracao_status(
+    db: Session = Depends(get_db),
+    _: None = Depends(_check_key),
+):
+    """Retorna estatísticas para o sistema externo verificar a sync."""
+    from core.database import Eleitor, LoteImportacao
+    from sqlalchemy import func
+    total = db.query(func.count(Eleitor.id)).scalar() or 0
+    ultimo_lote = db.query(LoteImportacao).order_by(LoteImportacao.data_upload.desc()).first()
+    return {
+        "ok": True,
+        "total_cadastros": total,
+        "ultimo_lote": {
+            "id": ultimo_lote.id,
+            "nome": ultimo_lote.nome_arquivo,
+            "data": str(ultimo_lote.data_upload),
+            "validos": ultimo_lote.registros_validos,
+            "origem": ultimo_lote.origem,
+        } if ultimo_lote else None,
+    }
+
+
+@app.post("/api/integracao/webhook")
+async def integracao_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """
+    Webhook genérico — aceita POST de qualquer sistema externo.
+    Verifica assinatura via header X-Api-Key.
+    Detecta automaticamente se é cadastro único ou lote.
+    """
+    key = request.headers.get("X-Api-Key", "")
+    if WEBHOOK_SECRET and not secrets.compare_digest(key, WEBHOOK_SECRET):
+        raise HTTPException(401, "API key inválida.")
+
+    body = await request.json()
+
+    # Detecta formato automático
+    if "cadastros" in body:
+        cadastros = body["cadastros"]
+        origem = body.get("origem", "webhook")
+    elif "nome" in body or "name" in body:
+        cadastros = [body]
+        origem = body.get("origem", "webhook")
+    else:
+        raise HTTPException(400, "Formato não reconhecido. Envie {'nome':...} ou {'cadastros':[...]}")
+
+    import pandas as pd
+    df = pd.DataFrame(cadastros)
+    ingestor = CadastroIngestion(db)
+    result = ingestor.ingest(df, nome_arquivo="webhook", origem=origem)
+    return {"ok": True, **result}
 
 
 # ── Demo seed (dados de demonstração) ─────────────────────────────────────────
