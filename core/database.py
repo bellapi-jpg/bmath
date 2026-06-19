@@ -8,10 +8,18 @@ from sqlalchemy import (
     ForeignKey, Text, Boolean, Date, JSON
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
-DB_PATH = BASE_DIR / "data" / "electoral.db"
+
+# Vercel e ambientes serverless têm filesystem read-only; usa /tmp nesses casos
+_data_dir = BASE_DIR / "data"
+if not _data_dir.exists() or not os.access(str(_data_dir), os.W_OK):
+    import tempfile
+    DB_PATH = Path(tempfile.gettempdir()) / "electoral.db"
+else:
+    DB_PATH = _data_dir / "electoral.db"
 
 engine = create_engine(f"sqlite:///{DB_PATH}", echo=False,
                        connect_args={"check_same_thread": False})

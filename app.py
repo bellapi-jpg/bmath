@@ -32,15 +32,26 @@ app = FastAPI(title="Quolis — Inteligência Eleitoral AM", version="2.0")
 if (BASE_DIR / "static").exists():
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
+_initialized = False
 
-@app.on_event("startup")
-def startup():
+def _ensure_init():
+    global _initialized
+    if _initialized:
+        return
+    _initialized = True
     init_db()
     db = SessionLocal()
     try:
         seed(db)
     finally:
         db.close()
+
+# Inicializa imediatamente ao importar (funciona no Vercel/serverless)
+_ensure_init()
+
+@app.on_event("startup")
+def startup():
+    _ensure_init()
 
 
 # ── Frontend ───────────────────────────────────────────────────────────────────
