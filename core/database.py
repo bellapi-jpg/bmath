@@ -2,27 +2,43 @@
 Banco de dados relacional — modelos completos
 Sistema de Inteligência Eleitoral AM 2026
 """
+import os
 from datetime import datetime
+from pathlib import Path
 from sqlalchemy import (
     create_engine, Column, Integer, String, Float, DateTime,
     ForeignKey, Text, Boolean, Date, JSON
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
-import os
-from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
 
-# Vercel e ambientes serverless têm filesystem read-only; usa /tmp nesses casos
-_data_dir = BASE_DIR / "data"
-if not _data_dir.exists() or not os.access(str(_data_dir), os.W_OK):
-    import tempfile
-    DB_PATH = Path(tempfile.gettempdir()) / "electoral.db"
-else:
-    DB_PATH = _data_dir / "electoral.db"
+# ── Seleção de banco: PostgreSQL (produção) ou SQLite (local/dev) ─────────────
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-engine = create_engine(f"sqlite:///{DB_PATH}", echo=False,
-                       connect_args={"check_same_thread": False})
+if DATABASE_URL:
+    # Supabase/Railway entregam URLs com "postgres://", SQLAlchemy ≥ 1.4 exige "postgresql://"
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,       # reconecta automaticamente após idle
+        pool_size=5,
+        max_overflow=10,
+    )
+else:
+    # SQLite local — detecta se diretório é gravável
+    _data_dir = BASE_DIR / "data"
+    if not _data_dir.exists() or not os.access(str(_data_dir), os.W_OK):
+        import tempfile
+        _db_path = Path(tempfile.gettempdir()) / "electoral.db"
+    else:
+        _db_path = _data_dir / "electoral.db"
+    engine = create_engine(
+        f"sqlite:///{_db_path}",
+        connect_args={"check_same_thread": False},
+    )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
