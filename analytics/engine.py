@@ -13,7 +13,8 @@ from core.database import (
     Eleitor, BairroRef, ZonaEleitoral, SecaoEleitoral,
     ResultadoSecao, CandidatoHistorico, EleicaoAgregada,
     EventoCampanha, MetricaRedeSocial, PostRedeSocial,
-    AlcanceGeografico, Voluntario, SnapshotProjecao, ScoreBairro
+    AlcanceGeografico, Voluntario, SnapshotProjecao, ScoreBairro,
+    ConcorrenteMapeado, AtlasTSE,
 )
 
 QUOCIENTE_2026 = 52_500
@@ -824,3 +825,636 @@ class ScoreViabilidade:
         })
 
         return recs
+
+
+# ══════════════════════════════════════════════════════════════════
+# MÓDULO: CONCORRENTES — Duelo, Colisão Territorial, ROI Comparativo
+# ══════════════════════════════════════════════════════════════════
+
+class ConcorrenteAnalytics:
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def listar(self) -> List[Dict]:
+        concs = self.db.query(ConcorrenteMapeado).filter(ConcorrenteMapeado.ativo == True).all()
+        result = []
+        for c in concs:
+            result.append({
+                "id": c.id,
+                "nome": c.nome,
+                "partido": c.partido,
+                "campo_politico": c.campo_politico,
+                "status": c.status,
+                "primeira_candidatura": c.primeira_candidatura,
+                "ano_primeira_candidatura": c.ano_primeira_candidatura,
+                "votos_2022": c.votos_2022,
+                "votos_2018": c.votos_2018,
+                "situacao_2022": c.situacao_2022,
+                "pct_quociente_2022": c.pct_quociente_2022,
+                "idade_estimada": c.idade_estimada,
+                "genero": c.genero,
+                "base_territorial": c.base_territorial,
+                "nicho_primario": c.nicho_primario,
+                "nicho_secundario": c.nicho_secundario,
+                "orcamento_estimado_r": c.orcamento_estimado_r,
+                "custo_por_voto_estimado": c.custo_por_voto_estimado,
+                "redutos": c.redutos_json or {},
+                "bairros_vulneraveis": c.bairros_vulneraveis_json or [],
+                "observacoes": c.observacoes,
+            })
+        return result
+
+    def colisao_territorial(self) -> Dict:
+        """
+        Para cada bairro onde temos cadastros, calcula o índice de colisão
+        com cada concorrente que tem reduto declarado naquele bairro.
+        Retorna risco agregado por bairro e ranking de concorrentes mais perigosos.
+        """
+        # Nossa presença por bairro
+        nossa_presenca = dict(
+            self.db.query(Eleitor.bairro, func.count(Eleitor.id))
+            .group_by(Eleitor.bairro).all()
+        )
+        total_nosso = max(sum(nossa_presenca.values()), 1)
+
+        # Referências de eleitores por bairro
+        bairros_ref = {b.nome: b.total_eleitores_estimado
+                       for b in self.db.query(BairroRef).all()}
+
+        concs = self.db.query(ConcorrenteMapeado).filter(ConcorrenteMapeado.ativo == True).all()
+
+        colisao_por_bairro = {}
+        for bairro, qtd_nosso in nossa_presenca.items():
+            eleit_total = bairros_ref.get(bairro, 10000)
+            nossa_pct = qtd_nosso / eleit_total * 100
+
+            competidores = []
+            for c in concs:
+                redutos = c.redutos_json or {}
+                forca_rival = redutos.get(bairro, 0.0)
+                if forca_rival > 0:
+                    # Índice de colisão: quanto mais forte o rival e mais fraco somos → maior risco
+                    colisao_idx = round(forca_rival * 100 - nossa_pct * 0.5, 1)
+                    competidores.append({
+                        "concorrente": c.nome,
+                        "partido": c.partido,
+                        "forca_rival_pct": round(forca_rival * 100, 1),
+                        "nossa_penetracao_pct": round(nossa_pct, 2),
+                        "indice_colisao": max(colisao_idx, 0),
+                        "nivel_risco": "ALTO" if colisao_idx > 60 else "MEDIO" if colisao_idx > 30 else "BAIXO",
+                    })
+
+            if competidores:
+                competidores.sort(key=lambda x: -x["indice_colisao"])
+                risco_total = sum(c["indice_colisao"] for c in competidores)
+                colisao_por_bairro[bairro] = {
+                    "nossa_penetracao_pct": round(nossa_pct, 2),
+                    "nossos_cadastros": qtd_nosso,
+                    "eleitores_estimados": eleit_total,
+                    "risco_total": round(risco_total, 1),
+                    "nivel_geral": "CRITICO" if risco_total > 120 else "ALTO" if risco_total > 70 else "MEDIO" if risco_total > 35 else "BAIXO",
+                    "competidores": competidores,
+                }
+
+        # Ranking de concorrentes mais presentes nos nossos territórios
+        ranking_conc = {}
+        for bairro_data in colisao_por_bairro.values():
+            for comp in bairro_data["competidores"]:
+                nome = comp["concorrente"]
+                if nome not in ranking_conc:
+                    ranking_conc[nome] = {"bairros_em_colisao": 0, "soma_colisao": 0.0, "partido": comp["partido"]}
+                ranking_conc[nome]["bairros_em_colisao"] += 1
+                ranking_conc[nome]["soma_colisao"] += comp["indice_colisao"]
+
+        ranking = sorted([
+            {"concorrente": k, **v, "media_colisao": round(v["soma_colisao"] / v["bairros_em_colisao"], 1)}
+            for k, v in ranking_conc.items()
+        ], key=lambda x: -x["soma_colisao"])
+
+        # Zonas livres de colisão (nossos bairros sem concorrentes fortes)
+        zonas_livres = [b for b, d in colisao_por_bairro.items()
+                        if d["nivel_geral"] in ("BAIXO",) or not d["competidores"]]
+
+        # Bairros sem nossa presença mas com potencial (ref tem eleitores, não estamos lá)
+        nossos_bairros = set(nossa_presenca.keys())
+        todos_bairros = set(bairros_ref.keys())
+        sem_presenca = todos_bairros - nossos_bairros
+
+        oportunidades = []
+        for bairro in sem_presenca:
+            eleit = bairros_ref.get(bairro, 0)
+            colisao_rival = 0.0
+            for c in concs:
+                colisao_rival += (c.redutos_json or {}).get(bairro, 0.0)
+            if eleit > 5000 and colisao_rival < 0.5:
+                oportunidades.append({
+                    "bairro": bairro,
+                    "eleitores_estimados": eleit,
+                    "colisao_rival_total": round(colisao_rival, 2),
+                    "oportunidade_score": round(eleit / 1000 * (1 - colisao_rival), 1),
+                })
+        oportunidades.sort(key=lambda x: -x["oportunidade_score"])
+
+        return {
+            "colisao_por_bairro": colisao_por_bairro,
+            "ranking_concorrentes_risco": ranking,
+            "bairros_livres_colisao": zonas_livres[:10],
+            "oportunidades_territoriais": oportunidades[:8],
+            "total_bairros_em_risco": sum(1 for d in colisao_por_bairro.values() if d["nivel_geral"] in ("CRITICO", "ALTO")),
+        }
+
+    def roi_comparativo(self) -> Dict:
+        """
+        Compara eficiência financeira: custo por voto da nossa campanha vs concorrentes.
+        Projeta custo total para atingir a meta e posição competitiva.
+        """
+        from analytics.engine import ProjecaoAnalytics
+        proj = ProjecaoAnalytics(self.db).projecao("realista")
+        votos_nos = proj["total_votos_estimado"]
+
+        concs = self.db.query(ConcorrenteMapeado).filter(ConcorrenteMapeado.ativo == True).all()
+
+        # Nossa estimativa de custo (baseado em eventos registrados)
+        eventos = self.db.query(EventoCampanha).all()
+        custo_nosso_real = sum(e.custo_estimado for e in eventos) if eventos else 0
+        # Estimativa de campanha completa até 2026 (modelo de mercado AM)
+        custo_nosso_estimado = max(custo_nosso_real, 600_000)  # mínimo operacional
+        cpv_nosso = round(custo_nosso_estimado / votos_nos, 2) if votos_nos > 0 else None
+
+        tabela = []
+        for c in concs:
+            votos_ref = c.votos_2022 or (c.votos_2018 or 35000)
+            orc = c.orcamento_estimado_r or 1_000_000
+            cpv = c.custo_por_voto_estimado or round(orc / votos_ref, 2)
+            tabela.append({
+                "concorrente": c.nome,
+                "partido": c.partido,
+                "status": c.status,
+                "votos_referencia": votos_ref,
+                "orcamento_estimado_r": orc,
+                "custo_por_voto": cpv,
+                "eficiencia_relativa": round(cpv_nosso / cpv, 2) if cpv_nosso and cpv > 0 else None,
+                "campo": c.campo_politico,
+            })
+
+        tabela.sort(key=lambda x: x["custo_por_voto"])
+
+        posicao_mercado = None
+        if cpv_nosso:
+            mais_eficientes = sum(1 for t in tabela if t["custo_por_voto"] < cpv_nosso)
+            posicao_mercado = mais_eficientes + 1
+
+        return {
+            "nossa_campanha": {
+                "votos_projetados": votos_nos,
+                "custo_estimado_r": custo_nosso_estimado,
+                "custo_por_voto": cpv_nosso,
+                "posicao_mercado": posicao_mercado,
+                "total_concorrentes": len(tabela),
+            },
+            "tabela_comparativa": tabela,
+            "media_mercado_cpv": round(
+                sum(t["custo_por_voto"] for t in tabela) / len(tabela), 2
+            ) if tabela else None,
+            "insight": (
+                f"Custo por voto estimado R$ {cpv_nosso:.2f}. "
+                f"Posição {posicao_mercado}ª mais eficiente entre {len(tabela)+1} campanhas mapeadas."
+                if cpv_nosso else "Registre eventos de campanha para calcular ROI real."
+            ),
+        }
+
+    def perfil_comparativo(self) -> Dict:
+        """Comparação de perfil demográfico/político entre candidatos"""
+        concs = self.db.query(ConcorrenteMapeado).filter(ConcorrenteMapeado.ativo == True).all()
+        historico = self.db.query(CandidatoHistorico).all()
+
+        primeiras_candidaturas = [c for c in concs if c.primeira_candidatura]
+        eleitos_historicos = [h for h in historico if h.situacao == "ELEITO"]
+        nao_eleitos = [h for h in historico if h.situacao != "ELEITO"]
+
+        # Distribuição de votos históricos
+        votos_eleitos = [h.votos_totais for h in eleitos_historicos if h.votos_totais]
+        pct_qe_eleitos = [round(v / 49559 * 100, 1) for v in votos_eleitos]
+
+        return {
+            "concorrentes_ativos": len(concs),
+            "primeiras_candidaturas": len(primeiras_candidaturas),
+            "campos_politicos": {
+                "esquerda": sum(1 for c in concs if c.campo_politico == "esquerda"),
+                "centro": sum(1 for c in concs if c.campo_politico == "centro"),
+                "direita": sum(1 for c in concs if c.campo_politico == "direita"),
+            },
+            "bases_territoriais": {
+                b: sum(1 for c in concs if c.base_territorial == b)
+                for b in set(c.base_territorial for c in concs)
+            },
+            "nichos_primarios": {
+                c.nicho_primario: sum(1 for x in concs if x.nicho_primario == c.nicho_primario)
+                for c in concs
+            },
+            "historico_votos": {
+                "eleitos_votos": sorted(votos_eleitos, reverse=True),
+                "pct_quociente_eleitos": sorted(pct_qe_eleitos, reverse=True),
+                "media_eleitos": round(sum(votos_eleitos) / len(votos_eleitos)) if votos_eleitos else 0,
+                "total_eleitos_base": len(eleitos_historicos),
+                "total_nao_eleitos_base": len(nao_eleitos),
+            },
+            "lista_concorrentes": [
+                {
+                    "nome": c.nome, "partido": c.partido, "status": c.status,
+                    "base": c.base_territorial, "nicho": c.nicho_primario,
+                    "votos_2022": c.votos_2022, "primeira_cand": c.primeira_candidatura,
+                    "pct_qe": c.pct_quociente_2022,
+                }
+                for c in sorted(concs, key=lambda x: -(x.votos_2022 or 0))
+            ],
+        }
+
+
+# ══════════════════════════════════════════════════════════════════
+# MÓDULO: ATLAS TSE — Estatísticas históricas oficiais
+# ══════════════════════════════════════════════════════════════════
+
+class AtlasTSEAnalytics:
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def demografico(self) -> Dict:
+        """Evolução demográfica do eleitorado por escopo e ciclo"""
+        registros = self.db.query(AtlasTSE).order_by(AtlasTSE.ano).all()
+
+        def _to_dict(r: AtlasTSE) -> Dict:
+            total = r.total_eleitores or 1
+            return {
+                "ano": r.ano,
+                "escopo": r.escopo,
+                "total_eleitores": r.total_eleitores,
+                "faixas_pct": {
+                    "18-24": round(r.eleitores_18_24 / total * 100, 1),
+                    "25-34": round(r.eleitores_25_34 / total * 100, 1),
+                    "35-44": round(r.eleitores_35_44 / total * 100, 1),
+                    "45-59": round(r.eleitores_45_59 / total * 100, 1),
+                    "60-69": round(r.eleitores_60_69 / total * 100, 1),
+                    "70+":   round(r.eleitores_70_mais / total * 100, 1),
+                },
+                "faixas_abs": {
+                    "18-24": r.eleitores_18_24,
+                    "25-34": r.eleitores_25_34,
+                    "35-44": r.eleitores_35_44,
+                    "45-59": r.eleitores_45_59,
+                    "60-69": r.eleitores_60_69,
+                    "70+":   r.eleitores_70_mais,
+                },
+                "genero_pct": {
+                    "M": round(r.eleitores_masculino / total * 100, 1),
+                    "F": round(r.eleitores_feminino / total * 100, 1),
+                },
+                "abstencao_pct": r.abstencao_pct,
+            }
+
+        manaus = [_to_dict(r) for r in registros if r.escopo == "manaus"]
+        interior = [_to_dict(r) for r in registros if r.escopo == "interior_am"]
+
+        # Tendência de crescimento de jovens eleitores (18-24) em Manaus
+        if len(manaus) >= 2:
+            j_ini = manaus[0]["faixas_pct"]["18-24"]
+            j_fim = manaus[-1]["faixas_pct"]["18-24"]
+            tendencia_jovens = round(j_fim - j_ini, 1)
+        else:
+            tendencia_jovens = 0
+
+        # Tendência de envelhecimento (60+)
+        if len(manaus) >= 2:
+            i_ini = manaus[0]["faixas_pct"]["60-69"] + manaus[0]["faixas_pct"]["70+"]
+            i_fim = manaus[-1]["faixas_pct"]["60-69"] + manaus[-1]["faixas_pct"]["70+"]
+            tendencia_idosos = round(i_fim - i_ini, 1)
+        else:
+            tendencia_idosos = 0
+
+        return {
+            "manaus": manaus,
+            "interior_am": interior,
+            "insights": {
+                "tendencia_jovens_pp": tendencia_jovens,
+                "tendencia_idosos_pp": tendencia_idosos,
+                "conclusao_jovens": "Queda" if tendencia_jovens < 0 else "Alta",
+                "conclusao_idosos": "Alta" if tendencia_idosos > 0 else "Queda",
+                "dominante_atual": "45-59" if manaus else "—",
+            }
+        }
+
+    def abstencao(self) -> Dict:
+        """Comparação de abstenção capital vs interior por ciclo"""
+        registros = self.db.query(AtlasTSE).order_by(AtlasTSE.ano).all()
+
+        manaus = [(r.ano, r.abstencao_pct) for r in registros if r.escopo == "manaus" and r.abstencao_pct]
+        interior = [(r.ano, r.abstencao_pct) for r in registros if r.escopo == "interior_am" and r.abstencao_pct]
+
+        anos_comuns = sorted(set(a for a, _ in manaus) & set(a for a, _ in interior))
+        manaus_dict = dict(manaus)
+        interior_dict = dict(interior)
+
+        comparativo = [
+            {
+                "ano": ano,
+                "manaus_pct": manaus_dict.get(ano),
+                "interior_pct": interior_dict.get(ano),
+                "diferenca_pp": round((interior_dict.get(ano, 0) - manaus_dict.get(ano, 0)), 1),
+            }
+            for ano in anos_comuns
+        ]
+
+        # Impacto da abstenção sobre o quociente efetivo
+        ultima_manaus = self.db.query(AtlasTSE).filter(
+            AtlasTSE.escopo == "manaus", AtlasTSE.quociente_eleitoral != None
+        ).order_by(AtlasTSE.ano.desc()).first()
+
+        qe_efetivo_2026 = None
+        if ultima_manaus:
+            # Quociente cresce com menos abstenção (mais votos válidos)
+            abstencao_proj = 0.285
+            fator = (1 - abstencao_proj) / (1 - ultima_manaus.abstencao_pct / 100)
+            qe_efetivo_2026 = round(ultima_manaus.quociente_eleitoral * fator)
+
+        return {
+            "comparativo": comparativo,
+            "media_manaus": round(sum(v for _, v in manaus) / len(manaus), 1) if manaus else None,
+            "media_interior": round(sum(v for _, v in interior) / len(interior), 1) if interior else None,
+            "tendencia_manaus": "crescente" if len(manaus) >= 2 and manaus[-1][1] > manaus[0][1] else "estável",
+            "qe_efetivo_2026_estimado": qe_efetivo_2026,
+            "insight": (
+                f"Interior AM tem abstenção {round(sum(v for _, v in interior)/len(interior)-sum(v for _, v in manaus)/len(manaus), 1)}pp "
+                f"maior que Manaus. Candidatos com base só na capital têm vantagem de mobilização."
+                if manaus and interior else ""
+            ),
+        }
+
+    def clausula_desempenho(self) -> Dict:
+        """
+        Análise da cláusula de desempenho individual: 20% do QE.
+        Impacto histórico e projeção 2026.
+        """
+        registros = self.db.query(AtlasTSE).filter(
+            AtlasTSE.escopo == "manaus",
+            AtlasTSE.quociente_eleitoral != None
+        ).order_by(AtlasTSE.ano).all()
+
+        historico = [
+            {
+                "ano": r.ano,
+                "quociente_eleitoral": r.quociente_eleitoral,
+                "clausula_20pct": r.clausula_desempenho_votos or round(r.quociente_eleitoral * 0.20),
+                "menor_eleito": r.menor_eleito_votos,
+                "maior_eleito": r.maior_eleito_votos,
+                "total_candidatos": r.total_candidatos,
+            }
+            for r in registros
+        ]
+
+        qe_2026 = QUOCIENTE_2026
+        clausula_2026 = round(qe_2026 * 0.20)
+
+        # Candidatos que teriam sido eliminados pela cláusula em 2022
+        cands_historicos = self.db.query(CandidatoHistorico).filter(
+            CandidatoHistorico.ano_eleicao == 2022
+        ).all()
+        qe_2022 = 49559
+        clausula_2022 = round(qe_2022 * 0.20)
+        eliminados_2022 = [
+            c for c in cands_historicos
+            if c.votos_totais and c.votos_totais < clausula_2022
+        ]
+        sobreviventes_2022 = [
+            c for c in cands_historicos
+            if c.votos_totais and c.votos_totais >= clausula_2022
+        ]
+
+        return {
+            "historico": historico,
+            "projecao_2026": {
+                "quociente_estimado": qe_2026,
+                "clausula_minima_votos": clausula_2026,
+                "clausula_pct": 20.0,
+                "meta_segura_multiplicador": round(META_SEGURA / clausula_2026, 1),
+                "nossa_meta_vs_clausula": round(META_SEGURA / clausula_2026 * 100, 1),
+            },
+            "analise_2022": {
+                "clausula_votos": clausula_2022,
+                "eliminados_pela_clausula": len(eliminados_2022),
+                "sobreviventes": len(sobreviventes_2022),
+                "pct_eliminados": round(len(eliminados_2022) / max(len(cands_historicos), 1) * 100, 1),
+            },
+            "insight": (
+                f"A cláusula de desempenho 2026 exige mínimo de {clausula_2026:,} votos (20% de {qe_2026:,}). "
+                f"Nossa meta segura de {META_SEGURA:,} representa "
+                f"{round(META_SEGURA / clausula_2026, 1)}× a cláusula — margem confortável."
+            ),
+        }
+
+
+# ══════════════════════════════════════════════════════════════════
+# MÓDULO: ESTRATEGISTA INTELIGENTE — Análise on-demand com consciência de redutos
+# ══════════════════════════════════════════════════════════════════
+
+class EstrategistaAnalytics:
+    """
+    Motor de análise estratégica on-demand.
+    Cruza nossa base + perfil de concorrentes + atlas TSE + histórico
+    para gerar diagnóstico territorial com consciência de redutos rivais.
+    """
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def analisar(self, foco: str = "geral") -> Dict:
+        """
+        foco: "geral" | "territorial" | "concorrentes" | "crescimento" | "digital"
+        """
+        # ── Coleta de dados base ─────────────────────────────────────
+        total_cadastros = self.db.query(func.count(Eleitor.id)).scalar() or 0
+        por_bairro_nosso = dict(
+            self.db.query(Eleitor.bairro, func.count(Eleitor.id))
+            .group_by(Eleitor.bairro).all()
+        )
+        bairros_ref = {b.nome: b for b in self.db.query(BairroRef).all()}
+        concs = self.db.query(ConcorrenteMapeado).filter(ConcorrenteMapeado.ativo == True).all()
+        proj = ProjecaoAnalytics(self.db).projecao("realista")
+        score = ScoreViabilidade(self.db).calcular()
+
+        # ── 1. Mapa de pressão territorial ──────────────────────────
+        pressao_por_bairro = {}
+        for bairro, qtd in por_bairro_nosso.items():
+            ref = bairros_ref.get(bairro)
+            eleit = ref.total_eleitores_estimado if ref else 10000
+            nossa_pct = qtd / eleit * 100
+
+            pressao_rival = 0.0
+            rivais_presentes = []
+            for c in concs:
+                forca = (c.redutos_json or {}).get(bairro, 0.0)
+                if forca > 0.3:
+                    pressao_rival += forca
+                    rivais_presentes.append({"nome": c.nome, "forca": round(forca * 100, 0)})
+
+            pressao_por_bairro[bairro] = {
+                "nossa_penetracao": round(nossa_pct, 2),
+                "pressao_rival": round(pressao_rival * 100, 1),
+                "rivais": rivais_presentes,
+                "saldo_territorial": round(nossa_pct - pressao_rival * 30, 1),
+                "classificacao": (
+                    "REDUTO_PROPRIO" if nossa_pct > 5 and pressao_rival < 0.5 else
+                    "CAMPO_DISPUTADO" if nossa_pct > 2 and pressao_rival >= 0.5 else
+                    "TERRITORIO_RIVAL" if pressao_rival >= 1.0 and nossa_pct < 2 else
+                    "ZONA_NEUTRA"
+                ),
+            }
+
+        # ── 2. Janelas de oportunidade ───────────────────────────────
+        todos_bairros = set(bairros_ref.keys())
+        bairros_nossos = set(por_bairro_nosso.keys())
+
+        oportunidades = []
+        for bairro in todos_bairros - bairros_nossos:
+            ref = bairros_ref[bairro]
+            pressao_rivals = sum(
+                (c.redutos_json or {}).get(bairro, 0.0) for c in concs
+            )
+            if ref.total_eleitores_estimado > 4000 and pressao_rivals < 0.8:
+                votos_pot = round(ref.total_eleitores_estimado * 0.015 * (1 - pressao_rivals * 0.5))
+                oportunidades.append({
+                    "bairro": bairro,
+                    "eleitores": ref.total_eleitores_estimado,
+                    "classe": ref.classe_social,
+                    "densidade": ref.densidade,
+                    "pressao_rival": round(pressao_rivals, 2),
+                    "votos_potenciais": votos_pot,
+                    "prioridade": "ALTA" if votos_pot > 500 and pressao_rivals < 0.4 else "MEDIA",
+                })
+
+        oportunidades.sort(key=lambda x: (-x["votos_potenciais"], x["pressao_rival"]))
+
+        # ── 3. Diagnóstico de nichos não cobertos ────────────────────
+        nichos_concs = set()
+        for c in concs:
+            if c.nicho_primario:
+                nichos_concs.add(c.nicho_primario)
+            if c.nicho_secundario:
+                nichos_concs.add(c.nicho_secundario)
+
+        nichos_saturados = []
+        nichos_abertos = []
+        todos_nichos = ["evangélico", "saúde", "educação", "sindical", "empresarial",
+                        "juventude / digital", "mulheres", "segurança pública",
+                        "assistência social", "meio ambiente", "idosos", "funcionalismo público"]
+        for n in todos_nichos:
+            cobertura = sum(1 for c in concs if c.nicho_primario == n or c.nicho_secundario == n)
+            if cobertura >= 2:
+                nichos_saturados.append({"nicho": n, "concorrentes": cobertura})
+            elif cobertura == 0:
+                nichos_abertos.append({"nicho": n, "concorrentes": 0})
+
+        # ── 4. Análise de timing eleitoral ──────────────────────────
+        from datetime import date
+        hoje = date.today()
+        eleicao = date(2026, 10, 4)
+        dias_restantes = (eleicao - hoje).days
+        meses_restantes = dias_restantes // 30
+
+        cadastros_necessarios = max(0, round(
+            (META_SEGURA / proj["multiplicador_medio"] / proj["taxa_conversao"] / 0.715) - total_cadastros
+        ))
+        ritmo_necessario_mes = round(cadastros_necessarios / max(meses_restantes, 1))
+
+        # ── 5. Recomendações priorizadas ─────────────────────────────
+        recomendacoes = []
+
+        # Baseadas em pressão territorial
+        campos_disputados = [b for b, d in pressao_por_bairro.items()
+                             if d["classificacao"] == "CAMPO_DISPUTADO"]
+        redutos_proprios = [b for b, d in pressao_por_bairro.items()
+                            if d["classificacao"] == "REDUTO_PROPRIO"]
+
+        if campos_disputados:
+            recomendacoes.append({
+                "prioridade": "URGENTE",
+                "categoria": "territorial",
+                "titulo": f"Defender {len(campos_disputados)} campo(s) disputado(s)",
+                "descricao": f"Bairros {', '.join(campos_disputados[:3])} têm presença nossa mas rival forte. "
+                             f"Intensificar porta-a-porta e eventos locais para consolidar.",
+                "impacto_votos": len(campos_disputados) * 400,
+            })
+
+        if oportunidades[:3]:
+            top3 = [o["bairro"] for o in oportunidades[:3]]
+            recomendacoes.append({
+                "prioridade": "ALTA",
+                "categoria": "expansao",
+                "titulo": f"Expandir para {len(oportunidades)} bairros sem presença e sem rival forte",
+                "descricao": f"Prioridade: {', '.join(top3)}. Soma de {sum(o['votos_potenciais'] for o in oportunidades[:5]):,} votos potenciais com baixa resistência.",
+                "impacto_votos": sum(o["votos_potenciais"] for o in oportunidades[:5]),
+            })
+
+        if nichos_abertos:
+            recomendacoes.append({
+                "prioridade": "MEDIA",
+                "categoria": "nicho",
+                "titulo": f"{len(nichos_abertos)} nichos eleitorais sem concorrência",
+                "descricao": f"Nichos abertos: {', '.join(n['nicho'] for n in nichos_abertos[:4])}. "
+                             f"Posicionamento nesses segmentos pode capturar votos sem disputar com rivais.",
+                "impacto_votos": len(nichos_abertos) * 600,
+            })
+
+        if ritmo_necessario_mes > 1000:
+            recomendacoes.append({
+                "prioridade": "URGENTE",
+                "categoria": "crescimento",
+                "titulo": f"Ritmo de {ritmo_necessario_mes:,} novos cadastros/mês necessário",
+                "descricao": f"Com {meses_restantes} meses para a eleição, são necessários "
+                             f"{cadastros_necessarios:,} cadastros adicionais para a meta segura. "
+                             f"Hoje o ritmo estimado é insuficiente.",
+                "impacto_votos": round(cadastros_necessarios * proj["taxa_conversao"] * 0.715 * proj["multiplicador_medio"]),
+            })
+
+        # Consolidar redutos
+        if len(redutos_proprios) > 3:
+            recomendacoes.append({
+                "prioridade": "MEDIA",
+                "categoria": "consolidacao",
+                "titulo": f"Consolidar {len(redutos_proprios)} redutos próprios com baixa pressão rival",
+                "descricao": f"Bairros {', '.join(redutos_proprios[:4])} são territórios com nossa presença "
+                             f"e pouca resistência. Investir em fidelização e multiplicadores locais.",
+                "impacto_votos": len(redutos_proprios) * 200,
+            })
+
+        recomendacoes.sort(key=lambda x: {"URGENTE": 0, "ALTA": 1, "MEDIA": 2}.get(x["prioridade"], 3))
+
+        return {
+            "foco": foco,
+            "resumo": {
+                "total_cadastros": total_cadastros,
+                "votos_projetados": proj["total_votos_estimado"],
+                "score_viabilidade": score["score_total"],
+                "dias_para_eleicao": dias_restantes,
+                "meses_restantes": meses_restantes,
+                "cadastros_necessarios": cadastros_necessarios,
+                "ritmo_necessario_mes": ritmo_necessario_mes,
+            },
+            "mapa_territorial": {
+                "redutos_proprios": redutos_proprios,
+                "campos_disputados": campos_disputados,
+                "territorios_rivais": [b for b, d in pressao_por_bairro.items()
+                                       if d["classificacao"] == "TERRITORIO_RIVAL"],
+                "zonas_neutras": [b for b, d in pressao_por_bairro.items()
+                                  if d["classificacao"] == "ZONA_NEUTRA"],
+                "detalhe": pressao_por_bairro,
+            },
+            "oportunidades_territoriais": oportunidades[:8],
+            "nichos": {
+                "saturados": nichos_saturados,
+                "abertos": nichos_abertos,
+            },
+            "recomendacoes": recomendacoes,
+            "concorrentes_analisados": len(concs),
+        }

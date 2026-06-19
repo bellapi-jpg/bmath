@@ -331,6 +331,67 @@ class ScoreBairro(Base):
     score_composto = Column(Float, default=0.0)
 
 
+# ══════════════════════════════════════════════════════════════════
+# CAMADA 7 — MAPEAMENTO DE CONCORRENTES
+# ══════════════════════════════════════════════════════════════════
+
+class ConcorrenteMapeado(Base):
+    """Perfil de concorrente esperado para 2026 — manual ou inferido do histórico"""
+    __tablename__ = "concorrentes_mapeados"
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(200), nullable=False)
+    partido = Column(String(20))
+    campo_politico = Column(String(30))       # esquerda, centro, direita
+    status = Column(String(20), default="declarado")  # declarado, provavel, historico
+    # Perfil eleitoral
+    primeira_candidatura = Column(Boolean, default=False)
+    ano_primeira_candidatura = Column(Integer, nullable=True)
+    cargo_anterior = Column(String(60), nullable=True)
+    votos_2022 = Column(Integer, nullable=True)
+    votos_2018 = Column(Integer, nullable=True)
+    situacao_2022 = Column(String(20), nullable=True)  # ELEITO / NÃO ELEITO
+    pct_quociente_2022 = Column(Float, nullable=True)
+    # Perfil demográfico estimado
+    idade_estimada = Column(Integer, nullable=True)
+    genero = Column(String(1), nullable=True)
+    base_territorial = Column(String(30))     # Norte, Sul, Leste, Oeste, Centro, Difuso
+    nicho_primario = Column(String(60))       # evangélico, sindical, empresarial, etc.
+    nicho_secundario = Column(String(60), nullable=True)
+    # Estimativas financeiras
+    orcamento_estimado_r = Column(Float, nullable=True)  # R$ estimado de campanha
+    custo_por_voto_estimado = Column(Float, nullable=True)
+    # Redutos (JSON com lista de bairros e pesos)
+    redutos_json = Column(JSON, nullable=True)     # {"Cidade Nova": 0.85, "Alvorada": 0.72}
+    bairros_vulneraveis_json = Column(JSON, nullable=True)
+    observacoes = Column(Text, nullable=True)
+    ativo = Column(Boolean, default=True)
+
+
+class AtlasTSE(Base):
+    """Dados históricos TSE agregados por ciclo eleitoral — AM/Manaus"""
+    __tablename__ = "atlas_tse"
+    id = Column(Integer, primary_key=True)
+    ano = Column(Integer)
+    escopo = Column(String(20))          # manaus, interior_am, estado_am
+    total_eleitores = Column(Integer)
+    eleitores_18_24 = Column(Integer, default=0)
+    eleitores_25_34 = Column(Integer, default=0)
+    eleitores_35_44 = Column(Integer, default=0)
+    eleitores_45_59 = Column(Integer, default=0)
+    eleitores_60_69 = Column(Integer, default=0)
+    eleitores_70_mais = Column(Integer, default=0)
+    eleitores_masculino = Column(Integer, default=0)
+    eleitores_feminino = Column(Integer, default=0)
+    total_votos_validos = Column(Integer, nullable=True)
+    abstencao_pct = Column(Float, nullable=True)
+    quociente_eleitoral = Column(Integer, nullable=True)
+    menor_eleito_votos = Column(Integer, nullable=True)
+    maior_eleito_votos = Column(Integer, nullable=True)
+    clausula_desempenho_votos = Column(Integer, nullable=True)  # 20% QE
+    total_candidatos = Column(Integer, nullable=True)
+    total_partidos = Column(Integer, nullable=True)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 

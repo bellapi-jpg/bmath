@@ -24,7 +24,8 @@ from ingestion.pipeline import CadastroIngestion, SocialIngestion, EventoIngesti
 from analytics.engine import (
     CadastroAnalytics, ProjecaoAnalytics, TerritorialAnalytics,
     SocialAnalytics, HistoricoAnalytics, CampanhaAnalytics,
-    AlertasAnalytics, ScoreViabilidade
+    AlertasAnalytics, ScoreViabilidade,
+    ConcorrenteAnalytics, AtlasTSEAnalytics, EstrategistaAnalytics,
 )
 
 app = FastAPI(title="Quolis — Inteligência Eleitoral AM", version="2.0")
@@ -223,6 +224,51 @@ def alertas(db: Session = Depends(get_db)):
 @app.get("/api/recomendacoes")
 def recomendacoes(db: Session = Depends(get_db)):
     return ScoreViabilidade(db).recomendacoes()
+
+
+# ── Concorrentes ──────────────────────────────────────────────────────────────
+
+@app.get("/api/concorrentes")
+def concorrentes_listar(db: Session = Depends(get_db)):
+    return ConcorrenteAnalytics(db).listar()
+
+@app.get("/api/concorrentes/colisao")
+def concorrentes_colisao(db: Session = Depends(get_db)):
+    return ConcorrenteAnalytics(db).colisao_territorial()
+
+@app.get("/api/concorrentes/roi")
+def concorrentes_roi(db: Session = Depends(get_db)):
+    return ConcorrenteAnalytics(db).roi_comparativo()
+
+@app.get("/api/concorrentes/perfil")
+def concorrentes_perfil(db: Session = Depends(get_db)):
+    return ConcorrenteAnalytics(db).perfil_comparativo()
+
+
+# ── Atlas TSE ─────────────────────────────────────────────────────────────────
+
+@app.get("/api/atlas/demografico")
+def atlas_demografico(db: Session = Depends(get_db)):
+    return AtlasTSEAnalytics(db).demografico()
+
+@app.get("/api/atlas/abstencao")
+def atlas_abstencao(db: Session = Depends(get_db)):
+    return AtlasTSEAnalytics(db).abstencao()
+
+@app.get("/api/atlas/clausula-desempenho")
+def atlas_clausula(db: Session = Depends(get_db)):
+    return AtlasTSEAnalytics(db).clausula_desempenho()
+
+
+# ── Estrategista On-Demand ────────────────────────────────────────────────────
+
+@app.post("/api/estrategista/analisar")
+def estrategista_analisar(foco: str = "geral", db: Session = Depends(get_db)):
+    return EstrategistaAnalytics(db).analisar(foco=foco)
+
+@app.get("/api/estrategista/analisar")
+def estrategista_analisar_get(foco: str = "geral", db: Session = Depends(get_db)):
+    return EstrategistaAnalytics(db).analisar(foco=foco)
 
 
 # ── Demo seed (dados de demonstração) ─────────────────────────────────────────

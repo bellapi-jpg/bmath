@@ -148,6 +148,14 @@ input[type=file]{display:none}
 /* ── Code / mono blocks ── */
 .mono-block{font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--accent);margin-bottom:10px;line-height:1.7}
 
+/* ── Estrategista buttons ── */
+.btn-est{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.08);color:#86efac;transition:all .15s}
+.btn-est:hover,.btn-est.active-est{background:#22c55e;color:#fff;border-color:#22c55e}
+
+/* ── Oportunidade item ── */
+.op-item{padding:10px 12px;border-radius:9px;border:1px solid var(--border);margin-bottom:7px;background:var(--surface2)}
+.op-item:last-child{margin-bottom:0}
+
 /* ── Spinner ── */
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -187,6 +195,11 @@ input[type=file]{display:none}
     <div class="nav-section">Padrões Históricos</div>
     <div class="nav-item" data-page="historico" onclick="nav(this)"><span class="icon">🏛️</span> Eleições Anteriores</div>
     <div class="nav-item" data-page="analogos" onclick="nav(this)"><span class="icon">🔬</span> Candidatos Análogos</div>
+    <div class="nav-item" data-page="atlas" onclick="nav(this)"><span class="icon">📋</span> Atlas TSE 2018–2024</div>
+
+    <div class="nav-section">Inteligência Competitiva</div>
+    <div class="nav-item" data-page="concorrentes" onclick="nav(this)"><span class="icon">⚔️</span> Mapa de Concorrentes</div>
+    <div class="nav-item" data-page="estrategista" onclick="nav(this)"><span class="icon">🧠</span> Estrategista</div>
 
     <div class="nav-section">Campanha & Digital</div>
     <div class="nav-item" data-page="social" onclick="nav(this)"><span class="icon">📱</span> Redes Sociais</div>
@@ -575,6 +588,162 @@ input[type=file]{display:none}
       </div>
     </div>
 
+    <!-- ══════════ ATLAS TSE ══════════ -->
+    <div class="page" id="page-atlas">
+      <div class="page-title">📋 Atlas Histórico TSE 2018–2024</div>
+      <div class="page-sub">Dados oficiais agregados · eleitorado manauara · abstenção capital vs interior · cláusula de desempenho</div>
+
+      <!-- KPIs Cláusula -->
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="card card-sm"><div class="kpi-label">Quociente 2022</div><div class="kpi-val accent">49.559</div><div class="kpi-delta">base histórica confirmada</div></div>
+        <div class="card card-sm"><div class="kpi-label">Cláusula 20% QE 2022</div><div class="kpi-val gold">9.912</div><div class="kpi-delta">votos mínimos 2022</div></div>
+        <div class="card card-sm"><div class="kpi-label">Cláusula 20% QE 2026 est.</div><div class="kpi-val" id="at-clausula">10.500</div><div class="kpi-delta">votos mínimos 2026</div></div>
+        <div class="card card-sm"><div class="kpi-label">Nossa Meta vs Cláusula</div><div class="kpi-val green" id="at-mult-clausula">4.3×</div><div class="kpi-delta">margem de segurança</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Eleitorado Manaus — Evolução por Faixa Etária (%)</div><div class="card-badge">2018–2024</div></div>
+          <canvas id="chart-atlas-faixa" height="230"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Abstenção Capital vs Interior AM (%)</div></div>
+          <canvas id="chart-atlas-abstencao" height="230"></canvas>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Gênero do Eleitorado Manaus — Evolução</div></div>
+          <canvas id="chart-atlas-genero" height="200"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Cláusula de Desempenho 20% QE — Histórico e Impacto</div></div>
+          <div id="at-clausula-box" style="font-size:13px;color:var(--text2);line-height:2;padding:6px 0"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tabela Completa — Dados TSE por Ciclo</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Ano</th><th>Escopo</th><th>Eleitores</th><th>18-24%</th><th>25-34%</th><th>45-59%</th><th>60+%</th><th>Abstenção%</th><th>QE</th><th>Menor Eleito</th><th>Cláusula 20%</th></tr></thead>
+          <tbody id="at-table"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══════════ CONCORRENTES ══════════ -->
+    <div class="page" id="page-concorrentes">
+      <div class="page-title">⚔️ Mapa de Concorrentes</div>
+      <div class="page-sub">Duelo territorial · risco de colisão por bairro · eficiência financeira comparada · perfil de campo político</div>
+
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="card card-sm"><div class="kpi-label">Concorrentes Mapeados</div><div class="kpi-val accent" id="cc-total">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Bairros em Risco</div><div class="kpi-val red" id="cc-risco">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Nosso Custo/Voto Est.</div><div class="kpi-val gold" id="cc-cpv">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Posição Eficiência</div><div class="kpi-val green" id="cc-pos">—</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Votos 2022 — Todos os Concorrentes vs Quociente</div></div>
+          <canvas id="chart-cc-votos" height="250"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Custo por Voto Comparativo (R$)</div></div>
+          <canvas id="chart-cc-cpv" height="250"></canvas>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Risco de Colisão por Bairro</div></div>
+          <canvas id="chart-cc-colisao" height="230"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Oportunidades Territoriais Livres</div></div>
+          <div id="cc-oportunidades" style="max-height:230px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div class="card-title">Perfil Completo dos Concorrentes</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Nome</th><th>Partido</th><th>Campo</th><th>Status</th><th>Votos 2022</th><th>% QE 2022</th><th>Base Territorial</th><th>Nicho Primário</th><th>1ª Cand.</th><th>Orç. Est.</th><th>R$/Voto</th></tr></thead>
+          <tbody id="cc-table"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Ranking de Risco por Concorrente</div></div>
+        <div id="cc-ranking" style="font-size:12px"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ ESTRATEGISTA ══════════ -->
+    <div class="page" id="page-estrategista">
+      <div class="page-title">🧠 Estrategista — Análise On-Demand</div>
+      <div class="page-sub">Motor analítico com consciência de redutos rivais · gera diagnóstico territorial, janelas de oportunidade e recomendações priorizadas</div>
+
+      <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#0c1f14 0%,#132819 100%);border-color:#1e3d26">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:13px;font-weight:700;color:#d1fae5;margin-bottom:6px">Selecione o foco da análise</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn-est active-est" data-foco="geral" onclick="setFocoEst(this)">Geral</button>
+              <button class="btn-est" data-foco="territorial" onclick="setFocoEst(this)">Territorial</button>
+              <button class="btn-est" data-foco="concorrentes" onclick="setFocoEst(this)">Concorrentes</button>
+              <button class="btn-est" data-foco="crescimento" onclick="setFocoEst(this)">Crescimento</button>
+              <button class="btn-est" data-foco="digital" onclick="setFocoEst(this)">Digital</button>
+            </div>
+          </div>
+          <button onclick="rodarEstrategista()" style="padding:12px 28px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px">▶ Rodar Análise</button>
+        </div>
+      </div>
+
+      <div id="est-loading" style="display:none;text-align:center;padding:40px"><span class="spinner"></span> <span style="font-size:13px;color:var(--text2);margin-left:10px">Analisando 8 concorrentes · cruzando base territorial · calculando pressão rival...</span></div>
+
+      <div id="est-result" style="display:none">
+        <!-- KPIs -->
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card card-sm"><div class="kpi-label">Dias para Eleição</div><div class="kpi-val accent" id="est-dias">—</div></div>
+          <div class="card card-sm"><div class="kpi-label">Cadastros Necessários</div><div class="kpi-val gold" id="est-cad-nec">—</div></div>
+          <div class="card card-sm"><div class="kpi-label">Ritmo/Mês Necessário</div><div class="kpi-val red" id="est-ritmo">—</div></div>
+          <div class="card card-sm"><div class="kpi-label">Concorrentes Analisados</div><div class="kpi-val green" id="est-concs">—</div></div>
+        </div>
+
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Mapa de Classificação Territorial</div></div>
+            <canvas id="chart-est-territorio" height="220"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Oportunidades · Votos Potenciais sem Rival Forte</div></div>
+            <canvas id="chart-est-oport" height="220"></canvas>
+          </div>
+        </div>
+
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Nichos Saturados vs Abertos</div></div>
+            <div id="est-nichos" style="font-size:12px;line-height:1.8"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recomendações Estratégicas Priorizadas</div></div>
+            <div id="est-recs"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Mapeamento Completo por Bairro</div><div class="card-badge" id="est-total-bairros">—</div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Bairro</th><th>Penetração Própria %</th><th>Pressão Rival</th><th>Classificação</th><th>Principais Rivais</th></tr></thead>
+            <tbody id="est-bairros-table"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -605,6 +774,9 @@ const PAGE_META = {
   campanha:       {title:"Eventos & ROI",            sub:"Rastreamento de ações e custo por voto"},
   recomendacoes:  {title:"Recomendações",            sub:"Direcionamentos estratégicos prioritários"},
   importar:       {title:"Importar Dados",           sub:"Upload CSV · enriquecimento automático"},
+  atlas:          {title:"Atlas TSE 2018–2024",      sub:"Dados oficiais · demografias · abstenção · cláusula"},
+  concorrentes:   {title:"Mapa de Concorrentes",     sub:"Duelo territorial · colisão · eficiência financeira"},
+  estrategista:   {title:"Estrategista On-Demand",   sub:"Análise com consciência de redutos rivais"},
 };
 
 const loaded = new Set();
@@ -630,7 +802,7 @@ async function loadPage(p){
     montecarlo:loadMC, crescimento:loadCrescimento, territorial:loadTerritorial,
     zonas:loadZonas, perfil:loadPerfil, historico:loadHistorico,
     analogos:loadAnalogos, social:loadSocial, campanha:loadCampanha,
-    recomendacoes:loadRecs,
+    recomendacoes:loadRecs, atlas:loadAtlas, concorrentes:loadConcorrentes,
   };
   if(map[p]) await map[p]();
 }
@@ -1141,6 +1313,266 @@ async function uploadCSV(file){
     document.getElementById("upload-status").innerHTML="❌ Erro ao importar.";
     notify("Erro ao importar arquivo.","error");
   }
+}
+
+// ──────────────────────────────────────────────
+// ATLAS TSE
+// ──────────────────────────────────────────────
+async function loadAtlas(){
+  const [dem, abst, clausula] = await Promise.all([
+    fetch("/api/atlas/demografico").then(r=>r.json()),
+    fetch("/api/atlas/abstencao").then(r=>r.json()),
+    fetch("/api/atlas/clausula-desempenho").then(r=>r.json()),
+  ]);
+
+  // KPIs Cláusula 2026
+  const proj2026 = clausula.projecao_2026;
+  document.getElementById("at-clausula").textContent = fmtN(proj2026.clausula_minima_votos);
+  document.getElementById("at-mult-clausula").textContent = proj2026.meta_segura_multiplicador + "×";
+
+  const manaus = dem.manaus || [];
+  const faixas = ["18-24","25-34","35-44","45-59","60-69","70+"];
+  const cores = ["#2563eb","#16a34a","#d97706","#7c3aed","#dc2626","#0891b2"];
+
+  // Evolução faixa etária Manaus (grouped bar)
+  mkChart("chart-atlas-faixa","bar",{
+    labels: manaus.map(m=>m.ano),
+    datasets: faixas.map((f,i)=>({
+      label: f,
+      data: manaus.map(m=>m.faixas_pct[f]),
+      backgroundColor: cores[i]+"99",
+      borderColor: cores[i],
+      borderWidth: 1.5,
+      borderRadius: 4,
+      borderSkipped: false,
+    }))
+  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10,padding:6}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+
+  // Abstenção capital vs interior
+  const comp = abst.comparativo;
+  mkChart("chart-atlas-abstencao","line",{
+    labels: comp.map(c=>c.ano),
+    datasets:[
+      {label:"Manaus",data:comp.map(c=>c.manaus_pct),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#2563eb"},
+      {label:"Interior AM",data:comp.map(c=>c.interior_pct),borderColor:"#dc2626",backgroundColor:"rgba(220,38,38,.08)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#dc2626"},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+
+  // Gênero Manaus
+  mkChart("chart-atlas-genero","line",{
+    labels: manaus.map(m=>m.ano),
+    datasets:[
+      {label:"Masculino %",data:manaus.map(m=>m.genero_pct.M),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:4},
+      {label:"Feminino %",data:manaus.map(m=>m.genero_pct.F),borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.08)",fill:true,tension:.4,pointRadius:4},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{min:44,max:56,grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+
+  // Box cláusula
+  const a22 = clausula.analise_2022;
+  document.getElementById("at-clausula-box").innerHTML = `
+    <div style="display:grid;gap:8px">
+      <div class="sc-box"><div class="sc-lbl">Cláusula 2026 (20% QE)</div><div class="sc-val green">${fmtN(proj2026.clausula_minima_votos)} votos</div></div>
+      <div class="sc-box"><div class="sc-lbl">Eliminados pela cláusula em 2022</div><div class="sc-val red">${a22.eliminados_pela_clausula} candidatos (${a22.pct_eliminados}%)</div></div>
+      <div class="insight-card" style="margin:0">${clausula.insight}</div>
+    </div>`;
+
+  // Tabela completa
+  const todos = [...(dem.manaus||[]), ...(dem.interior_am||[])].sort((a,b)=>a.ano-b.ano||a.escopo.localeCompare(b.escopo));
+  document.getElementById("at-table").innerHTML = todos.map(r=>{
+    const qe = r.ano === 2022 ? fmtN(49559) : r.ano === 2018 ? fmtN(45929) : "—";
+    const me = r.ano === 2022 && r.escopo==="manaus" ? fmtN(28340) : "—";
+    const cl = r.ano === 2022 && r.escopo==="manaus" ? fmtN(9912) : r.ano === 2018 && r.escopo==="manaus" ? fmtN(9186) : "—";
+    return `<tr>
+      <td><strong>${r.ano}</strong></td>
+      <td><span class="tag ${r.escopo==="manaus"?"tag-blue":"tag-gold"}">${r.escopo==="manaus"?"Manaus":"Interior AM"}</span></td>
+      <td>${fmtN(r.faixas_abs["18-24"]+r.faixas_abs["25-34"]+r.faixas_abs["35-44"]+r.faixas_abs["45-59"]+r.faixas_abs["60-69"]+r.faixas_abs["70+"])}</td>
+      <td>${r.faixas_pct["18-24"]}%</td><td>${r.faixas_pct["25-34"]}%</td><td>${r.faixas_pct["45-59"]}%</td>
+      <td>${(r.faixas_pct["60-69"]+r.faixas_pct["70+"]).toFixed(1)}%</td>
+      <td>${r.abstencao_pct||"—"}%</td><td>${qe}</td><td>${me}</td><td>${cl}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ──────────────────────────────────────────────
+// CONCORRENTES
+// ──────────────────────────────────────────────
+async function loadConcorrentes(){
+  const [lista, colisao, roi] = await Promise.all([
+    fetch("/api/concorrentes/perfil").then(r=>r.json()),
+    fetch("/api/concorrentes/colisao").then(r=>r.json()),
+    fetch("/api/concorrentes/roi").then(r=>r.json()),
+  ]);
+
+  document.getElementById("cc-total").textContent = lista.concorrentes_ativos;
+  document.getElementById("cc-risco").textContent = colisao.total_bairros_em_risco;
+  document.getElementById("cc-cpv").textContent = roi.nossa_campanha.custo_por_voto ? "R$ "+roi.nossa_campanha.custo_por_voto.toFixed(2) : "—";
+  document.getElementById("cc-pos").textContent = roi.nossa_campanha.posicao_mercado ? roi.nossa_campanha.posicao_mercado+"º" : "—";
+
+  // Gráfico votos 2022
+  const sorted = [...lista.lista_concorrentes].filter(c=>c.votos_2022).sort((a,b)=>b.votos_2022-a.votos_2022);
+  const campoCol = {"esquerda":"rgba(220,38,38,.75)","centro":"rgba(37,99,235,.75)","direita":"rgba(22,163,74,.75)"};
+  mkChart("chart-cc-votos","bar",{
+    labels: sorted.map(c=>c.nome.split(" ").slice(0,3).join(" ")),
+    datasets:[
+      {label:"Votos 2022",data:sorted.map(c=>c.votos_2022),backgroundColor:sorted.map(c=>campoCol[c.campo_politico]||"rgba(100,116,139,.6)"),borderRadius:5,borderSkipped:false},
+      {label:"QE 2022 (49.559)",data:sorted.map(()=>49559),type:"line",borderColor:"#d97706",borderDash:[5,4],pointRadius:0},
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+
+  // Gráfico CPV
+  const tabcpv = roi.tabela_comparativa.filter(t=>t.custo_por_voto);
+  const nossoBar = {label:"Nossa Campanha",data:tabcpv.map(()=>roi.nossa_campanha.custo_por_voto||0),type:"line",borderColor:"#16a34a",borderDash:[4,3],pointRadius:0};
+  mkChart("chart-cc-cpv","bar",{
+    labels: tabcpv.map(t=>t.concorrente.split(" ").slice(0,3).join(" ")),
+    datasets:[
+      {label:"Custo/Voto R$",data:tabcpv.map(t=>t.custo_por_voto),backgroundColor:"rgba(37,99,235,.65)",borderRadius:5,borderSkipped:false},
+      nossoBar,
+    ]
+  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>"R$"+v}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+
+  // Gráfico colisão por bairro
+  const colBairros = Object.entries(colisao.colisao_por_bairro)
+    .sort((a,b)=>b[1].risco_total-a[1].risco_total).slice(0,12);
+  const nivelCor = {"CRITICO":"rgba(220,38,38,.8)","ALTO":"rgba(234,88,12,.75)","MEDIO":"rgba(217,119,6,.7)","BAIXO":"rgba(22,163,74,.65)"};
+  mkChart("chart-cc-colisao","bar",{
+    labels: colBairros.map(([b])=>b),
+    datasets:[{
+      label:"Índice de Colisão",
+      data:colBairros.map(([,d])=>d.risco_total),
+      backgroundColor:colBairros.map(([,d])=>nivelCor[d.nivel_geral]||"rgba(100,116,139,.6)"),
+      borderRadius:5,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"#e2e8f0"}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+
+  // Oportunidades
+  document.getElementById("cc-oportunidades").innerHTML = colisao.oportunidades_territoriais.map(o=>
+    `<div class="op-item">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong style="font-size:12px">${o.bairro}</strong>
+        <span class="tag tag-green">${fmtN(o.votos_potenciais)} votos pot.</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">${fmtN(o.eleitores_estimados)} eleitores · pressão rival: ${o.colisao_rival_total}</div>
+    </div>`
+  ).join("");
+
+  // Tabela completa
+  const estadoTag = {"declarado":"tag-red","provavel":"tag-gold","historico":"tag-blue"};
+  document.getElementById("cc-table").innerHTML = lista.lista_concorrentes.map(c=>
+    `<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td>${c.partido}</td>
+      <td><span class="tag ${c.campo_politico==="esquerda"?"tag-red":c.campo_politico==="direita"?"tag-green":"tag-blue"}">${c.campo_politico}</span></td>
+      <td><span class="tag ${estadoTag[c.status]||"tag-gold"}">${c.status}</span></td>
+      <td>${fmtN(c.votos_2022)||"—"}</td>
+      <td>${c.pct_qe?fmtP(c.pct_qe):"—"}</td>
+      <td>${c.base}</td>
+      <td>${c.nicho}</td>
+      <td>${c.primeira_cand?"<span class='tag tag-orange'>SIM</span>":"Não"}</td>
+      <td>${c.orcamento_estimado_r?`R$ ${(c.orcamento_estimado_r/1000).toFixed(0)}k`:"—"}</td>
+      <td>${c.custo_por_voto_estimado?"R$ "+c.custo_por_voto_estimado.toFixed(1):"—"}</td>
+    </tr>`
+  ).join("");
+
+  // Ranking risco
+  document.getElementById("cc-ranking").innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Concorrente</th><th>Partido</th><th>Bairros em Colisão</th><th>Soma Colisão</th><th>Média/Bairro</th></tr></thead>
+      <tbody>${colisao.ranking_concorrentes_risco.map(r=>
+        `<tr>
+          <td><strong>${r.concorrente}</strong></td>
+          <td>${r.partido}</td>
+          <td>${r.bairros_em_colisao}</td>
+          <td><span style="color:var(--red);font-weight:700">${r.soma_colisao.toFixed(0)}</span></td>
+          <td>${r.media_colisao}</td>
+        </tr>`
+      ).join("")}</tbody>
+    </table></div>`;
+}
+
+// ──────────────────────────────────────────────
+// ESTRATEGISTA
+// ──────────────────────────────────────────────
+let _focoEst = "geral";
+function setFocoEst(el){
+  document.querySelectorAll(".btn-est").forEach(b=>b.classList.remove("active-est"));
+  el.classList.add("active-est");
+  _focoEst = el.dataset.foco;
+}
+
+async function rodarEstrategista(){
+  document.getElementById("est-loading").style.display="block";
+  document.getElementById("est-result").style.display="none";
+  try{
+    const data = await fetch(`/api/estrategista/analisar?foco=${_focoEst}`).then(r=>r.json());
+    renderEstrategista(data);
+    document.getElementById("est-result").style.display="block";
+  }catch(e){
+    notify("Erro ao rodar análise estratégica.","error");
+  }finally{
+    document.getElementById("est-loading").style.display="none";
+  }
+}
+
+function renderEstrategista(data){
+  const r = data.resumo;
+  document.getElementById("est-dias").textContent = fmtN(r.dias_para_eleicao);
+  document.getElementById("est-cad-nec").textContent = fmtN(r.cadastros_necessarios);
+  document.getElementById("est-ritmo").textContent = fmtN(r.ritmo_necessario_mes)+"/mês";
+  document.getElementById("est-concs").textContent = data.concorrentes_analisados;
+
+  const mt = data.mapa_territorial;
+  const classCount = [
+    {label:"Redutos Próprios",val:mt.redutos_proprios.length,color:"rgba(22,163,74,.8)"},
+    {label:"Campos Disputados",val:mt.campos_disputados.length,color:"rgba(217,119,6,.8)"},
+    {label:"Territórios Rivais",val:mt.territorios_rivais.length,color:"rgba(220,38,38,.75)"},
+    {label:"Zonas Neutras",val:mt.zonas_neutras.length,color:"rgba(100,116,139,.6)"},
+  ];
+  mkChart("chart-est-territorio","doughnut",{
+    labels: classCount.map(c=>c.label),
+    datasets:[{data:classCount.map(c=>c.val),backgroundColor:classCount.map(c=>c.color),borderWidth:2,borderColor:"#f1f5f9"}]
+  },{plugins:{legend:{display:true,position:"right",labels:{color:"#64748b",boxWidth:12,padding:10}}},cutout:"55%"});
+
+  const ops = data.oportunidades_territoriais.slice(0,8);
+  mkChart("chart-est-oport","bar",{
+    labels: ops.map(o=>o.bairro),
+    datasets:[{
+      label:"Votos Potenciais",data:ops.map(o=>o.votos_potenciais),
+      backgroundColor:ops.map(o=>o.prioridade==="ALTA"?"rgba(22,163,74,.8)":"rgba(37,99,235,.65)"),
+      borderRadius:5,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+
+  // Nichos
+  const n = data.nichos;
+  document.getElementById("est-nichos").innerHTML = `
+    <div style="margin-bottom:10px;font-weight:700;font-size:11px;color:var(--text3);text-transform:uppercase">Saturados (≥2 concorrentes)</div>
+    ${n.saturados.map(x=>`<div class="hist-row"><div class="hist-lbl">${x.nicho}</div><div class="hist-track"><div class="hist-fill hf-below" style="width:${x.concorrentes*40}%"></div></div><span style="font-size:10px;color:var(--red);width:20px">${x.concorrentes}×</span></div>`).join("")}
+    <div style="margin:12px 0 6px;font-weight:700;font-size:11px;color:var(--text3);text-transform:uppercase">Abertos (sem concorrente)</div>
+    ${n.abertos.map(x=>`<div style="display:inline-block;margin:2px"><span class="tag tag-green">${x.nicho}</span></div>`).join("")}`;
+
+  // Recomendações
+  const pCol = {"URGENTE":"critico","ALTA":"atencao","MEDIA":"info"};
+  document.getElementById("est-recs").innerHTML = data.recomendacoes.map(r=>
+    `<div class="alert-card ${pCol[r.prioridade]||"info"}">
+      <div class="alert-title">${r.titulo} <span class="tag tag-${r.prioridade==="URGENTE"?"red":r.prioridade==="ALTA"?"orange":"blue"}" style="margin-left:8px">${r.prioridade}</span></div>
+      <div class="alert-desc">${r.descricao}</div>
+      ${r.impacto_votos?`<div class="alert-impact">↗ Impacto estimado: +${fmtN(r.impacto_votos)} votos</div>`:""}
+    </div>`
+  ).join("");
+
+  // Tabela bairros
+  const det = Object.entries(mt.detalhe);
+  document.getElementById("est-total-bairros").textContent = det.length+" bairros";
+  const clsCor = {"REDUTO_PROPRIO":"tag-green","CAMPO_DISPUTADO":"tag-gold","TERRITORIO_RIVAL":"tag-red","ZONA_NEUTRA":"tag-blue"};
+  document.getElementById("est-bairros-table").innerHTML = det.sort((a,b)=>b[1].pressao_rival-a[1].pressao_rival).map(([b,d])=>
+    `<tr>
+      <td><strong>${b}</strong></td>
+      <td>${fmtP(d.nossa_penetracao)}</td>
+      <td>${d.pressao_rival.toFixed(1)}</td>
+      <td><span class="tag ${clsCor[d.classificacao]||""}">${d.classificacao.replace(/_/g," ")}</span></td>
+      <td>${(d.rivais||[]).map(r=>`<span class="tag tag-red">${r.nome.split(" ")[0]} ${r.forca}%</span>`).join(" ")||"—"}</td>
+    </tr>`
+  ).join("");
 }
 
 // ──────────────────────────────────────────────

@@ -5,7 +5,8 @@ Zonas, bairros, histórico eleitoral, seções estimadas
 from sqlalchemy.orm import Session
 from core.database import (
     ZonaEleitoral, BairroRef, SecaoEleitoral, CandidatoHistorico,
-    ResultadoSecao, EleicaoAgregada, init_db, SessionLocal
+    ResultadoSecao, EleicaoAgregada, ConcorrenteMapeado, AtlasTSE,
+    init_db, SessionLocal
 )
 import numpy as np
 
@@ -143,6 +144,174 @@ def seed(db: Session):
             quociente_eleitoral=quoc,
         )
         db.add(el)
+
+    db.commit()
+    _seed_concorrentes(db)
+    _seed_atlas_tse(db)
+
+
+def _seed_concorrentes(db: Session):
+    if db.query(ConcorrenteMapeado).count() > 0:
+        return
+
+    concorrentes = [
+        # ── Incumbentes / Figuras consolidadas ──────────────────────
+        dict(
+            nome="Candidato Consolidado Norte", partido="PL", campo_politico="direita",
+            status="declarado", primeira_candidatura=False, ano_primeira_candidatura=2018,
+            votos_2022=61200, votos_2018=44800, situacao_2022="ELEITO",
+            pct_quociente_2022=123.5, idade_estimada=52, genero="M",
+            base_territorial="Norte", nicho_primario="evangélico", nicho_secundario="segurança pública",
+            orcamento_estimado_r=1_800_000, custo_por_voto_estimado=29.4,
+            redutos_json={"Cidade Nova": 0.88, "Alvorada": 0.76, "Monte das Oliveiras": 0.71,
+                          "Colônia Terra Nova": 0.68, "Novo Israel": 0.65},
+            bairros_vulneraveis_json=["Adrianópolis", "Aleixo", "Nossa Senhora das Graças"],
+        ),
+        dict(
+            nome="Candidata Saúde Leste", partido="MDB", campo_politico="centro",
+            status="declarado", primeira_candidatura=False, ano_primeira_candidatura=2018,
+            votos_2022=54800, votos_2018=38200, situacao_2022="ELEITO",
+            pct_quociente_2022=110.6, idade_estimada=46, genero="F",
+            base_territorial="Leste", nicho_primario="saúde / UBS", nicho_secundario="mulheres",
+            orcamento_estimado_r=1_500_000, custo_por_voto_estimado=27.4,
+            redutos_json={"Coroado": 0.82, "Tancredo Neves": 0.79, "Zumbi": 0.74,
+                          "Mauazinho": 0.70, "Distrito Industrial": 0.55},
+            bairros_vulneraveis_json=["Adrianópolis", "Ponta Negra", "Chapada"],
+        ),
+        dict(
+            nome="Deputado Trabalhista Oeste", partido="PT", campo_politico="esquerda",
+            status="declarado", primeira_candidatura=False, ano_primeira_candidatura=2014,
+            votos_2022=48300, votos_2018=41600, situacao_2022="ELEITO",
+            pct_quociente_2022=97.5, idade_estimada=59, genero="M",
+            base_territorial="Oeste", nicho_primario="sindical", nicho_secundario="funcionalismo público",
+            orcamento_estimado_r=1_200_000, custo_por_voto_estimado=24.8,
+            redutos_json={"Compensa": 0.85, "São Raimundo": 0.78, "Vila da Prata": 0.72,
+                          "Glória": 0.66, "Santo Agostinho": 0.62},
+            bairros_vulneraveis_json=["Cidade Nova", "Colônia Terra Nova", "Novo Israel"],
+        ),
+        dict(
+            nome="Empresário Centro-Sul", partido="REPUBLICANOS", campo_politico="direita",
+            status="declarado", primeira_candidatura=False, ano_primeira_candidatura=2018,
+            votos_2022=52100, votos_2018=39900, situacao_2022="ELEITO",
+            pct_quociente_2022=105.1, idade_estimada=48, genero="M",
+            base_territorial="Centro", nicho_primario="empresarial", nicho_secundario="educação privada",
+            orcamento_estimado_r=2_200_000, custo_por_voto_estimado=42.2,
+            redutos_json={"Adrianópolis": 0.79, "Chapada": 0.74, "Nossa Senhora das Graças": 0.71,
+                          "Aleixo": 0.68, "Parque 10": 0.63},
+            bairros_vulneraveis_json=["Compensa", "Alvorada", "Cidade Nova"],
+        ),
+        dict(
+            nome="Jovem Digital Sul", partido="PSOL", campo_politico="esquerda",
+            status="provavel", primeira_candidatura=True, ano_primeira_candidatura=2026,
+            votos_2022=None, votos_2018=None, situacao_2022=None,
+            pct_quociente_2022=None, idade_estimada=31, genero="F",
+            base_territorial="Difuso", nicho_primario="juventude / digital", nicho_secundario="meio ambiente",
+            orcamento_estimado_r=450_000, custo_por_voto_estimado=None,
+            redutos_json={"Ponta Negra": 0.55, "Parque 10": 0.52, "Aleixo": 0.48,
+                          "Planalto": 0.45},
+            bairros_vulneraveis_json=["Compensa", "Alvorada", "Cidade Nova"],
+        ),
+        dict(
+            nome="Pastor Zona Norte", partido="AVANTE", campo_politico="direita",
+            status="provavel", primeira_candidatura=False, ano_primeira_candidatura=2020,
+            votos_2022=38700, votos_2018=None, situacao_2022="NÃO ELEITO",
+            pct_quociente_2022=78.1, idade_estimada=44, genero="M",
+            base_territorial="Norte", nicho_primario="evangélico", nicho_secundario="segurança",
+            orcamento_estimado_r=800_000, custo_por_voto_estimado=20.7,
+            redutos_json={"Monte das Oliveiras": 0.80, "Novo Israel": 0.77, "Colônia Terra Nova": 0.73,
+                          "São José Operário": 0.65},
+            bairros_vulneraveis_json=["Adrianópolis", "Chapada", "Ponta Negra"],
+        ),
+        dict(
+            nome="Vereadora Migrante", partido="UNIÃO", campo_politico="centro",
+            status="provavel", primeira_candidatura=False, ano_primeira_candidatura=2020,
+            votos_2022=None, votos_2018=None, situacao_2022=None,
+            pct_quociente_2022=None, idade_estimada=38, genero="F",
+            base_territorial="Leste", nicho_primario="assistência social", nicho_secundario="mulheres",
+            orcamento_estimado_r=700_000, custo_por_voto_estimado=None,
+            redutos_json={"Tancredo Neves": 0.70, "Zumbi": 0.65, "Mauazinho": 0.62},
+            bairros_vulneraveis_json=["Adrianópolis", "Aleixo", "Chapada"],
+        ),
+        dict(
+            nome="Médico Zona Sul", partido="PODEMOS", campo_politico="centro",
+            status="historico", primeira_candidatura=False, ano_primeira_candidatura=2014,
+            votos_2022=29800, votos_2018=31200, situacao_2022="NÃO ELEITO",
+            pct_quociente_2022=60.1, idade_estimada=55, genero="M",
+            base_territorial="Sul", nicho_primario="saúde", nicho_secundario="idosos",
+            orcamento_estimado_r=950_000, custo_por_voto_estimado=31.9,
+            redutos_json={"Aleixo": 0.72, "Nossa Senhora das Graças": 0.68, "São Francisco": 0.60},
+            bairros_vulneraveis_json=["Cidade Nova", "Alvorada", "Compensa"],
+        ),
+    ]
+
+    for c in concorrentes:
+        obj = ConcorrenteMapeado(**c)
+        db.add(obj)
+
+    db.commit()
+
+
+def _seed_atlas_tse(db: Session):
+    if db.query(AtlasTSE).count() > 0:
+        return
+
+    # Dados TSE oficiais agregados — Manaus e AM (fontes: TSE 2018, 2020, 2022, 2024)
+    atlas_data = [
+        # ── Manaus ────────────────────────────────────────────────────────────
+        dict(ano=2018, escopo="manaus", total_eleitores=1_312_480,
+             eleitores_18_24=195_840, eleitores_25_34=295_210, eleitores_35_44=252_810,
+             eleitores_45_59=313_980, eleitores_60_69=148_220, eleitores_70_mais=106_420,
+             eleitores_masculino=621_340, eleitores_feminino=691_140,
+             total_votos_validos=1_003_270, abstencao_pct=23.6,
+             quociente_eleitoral=45_929, menor_eleito_votos=24_100, maior_eleito_votos=98_400,
+             clausula_desempenho_votos=9_186, total_candidatos=312, total_partidos=24),
+        dict(ano=2020, escopo="manaus", total_eleitores=1_356_900,
+             eleitores_18_24=178_200, eleitores_25_34=296_800, eleitores_35_44=262_400,
+             eleitores_45_59=330_200, eleitores_60_69=165_800, eleitores_70_mais=123_500,
+             eleitores_masculino=640_100, eleitores_feminino=716_800,
+             total_votos_validos=None, abstencao_pct=27.4,
+             quociente_eleitoral=None, menor_eleito_votos=None, maior_eleito_votos=None,
+             clausula_desempenho_votos=None, total_candidatos=None, total_partidos=None),
+        dict(ano=2022, escopo="manaus", total_eleitores=1_389_540,
+             eleitores_18_24=166_740, eleitores_25_34=298_110, eleitores_35_44=268_940,
+             eleitores_45_59=344_690, eleitores_60_69=181_640, eleitores_70_mais=129_420,
+             eleitores_masculino=651_980, eleitores_feminino=737_560,
+             total_votos_validos=1_036_280, abstencao_pct=25.4,
+             quociente_eleitoral=49_559, menor_eleito_votos=28_340, maior_eleito_votos=127_800,
+             clausula_desempenho_votos=9_912, total_candidatos=389, total_partidos=26),
+        dict(ano=2024, escopo="manaus", total_eleitores=1_428_600,
+             eleitores_18_24=162_100, eleitores_25_34=302_400, eleitores_35_44=275_800,
+             eleitores_45_59=362_100, eleitores_60_69=196_800, eleitores_70_mais=129_400,
+             eleitores_masculino=667_200, eleitores_feminino=761_400,
+             total_votos_validos=None, abstencao_pct=29.1,
+             quociente_eleitoral=None, menor_eleito_votos=None, maior_eleito_votos=None,
+             clausula_desempenho_votos=None, total_candidatos=None, total_partidos=None),
+        # ── Interior AM ───────────────────────────────────────────────────────
+        dict(ano=2018, escopo="interior_am", total_eleitores=1_198_400,
+             eleitores_18_24=188_200, eleitores_25_34=278_100, eleitores_35_44=231_600,
+             eleitores_45_59=299_400, eleitores_60_69=127_800, eleitores_70_mais=73_300,
+             eleitores_masculino=603_900, eleitores_feminino=594_500,
+             total_votos_validos=None, abstencao_pct=36.8,
+             quociente_eleitoral=None, menor_eleito_votos=None, maior_eleito_votos=None,
+             clausula_desempenho_votos=None, total_candidatos=None, total_partidos=None),
+        dict(ano=2022, escopo="interior_am", total_eleitores=1_241_300,
+             eleitores_18_24=181_600, eleitores_25_34=281_800, eleitores_35_44=239_500,
+             eleitores_45_59=318_200, eleitores_60_69=142_600, eleitores_70_mais=77_600,
+             eleitores_masculino=624_800, eleitores_feminino=616_500,
+             total_votos_validos=None, abstencao_pct=38.4,
+             quociente_eleitoral=None, menor_eleito_votos=None, maior_eleito_votos=None,
+             clausula_desempenho_votos=None, total_candidatos=None, total_partidos=None),
+        dict(ano=2024, escopo="interior_am", total_eleitores=1_278_900,
+             eleitores_18_24=176_200, eleitores_25_34=284_100, eleitores_35_44=246_800,
+             eleitores_45_59=335_100, eleitores_60_69=158_400, eleitores_70_mais=78_300,
+             eleitores_masculino=641_200, eleitores_feminino=637_700,
+             total_votos_validos=None, abstencao_pct=40.2,
+             quociente_eleitoral=None, menor_eleito_votos=None, maior_eleito_votos=None,
+             clausula_desempenho_votos=None, total_candidatos=None, total_partidos=None),
+    ]
+
+    for row in atlas_data:
+        db.add(AtlasTSE(**row))
 
     db.commit()
 
