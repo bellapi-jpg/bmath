@@ -27,7 +27,7 @@ from analytics.engine import (
     AlertasAnalytics, ScoreViabilidade
 )
 
-app = FastAPI(title="BMATH Electoral Intelligence", version="2.0")
+app = FastAPI(title="Quolis — Inteligência Eleitoral AM", version="2.0")
 
 if (BASE_DIR / "static").exists():
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
