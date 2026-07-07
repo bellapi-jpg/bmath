@@ -191,13 +191,17 @@ async def upload_cadastros(
     db: Session = Depends(get_db)
 ):
     content = await file.read()
+    fname = (file.filename or "").lower()
     try:
-        df = pd.read_csv(io.BytesIO(content))
-    except Exception:
-        try:
-            df = pd.read_csv(io.BytesIO(content), encoding="latin1")
-        except Exception as e:
-            raise HTTPException(400, f"Erro ao ler CSV: {e}")
+        if fname.endswith(".xlsx") or fname.endswith(".xls"):
+            df = pd.read_excel(io.BytesIO(content))
+        else:
+            try:
+                df = pd.read_csv(io.BytesIO(content))
+            except Exception:
+                df = pd.read_csv(io.BytesIO(content), encoding="latin1")
+    except Exception as e:
+        raise HTTPException(400, f"Erro ao ler arquivo: {e}")
 
     ingestor = CadastroIngestion(db)
     result = ingestor.ingest(df, file.filename, origem)
