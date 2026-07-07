@@ -156,6 +156,12 @@ input[type=file]{display:none}
 .op-item{padding:10px 12px;border-radius:9px;border:1px solid var(--border);margin-bottom:7px;background:var(--surface2)}
 .op-item:last-child{margin-bottom:0}
 
+/* ── Chart proportional sizing ── */
+.chart-sm{max-height:180px}
+.chart-md{max-height:220px}
+.chart-lg{max-height:260px}
+canvas{max-height:var(--chart-h,220px);width:100%!important}
+
 /* ── Spinner ── */
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -209,7 +215,10 @@ input[type=file]{display:none}
     <div class="nav-section">Sistema</div>
     <div class="nav-item" data-page="importar" onclick="nav(this)"><span class="icon">⬆️</span> Importar Dados</div>
   </div>
-  <div class="sidebar-footer"><span class="status-dot"></span>Quolis v2.0 · AM · Dep. Estadual 2026</div>
+  <div class="sidebar-footer">
+    <span class="status-dot"></span>Quolis v2.0 · AM · Dep. Estadual 2026
+    <div style="margin-top:8px;font-size:9px;opacity:.45;letter-spacing:.6px">shipped by IBP</div>
+  </div>
 </nav>
 
 <!-- MAIN -->
@@ -288,8 +297,8 @@ input[type=file]{display:none}
       </div>
 
       <div class="grid g2">
-        <div class="card"><div class="card-header"><div class="card-title">Top 10 Bairros</div></div><canvas id="chart-bairros" height="210"></canvas></div>
-        <div class="card"><div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div><canvas id="chart-genero" height="210"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Top 10 Bairros</div></div><canvas id="chart-bairros"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div><canvas id="chart-genero"></canvas></div>
       </div>
     </div>
 
@@ -316,7 +325,7 @@ input[type=file]{display:none}
         <div class="card card-sm"><div class="kpi-label">Total Projetado</div><div class="kpi-val green" id="pj-tot">—</div><div class="kpi-delta" id="pj-tot-d"></div></div>
       </div>
       <div class="grid g12" style="margin-bottom:14px">
-        <div class="card"><div class="card-header"><div class="card-title">Funil de Conversão</div></div><canvas id="chart-funil" height="260"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Funil de Conversão</div></div><canvas id="chart-funil"></canvas></div>
         <div class="card">
           <div class="card-header"><div class="card-title">Parâmetros do Modelo</div></div>
           <div style="font-size:13px;color:var(--text2);line-height:2;padding:4px 0">
@@ -336,7 +345,7 @@ input[type=file]{display:none}
           </div>
         </div>
       </div>
-      <div class="card"><div class="card-header"><div class="card-title">Comparativo dos 3 Cenários vs. Metas</div></div><canvas id="chart-cenarios" height="170"></canvas></div>
+      <div class="card"><div class="card-header"><div class="card-title">Comparativo dos 3 Cenários vs. Metas</div></div><canvas id="chart-cenarios"></canvas></div>
     </div>
 
     <!-- ══════════ MONTE CARLO ══════════ -->
@@ -368,7 +377,7 @@ input[type=file]{display:none}
     <div class="page" id="page-crescimento">
       <div class="page-title">📈 Crescimento & Metas</div>
       <div class="page-sub">Projeção mensal de cadastros → votos · trajetória Set/25 → Jun/26</div>
-      <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados ao Longo do Tempo</div></div><canvas id="chart-cresc" height="200"></canvas></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados ao Longo do Tempo</div></div><canvas id="chart-cresc"></canvas></div>
       <div class="card"><div class="card-header"><div class="card-title">Calendário de Metas</div></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Mês</th><th>Novos Cadastros</th><th>Acumulado</th><th>Votos Est.</th><th>% Meta</th><th>Status</th></tr></thead>
@@ -387,8 +396,8 @@ input[type=file]{display:none}
         <div class="card card-sm"><div class="kpi-label">Sem Presença</div><div class="kpi-val red" id="t-zero">—</div></div>
       </div>
       <div class="grid g2" style="margin-bottom:14px">
-        <div class="card"><div class="card-header"><div class="card-title">Top 12 por Penetração (%)</div></div><canvas id="chart-pen" height="230"></canvas></div>
-        <div class="card"><div class="card-header"><div class="card-title">Top 12 por ROI Estratégico</div></div><canvas id="chart-roi" height="230"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Top 12 por Penetração (%)</div></div><canvas id="chart-pen"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Top 12 por ROI Estratégico</div></div><canvas id="chart-roi"></canvas></div>
       </div>
       <div class="card"><div class="card-header"><div class="card-title">Tabela Completa</div><div class="card-badge" id="t-count">—</div></div>
         <div class="table-wrap"><table>
@@ -402,7 +411,7 @@ input[type=file]{display:none}
     <div class="page" id="page-zonas">
       <div class="page-title">📍 Zonas Eleitorais</div>
       <div class="page-sub">Análise por zona · votos estimados · contribuição à meta · priorização estratégica</div>
-      <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados por Zona</div></div><canvas id="chart-zonas" height="210"></canvas></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados por Zona</div></div><canvas id="chart-zonas"></canvas></div>
       <div class="card"><div class="card-header"><div class="card-title">Detalhamento</div></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Zona</th><th>Cadastros</th><th>Eleitores</th><th>Penetração</th><th>Votos Est.</th><th>% Meta</th><th>Prioridade</th></tr></thead>
@@ -416,12 +425,12 @@ input[type=file]{display:none}
       <div class="page-title">👥 Perfil do Eleitor</div>
       <div class="page-sub">Análise demográfica da base cadastral vs. eleitorado amazonense (TSE 2024)</div>
       <div class="grid g2" style="margin-bottom:14px">
-        <div class="card"><div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div><canvas id="chart-gen2" height="220"></canvas></div>
-        <div class="card"><div class="card-header"><div class="card-title">Faixa Etária · Base vs. Eleitorado AM</div></div><canvas id="chart-faixa" height="220"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div><canvas id="chart-gen2"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Faixa Etária · Base vs. Eleitorado AM</div></div><canvas id="chart-faixa"></canvas></div>
       </div>
       <div class="grid g2">
-        <div class="card"><div class="card-header"><div class="card-title">Origem dos Cadastros</div></div><canvas id="chart-origem" height="200"></canvas></div>
-        <div class="card"><div class="card-header"><div class="card-title">Classe Social Estimada</div></div><canvas id="chart-classe" height="200"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Origem dos Cadastros</div></div><canvas id="chart-origem"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Classe Social Estimada</div></div><canvas id="chart-classe"></canvas></div>
       </div>
     </div>
 
@@ -436,8 +445,8 @@ input[type=file]{display:none}
         <div class="card card-sm"><div class="kpi-label">Crescimento/Ciclo</div><div class="kpi-val green">+7,4%</div></div>
       </div>
       <div class="grid g2" style="margin-bottom:14px">
-        <div class="card"><div class="card-header"><div class="card-title">Quociente Histórico · Tendência 2026</div></div><canvas id="chart-hq" height="210"></canvas></div>
-        <div class="card"><div class="card-header"><div class="card-title">Participação Eleitoral por Ciclo</div></div><canvas id="chart-hp" height="210"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Quociente Histórico · Tendência 2026</div></div><canvas id="chart-hq"></canvas></div>
+        <div class="card"><div class="card-header"><div class="card-title">Participação Eleitoral por Ciclo</div></div><canvas id="chart-hp"></canvas></div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Insights Históricos</div></div>
@@ -457,7 +466,7 @@ input[type=file]{display:none}
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Candidatos · % do Quociente</div></div>
-          <canvas id="chart-analogos" height="230"></canvas>
+          <canvas id="chart-analogos"></canvas>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Insights de Trajetória</div></div>
@@ -501,7 +510,7 @@ input[type=file]{display:none}
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title">Tipos de Conteúdo — Efeito no Eleitorado</div></div>
-            <canvas id="chart-content-types" height="200"></canvas>
+            <canvas id="chart-content-types"></canvas>
           </div>
         </div>
       </div>
@@ -521,7 +530,7 @@ input[type=file]{display:none}
         <div class="grid g2">
           <div class="card">
             <div class="card-header"><div class="card-title">ROI por Tipo de Ação (Referência)</div></div>
-            <canvas id="chart-roi-acao" height="200"></canvas>
+            <canvas id="chart-roi-acao"></canvas>
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title">Custo por Voto Estimado (Mercado AM)</div></div>
@@ -546,15 +555,24 @@ input[type=file]{display:none}
       <div id="rec-list" style="margin-bottom:20px"></div>
       <div class="card">
         <div class="card-header"><div class="card-title">Efeito de Presença por Tipo de Ação (+% de intenção de voto)</div></div>
-        <canvas id="chart-efpres" height="190"></canvas>
+        <canvas id="chart-efpres"></canvas>
       </div>
     </div>
 
     <!-- ══════════ IMPORTAR ══════════ -->
     <div class="page" id="page-importar">
       <div class="page-title">⬆️ Importar Dados</div>
-      <div class="page-sub">Upload de planilhas · auto-detecção de colunas · enriquecimento automático por bairro</div>
-      <div class="grid g2" style="margin-bottom:20px">
+      <div class="page-sub">Upload de CSV ou JSON · auto-detecção de colunas · enriquecimento automático por bairro</div>
+
+      <!-- Status sync -->
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="card card-sm"><div class="kpi-label">Total na Base</div><div class="kpi-val accent" id="imp-total">—</div><div class="kpi-delta">cadastros importados</div></div>
+        <div class="card card-sm"><div class="kpi-label">Último Upload</div><div class="kpi-val" id="imp-ultimo" style="font-size:16px">—</div><div class="kpi-delta" id="imp-ultimo-d">aguardando</div></div>
+        <div class="card card-sm"><div class="kpi-label">Bairros Mapeados</div><div class="kpi-val" id="imp-bairros">—</div><div class="kpi-delta">com apoiadores</div></div>
+        <div class="card card-sm"><div class="kpi-label">Status API</div><div class="kpi-val green" id="imp-api" style="font-size:14px">—</div><div class="kpi-delta">integração externa</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Upload de Cadastros (CSV)</div></div>
           <div class="upload-area" id="upload-area" onclick="document.getElementById('finput').click()"
@@ -562,26 +580,44 @@ input[type=file]{display:none}
                ondragleave="this.style.borderColor='var(--border)'"
                ondrop="handleDrop(event)">
             <div style="font-size:36px;margin-bottom:10px">📂</div>
-            <div style="font-size:15px;font-weight:600;color:#fff">Arraste seu CSV aqui</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text)">Arraste seu CSV aqui</div>
             <div style="font-size:12px;color:var(--text2);margin-top:4px">ou clique para selecionar</div>
           </div>
-          <input type="file" id="finput" accept=".csv" onchange="uploadCSV(this.files[0])"/>
+          <input type="file" id="finput" accept=".csv,.xlsx" onchange="uploadCSV(this.files[0])"/>
           <div id="upload-status" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Formato Esperado</div></div>
-          <div style="font-size:13px;color:var(--text2);line-height:1.9">
+          <div style="font-size:12px;color:var(--text2);line-height:1.9">
             <div class="mono-block">
               nome,bairro,zona,genero,idade,telefone,escolaridade,origem<br>
               João Silva,Cidade Nova,02,M,34,92 9xxxx-xxxx,Médio,evento<br>
               Maria Souza,Compensa,06,F,28,92 9xxxx-xxxx,Superior,online
             </div>
-            <div>✅ O sistema detecta variações de nomes de colunas automaticamente</div>
+            <div>✅ Detecta variações de nomes de colunas automaticamente</div>
             <div>✅ Enriquece com classe social, densidade e mult. pelo bairro</div>
             <div>✅ Calcula score de fidelidade por faixa etária</div>
-            <div>✅ Aceita variações de acentuação e capitalização</div>
+            <div>✅ Aceita acentuação e capitalização variadas</div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <strong style="font-size:11px;color:var(--text3)">COLUNAS OPCIONAIS</strong><br>
+              <span style="font-size:11px">telefone · escolaridade · classe · zona · origem · multiplicador</span>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Integração direta via JSON -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div class="card-title">Integração Direta — Colar Dados JSON</div><div class="card-badge">do seu sistema de cadastros</div></div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Cole o JSON exportado do seu sistema de gestão de cadastros. Aceita array de objetos com qualquer estrutura.</div>
+        <textarea id="json-input" placeholder='[{"nome":"João","bairro":"Cidade Nova","telefone":"92 9xxxx-xxxx"},...]'
+          style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:11px;font-family:monospace;color:var(--text);background:var(--surface2);outline:none;resize:vertical;transition:border-color .15s"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary" onclick="uploadJSON()">Importar JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('json-input').value=''">Limpar</button>
+        </div>
+        <div id="json-status" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
       </div>
       <div class="card" id="prev-card" style="display:none">
         <div class="card-header"><div class="card-title">Preview</div><div class="card-badge" id="prev-count">—</div></div>
@@ -605,18 +641,18 @@ input[type=file]{display:none}
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Eleitorado Manaus — Evolução por Faixa Etária (%)</div><div class="card-badge">2018–2024</div></div>
-          <canvas id="chart-atlas-faixa" height="230"></canvas>
+          <canvas id="chart-atlas-faixa"></canvas>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Abstenção Capital vs Interior AM (%)</div></div>
-          <canvas id="chart-atlas-abstencao" height="230"></canvas>
+          <canvas id="chart-atlas-abstencao"></canvas>
         </div>
       </div>
 
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Gênero do Eleitorado Manaus — Evolução</div></div>
-          <canvas id="chart-atlas-genero" height="200"></canvas>
+          <canvas id="chart-atlas-genero"></canvas>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Cláusula de Desempenho 20% QE — Histórico e Impacto</div></div>
@@ -648,18 +684,18 @@ input[type=file]{display:none}
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Votos 2022 — Todos os Concorrentes vs Quociente</div></div>
-          <canvas id="chart-cc-votos" height="250"></canvas>
+          <canvas id="chart-cc-votos"></canvas>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Custo por Voto Comparativo (R$)</div></div>
-          <canvas id="chart-cc-cpv" height="250"></canvas>
+          <canvas id="chart-cc-cpv"></canvas>
         </div>
       </div>
 
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">Risco de Colisão por Bairro</div></div>
-          <canvas id="chart-cc-colisao" height="230"></canvas>
+          <canvas id="chart-cc-colisao"></canvas>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Oportunidades Territoriais Livres</div></div>
@@ -716,11 +752,11 @@ input[type=file]{display:none}
         <div class="grid g2" style="margin-bottom:14px">
           <div class="card">
             <div class="card-header"><div class="card-title">Mapa de Classificação Territorial</div></div>
-            <canvas id="chart-est-territorio" height="220"></canvas>
+            <canvas id="chart-est-territorio"></canvas>
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title">Oportunidades · Votos Potenciais sem Rival Forte</div></div>
-            <canvas id="chart-est-oport" height="220"></canvas>
+            <canvas id="chart-est-oport"></canvas>
           </div>
         </div>
 
@@ -758,6 +794,8 @@ Chart.defaults.color = "#64748b";
 Chart.defaults.borderColor = "#e2e8f0";
 Chart.defaults.font.family = "Inter, system-ui, sans-serif";
 Chart.defaults.font.size = 11;
+Chart.defaults.maintainAspectRatio = true;
+Chart.defaults.aspectRatio = 2.4;
 const charts = {};
 
 const PAGE_META = {
@@ -804,6 +842,7 @@ async function loadPage(p){
     zonas:loadZonas, perfil:loadPerfil, historico:loadHistorico,
     analogos:loadAnalogos, social:loadSocial, campanha:loadCampanha,
     recomendacoes:loadRecs, atlas:loadAtlas, concorrentes:loadConcorrentes,
+    importar:loadImportStatus,
   };
   if(map[p]) await map[p]();
 }
@@ -819,7 +858,7 @@ function mkChart(id,type,data,options={}){
   const ctx = document.getElementById(id);
   if(!ctx) return;
   charts[id] = new Chart(ctx,{type,data,options:{
-    responsive:true,maintainAspectRatio:false,
+    responsive:true,maintainAspectRatio:true,aspectRatio:2.2,
     plugins:{legend:{display:false},tooltip:{backgroundColor:"#0f172a",borderColor:"#334155",borderWidth:1,titleColor:"#f8fafc",bodyColor:"#cbd5e1",padding:10,cornerRadius:8}},
     ...options
   }});
@@ -1314,6 +1353,46 @@ async function uploadCSV(file){
     document.getElementById("upload-status").innerHTML="❌ Erro ao importar.";
     notify("Erro ao importar arquivo.","error");
   }
+}
+
+async function uploadJSON(){
+  const raw=document.getElementById("json-input").value.trim();
+  if(!raw){notify("Cole os dados JSON antes de importar.","error");return;}
+  let data;
+  try{data=JSON.parse(raw);}catch(e){notify("JSON inválido. Verifique o formato.","error");return;}
+  if(!Array.isArray(data)) data=[data];
+  document.getElementById("json-status").innerHTML='<span class="spinner"></span> Importando '+data.length+' registros...';
+  try{
+    const r=await fetch("/api/upload/cadastros/json",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({cadastros:data})
+    });
+    const d=await r.json();
+    if(d.ok||d.importados){
+      const n=d.importados||d.validos||data.length;
+      document.getElementById("json-status").innerHTML=`✅ ${fmtN(n)} cadastros importados com sucesso!`;
+      notify(`✅ ${fmtN(n)} cadastros importados!`);
+      loaded.clear(); loadPage(currentPage);
+    } else {
+      document.getElementById("json-status").innerHTML="❌ "+(d.detail||"Erro ao importar.");
+    }
+  }catch(e){
+    document.getElementById("json-status").innerHTML="❌ Erro de conexão.";
+    notify("Erro ao importar JSON.","error");
+  }
+}
+
+async function loadImportStatus(){
+  try{
+    const r=await fetch("/api/cadastro/analytics");
+    if(!r.ok) return;
+    const d=await r.json();
+    const tot=d.total||0;
+    document.getElementById("imp-total").textContent=fmtN(tot);
+    document.getElementById("imp-bairros").textContent=d.bairros||"—";
+    document.getElementById("imp-api").textContent="Online";
+  }catch(e){}
 }
 
 // ──────────────────────────────────────────────

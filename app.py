@@ -204,6 +204,23 @@ async def upload_cadastros(
     return {"ok": True, **result}
 
 
+@app.post("/api/upload/cadastros/json")
+async def upload_cadastros_json(
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    """Importa cadastros via JSON colado na UI (sem API key, requer sessão autenticada)."""
+    registros = payload.get("cadastros", [])
+    if not registros:
+        raise HTTPException(400, "Campo 'cadastros' ausente ou vazio.")
+    if len(registros) > 5000:
+        raise HTTPException(400, "Limite de 5.000 registros por upload.")
+    df = pd.DataFrame(registros)
+    ingestor = CadastroIngestion(db)
+    result = ingestor.ingest(df, "upload_json", "json_manual")
+    return {"ok": True, **result}
+
+
 @app.post("/api/upload/social")
 async def upload_social(data: dict, db: Session = Depends(get_db)):
     ingestor = SocialIngestion(db)
