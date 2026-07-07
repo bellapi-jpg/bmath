@@ -6,48 +6,47 @@
 <title>QUOLIS — Inteligência Eleitoral AM 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root{
-  /* Paleta editorial */
-  --bg:#f7f5f0;
-  --surface:#ffffff;
-  --surface2:#f2f0eb;
-  --surface3:#e8e4dc;
-  --border:#ddd9d0;
-  --accent:#1a3a5c;       /* azul-marinho profundo */
-  --accent2:#2d5a8e;
-  --gold:#b45309;
-  --green:#2d6a4f;
-  --green2:#40916c;
-  --red:#9b1c1c;
-  --orange:#92400e;
-  --purple:#4c1d95;
-  --text:#111008;
-  --text2:#5c5748;
-  --text3:#9c9485;
+  --bg:#0b0f0e;
+  --surface:#111614;
+  --surface2:#161c1a;
+  --surface3:#1d2522;
+  --border:#233029;
+  --border2:#2d3d35;
 
-  /* Sidebar — quase-preto editorial */
-  --sb-bg:#0e0d0b;
-  --sb-surface:#1a1916;
-  --sb-border:#2a2825;
-  --sb-text:#e8e4dc;
-  --sb-text2:#a09890;
-  --sb-text3:#c8b97a;     /* dourado discreto como accent */
-  --sidebar-w:256px;
+  --accent:#e8b84b;        /* âmbar tático */
+  --accent2:#f5d07a;
+  --green:#3ddc84;
+  --green2:#2ab06a;
+  --red:#e05555;
+  --orange:#e07c2a;
+  --purple:#9b7fe8;
+  --gold:#e8b84b;
 
-  --shadow:none;
-  --radius:4px;
-  --radius-lg:6px;
+  --text:#d4e8df;
+  --text2:#8aaa98;
+  --text3:#4a6659;
+
+  --sb-bg:#080c0b;
+  --sb-surface:#0e1412;
+  --sb-border:#1a2620;
+  --sb-text:#c8ddd5;
+  --sb-text2:#5a7a6a;
+  --sb-text3:#e8b84b;
+  --sidebar-w:248px;
+
+  --radius:2px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'DM Sans',system-ui,sans-serif;
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
   font-size:13px;
-  line-height:1.6;
+  line-height:1.55;
   display:flex;
   min-height:100vh;
 }
@@ -60,136 +59,148 @@ body{
   display:flex;flex-direction:column;
   position:fixed;top:0;left:0;z-index:100;
 }
-.logo{padding:28px 22px 20px;border-bottom:1px solid var(--sb-border)}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--sb-border)}
 .logo-title{
-  font-family:'Playfair Display',serif;
-  font-size:20px;font-weight:700;
-  letter-spacing:.5px;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:600;
+  letter-spacing:3px;text-transform:uppercase;
+  color:#fff;
 }
 .logo-title span{color:var(--sb-text3)}
 .logo-sub{
-  font-family:'DM Sans',sans-serif;
-  font-size:9px;color:var(--sb-text2);
-  margin-top:5px;text-transform:uppercase;
-  letter-spacing:2px;font-weight:400;
-}
-.nav{flex:1;padding:12px 0;overflow-y:auto}
-.nav::-webkit-scrollbar{width:3px}
-.nav::-webkit-scrollbar-track{background:transparent}
-.nav::-webkit-scrollbar-thumb{background:var(--sb-border);border-radius:2px}
-.nav-section{
-  padding:18px 22px 5px;
+  font-family:'IBM Plex Mono',monospace;
   font-size:8.5px;color:var(--sb-text2);
-  text-transform:uppercase;letter-spacing:2px;
-  font-weight:500;opacity:.5;
+  margin-top:6px;text-transform:uppercase;
+  letter-spacing:1.8px;
+}
+.nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav::-webkit-scrollbar{width:2px}
+.nav::-webkit-scrollbar-track{background:transparent}
+.nav::-webkit-scrollbar-thumb{background:var(--sb-border)}
+.nav-section{
+  padding:16px 20px 4px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;color:var(--sb-text2);
+  text-transform:uppercase;letter-spacing:2.5px;
+  opacity:.6;
 }
 .nav-item{
   display:flex;align-items:center;gap:10px;
-  padding:9px 22px;cursor:pointer;
-  font-size:12.5px;font-weight:400;
+  padding:8px 20px;cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:12px;font-weight:400;
   color:var(--sb-text2);
-  transition:all .12s;
+  transition:color .1s,background .1s;
   border-left:2px solid transparent;
 }
-.nav-item:hover{color:var(--sb-text);background:rgba(255,255,255,.04)}
+.nav-item:hover{color:var(--sb-text);background:rgba(255,255,255,.03)}
 .nav-item.active{
   color:var(--sb-text3);
   border-left-color:var(--sb-text3);
-  background:rgba(200,185,122,.06);
+  background:rgba(232,184,75,.05);
   font-weight:500;
 }
-.nav-item .icon{font-size:13px;width:16px;text-align:center;opacity:.7}
+.nav-item .icon{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;width:18px;
+  color:var(--sb-text3);opacity:.5;
+  flex-shrink:0;letter-spacing:0;
+}
+.nav-item.active .icon{opacity:1}
 .sidebar-footer{
-  padding:16px 22px;
+  padding:14px 20px;
   border-top:1px solid var(--sb-border);
-  font-size:10px;color:var(--sb-text2);opacity:.5;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--sb-text2);opacity:.4;
 }
 .status-dot{
   display:inline-block;width:5px;height:5px;
-  border-radius:50%;background:var(--sb-text3);
-  margin-right:6px;animation:pulse 3s infinite;
+  background:var(--green);margin-right:6px;
+  animation:pulse 2s infinite;
 }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* ── Main ── */
 #main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
 #header{
-  height:56px;background:var(--surface);
+  height:52px;background:var(--surface);
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;position:sticky;top:0;z-index:50;
+  padding:0 28px;position:sticky;top:0;z-index:50;
 }
-.header-right{display:flex;align-items:center;gap:10px}
+.header-right{display:flex;align-items:center;gap:8px}
 .badge{
-  padding:3px 10px;border-radius:2px;
-  font-size:10px;font-weight:500;
-  font-family:'DM Sans',sans-serif;
-  letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 9px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;font-weight:400;
+  letter-spacing:.8px;text-transform:uppercase;
   background:transparent;color:var(--accent);
-  border:1px solid var(--accent);
+  border:1px solid rgba(232,184,75,.35);
 }
-.badge.gold{color:var(--gold);border-color:var(--gold)}
-.badge.red{color:var(--red);border-color:var(--red)}
-.badge.green{color:var(--green);border-color:var(--green)}
+.badge.gold{color:var(--gold);border-color:rgba(232,184,75,.35)}
+.badge.red{color:var(--red);border-color:rgba(224,85,85,.35)}
+.badge.green{color:var(--green);border-color:rgba(61,220,132,.35)}
 
-#content{padding:32px 36px;flex:1}
+#content{padding:28px 32px;flex:1}
 .page{display:none}.page.active{display:block}
 
 /* ── Grid ── */
-.grid{display:grid;gap:16px}
+.grid{display:grid;gap:12px}
 .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
 .g4{grid-template-columns:repeat(4,1fr)}.g12{grid-template-columns:1fr 2fr}
 .g21{grid-template-columns:2fr 1fr}.g13{grid-template-columns:1fr 3fr}
 @media(max-width:900px){.g2,.g3,.g4,.g12,.g21,.g13{grid-template-columns:1fr}}
 
-/* ── Cards — flat editorial ── */
+/* ── Cards ── */
 .card{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:24px;
+  padding:20px;
 }
-.card-sm{padding:18px 20px}
+.card-sm{padding:16px 18px}
 .card-header{
   display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:18px;
-  padding-bottom:12px;
+  margin-bottom:16px;
+  padding-bottom:10px;
   border-bottom:1px solid var(--border);
 }
 .card-title{
-  font-size:10px;font-weight:500;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;font-weight:400;
   color:var(--text3);
-  text-transform:uppercase;letter-spacing:1.2px;
-  font-family:'DM Sans',sans-serif;
+  text-transform:uppercase;letter-spacing:1.5px;
 }
 .card-badge{
-  font-size:10px;padding:2px 8px;
-  border-radius:2px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;padding:2px 7px;
   background:transparent;color:var(--text3);
-  font-weight:400;border:1px solid var(--border);
+  border:1px solid var(--border);letter-spacing:.5px;
 }
 
-/* ── KPI — números grandes em DM Mono ── */
+/* ── KPI ── */
 .kpi-val{
-  font-family:'DM Mono',monospace;
-  font-size:32px;font-weight:500;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:30px;font-weight:500;
   color:var(--text);line-height:1;
   margin:6px 0 2px;
   letter-spacing:-1px;
 }
 .kpi-label{
-  font-size:9.5px;color:var(--text3);
-  font-weight:500;text-transform:uppercase;letter-spacing:1.2px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8.5px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;
 }
-.kpi-delta{font-size:11px;margin-top:6px;color:var(--text2);font-weight:400}
+.kpi-delta{font-size:11px;margin-top:6px;color:var(--text2);font-weight:300}
 .accent{color:var(--accent)}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.purple{color:var(--purple)}
 
 /* ── Progress ── */
-.progress-wrap{margin:10px 0}
+.progress-wrap{margin:9px 0}
 .progress-label{
   display:flex;justify-content:space-between;
-  font-size:11px;color:var(--text2);
-  margin-bottom:6px;font-weight:400;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text3);
+  margin-bottom:5px;
 }
 .progress-bar{height:3px;background:var(--surface3);overflow:hidden}
 .progress-fill{height:100%;transition:width .9s cubic-bezier(.4,0,.2,1)}
@@ -201,186 +212,194 @@ body{
 
 /* ── Tabs ── */
 .tabs{
-  display:flex;gap:0;margin-bottom:20px;
+  display:flex;gap:0;margin-bottom:18px;
   border-bottom:1px solid var(--border);
 }
 .tab{
-  padding:9px 18px;
-  font-size:11.5px;font-weight:500;
+  padding:8px 16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;font-weight:400;
+  letter-spacing:.5px;text-transform:uppercase;
   cursor:pointer;color:var(--text3);
-  transition:all .12s;
+  transition:color .1s;
   border-bottom:2px solid transparent;
   margin-bottom:-1px;
 }
 .tab:hover{color:var(--text2)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* ── Table — estilo FT/Economist ── */
+/* ── Table ── */
 .table-wrap{overflow-x:auto;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{
-  text-align:left;padding:10px 14px;
+  text-align:left;padding:9px 13px;
   background:var(--surface2);
   color:var(--text3);
-  font-size:9.5px;font-weight:500;
-  text-transform:uppercase;letter-spacing:1px;
-  border-bottom:2px solid var(--border);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;font-weight:400;
+  text-transform:uppercase;letter-spacing:1.2px;
+  border-bottom:1px solid var(--border2);
 }
-td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);font-weight:300}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text);font-weight:300}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface2)}
 
 /* ── Tags ── */
 .tag{
-  display:inline-block;padding:1px 7px;
-  border-radius:2px;font-size:10px;
-  font-weight:500;letter-spacing:.3px;margin:1px;
+  display:inline-block;padding:1px 6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;font-weight:400;
+  letter-spacing:.3px;margin:1px;
 }
-.tag-red{background:rgba(155,28,28,.08);color:var(--red);border:1px solid rgba(155,28,28,.2)}
-.tag-orange{background:rgba(146,64,14,.08);color:var(--orange);border:1px solid rgba(146,64,14,.2)}
-.tag-gold{background:rgba(180,83,9,.08);color:var(--gold);border:1px solid rgba(180,83,9,.2)}
-.tag-green{background:rgba(45,106,79,.08);color:var(--green);border:1px solid rgba(45,106,79,.2)}
-.tag-blue{background:rgba(26,58,92,.08);color:var(--accent);border:1px solid rgba(26,58,92,.2)}
-.tag-purple{background:rgba(76,29,149,.08);color:var(--purple);border:1px solid rgba(76,29,149,.2)}
+.tag-red{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.25)}
+.tag-orange{background:rgba(224,124,42,.1);color:var(--orange);border:1px solid rgba(224,124,42,.25)}
+.tag-gold{background:rgba(232,184,75,.1);color:var(--gold);border:1px solid rgba(232,184,75,.25)}
+.tag-green{background:rgba(61,220,132,.1);color:var(--green);border:1px solid rgba(61,220,132,.25)}
+.tag-blue{background:rgba(232,184,75,.08);color:var(--accent);border:1px solid rgba(232,184,75,.2)}
+.tag-purple{background:rgba(155,127,232,.1);color:var(--purple);border:1px solid rgba(155,127,232,.25)}
 
 /* ── Alert cards ── */
 .alert-card{
-  padding:16px 18px;
-  border-left:3px solid;margin-bottom:10px;
-  border:1px solid var(--border);border-left-width:3px;
-  border-radius:var(--radius);
+  padding:14px 16px;
+  border-left:2px solid;margin-bottom:8px;
+  border:1px solid var(--border);border-left-width:2px;
 }
-.alert-card.critico{background:#fdf8f8;border-left-color:var(--red)}
-.alert-card.atencao{background:#fdf9f4;border-left-color:var(--gold)}
-.alert-card.info{background:#f6f8fb;border-left-color:var(--accent)}
-.alert-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
-.alert-desc{font-size:12px;color:var(--text2);line-height:1.6;font-weight:300}
-.alert-acao{font-size:11px;color:var(--gold);margin-top:8px;font-weight:500}
-.alert-impact{font-size:11px;color:var(--green);margin-top:4px;font-weight:500}
+.alert-card.critico{background:rgba(224,85,85,.04);border-left-color:var(--red)}
+.alert-card.atencao{background:rgba(232,184,75,.04);border-left-color:var(--gold)}
+.alert-card.info{background:rgba(61,220,132,.03);border-left-color:var(--green)}
+.alert-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:5px}
+.alert-desc{font-size:11.5px;color:var(--text2);line-height:1.6;font-weight:300}
+.alert-acao{font-size:10.5px;color:var(--gold);margin-top:7px;font-weight:500;font-family:'IBM Plex Mono',monospace;letter-spacing:.3px}
+.alert-impact{font-size:10.5px;color:var(--green);margin-top:4px;font-weight:400;font-family:'IBM Plex Mono',monospace}
 
 /* ── Upload ── */
 .upload-area{
-  border:1px dashed var(--border);
-  padding:44px;text-align:center;cursor:pointer;
-  transition:all .2s;background:var(--surface2);
-  border-radius:var(--radius);
+  border:1px dashed var(--border2);
+  padding:40px;text-align:center;cursor:pointer;
+  transition:all .15s;background:var(--surface2);
 }
-.upload-area:hover{border-color:var(--accent);background:#f0eee8}
+.upload-area:hover{border-color:var(--accent);background:rgba(232,184,75,.04)}
 .btn{
   display:inline-flex;align-items:center;gap:6px;
-  padding:9px 20px;border-radius:var(--radius);
+  padding:8px 18px;
+  font-family:'IBM Plex Sans',sans-serif;
   font-size:12px;font-weight:500;
   cursor:pointer;border:none;
-  font-family:'DM Sans',sans-serif;
-  transition:all .12s;letter-spacing:.3px;
+  transition:all .12s;letter-spacing:.2px;
 }
-.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
-.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#0b0f0e}.btn-primary:hover{background:var(--accent2)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 input[type=file]{display:none}
 
 /* ── Gauge ── */
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:16px 0}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0}
 .gauge-val{
-  font-family:'DM Mono',monospace;
-  font-size:52px;font-weight:500;
-  margin-top:8px;color:var(--text);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:48px;font-weight:500;
+  margin-top:6px;color:var(--text);
   letter-spacing:-2px;
 }
-.gauge-lbl{font-size:11px;font-weight:500;letter-spacing:1.5px;margin-top:4px;text-transform:uppercase;color:var(--text2)}
+.gauge-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;margin-top:4px;text-transform:uppercase;color:var(--accent)}
 
 /* ── Hist bars ── */
-.hist-row{display:flex;align-items:center;gap:8px;margin:3px 0}
-.hist-lbl{font-size:9px;color:var(--text3);width:60px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace}
-.hist-track{flex:1;height:8px;background:var(--surface2);overflow:hidden;border:1px solid var(--border)}
+.hist-row{display:flex;align-items:center;gap:8px;margin:2px 0}
+.hist-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);width:62px;text-align:right;flex-shrink:0}
+.hist-track{flex:1;height:6px;background:var(--surface3);overflow:hidden;border:1px solid var(--border)}
 .hist-fill{height:100%;transition:width .4s}
-.hf-below{background:var(--accent);opacity:.6}
-.hf-above{background:var(--green)}
+.hf-below{background:var(--accent);opacity:.7}
+.hf-above{background:var(--green);opacity:.8}
 
 /* ── Scenario box ── */
 .sc-box{
   background:var(--surface2);
-  padding:18px;text-align:center;
+  padding:16px;text-align:center;
   border:1px solid var(--border);
-  border-radius:var(--radius);
 }
 .sc-val{
-  font-family:'DM Mono',monospace;
-  font-size:28px;font-weight:500;
-  margin:6px 0;color:var(--text);letter-spacing:-1px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:26px;font-weight:500;
+  margin:5px 0;color:var(--text);letter-spacing:-1px;
 }
-.sc-lbl{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-weight:500}
+.sc-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px}
 
-/* ── Page header — editorial ── */
+/* ── Page header ── */
 .page-title{
-  font-family:'Playfair Display',serif;
-  font-size:26px;font-weight:600;
-  color:var(--text);margin-bottom:4px;
-  letter-spacing:-.3px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:28px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text);margin-bottom:3px;
 }
 .page-sub{
-  font-size:11.5px;color:var(--text3);
-  margin-bottom:28px;font-weight:300;
-  padding-bottom:20px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;color:var(--text3);
+  margin-bottom:24px;font-weight:400;
+  padding-bottom:16px;
   border-bottom:1px solid var(--border);
+  letter-spacing:.3px;
 }
-.divider{height:1px;background:var(--border);margin:20px 0}
+.divider{height:1px;background:var(--border);margin:18px 0}
 
 /* ── Insight card ── */
 .insight-card{
   background:var(--surface2);
-  border-radius:var(--radius);
-  padding:14px 16px;margin-bottom:8px;
+  padding:13px 15px;margin-bottom:8px;
   font-size:12px;color:var(--text2);
-  line-height:1.7;font-weight:300;
+  line-height:1.65;font-weight:300;
   border-left:2px solid var(--accent);
   border:1px solid var(--border);border-left-width:2px;
 }
 
 /* ── Mono blocks ── */
 .mono-block{
-  font-family:'DM Mono',monospace;
+  font-family:'IBM Plex Mono',monospace;
   font-size:11px;background:var(--sb-bg);
-  color:#c8b97a;
-  border:none;border-radius:var(--radius);
-  padding:14px 16px;margin-bottom:12px;line-height:1.8;
+  color:var(--accent);
+  border:1px solid var(--sb-border);
+  padding:12px 14px;margin-bottom:10px;line-height:1.8;
 }
 
 /* ── Estrategista buttons ── */
 .btn-est{
-  padding:7px 16px;border-radius:var(--radius);
-  font-size:11.5px;font-weight:500;cursor:pointer;
-  border:1px solid var(--sb-border);
-  background:rgba(200,185,122,.08);color:var(--sb-text3);
-  transition:all .12s;font-family:'DM Sans',sans-serif;
+  padding:6px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;font-weight:400;cursor:pointer;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--text2);
+  transition:all .12s;letter-spacing:.5px;text-transform:uppercase;
 }
 .btn-est:hover,.btn-est.active-est{
-  background:var(--sb-text3);color:var(--sb-bg);border-color:var(--sb-text3);
+  background:var(--accent);color:var(--bg);border-color:var(--accent);
 }
 
 /* ── Oportunidade item ── */
 .op-item{
-  padding:12px 14px;border-radius:var(--radius);
-  border:1px solid var(--border);margin-bottom:8px;
+  padding:11px 13px;
+  border:1px solid var(--border);margin-bottom:7px;
   background:var(--surface2);font-weight:300;
 }
 .op-item:last-child{margin-bottom:0}
 
-/* ── Chart proportional sizing ── */
+/* ── Chart ── */
 canvas{max-height:var(--chart-h,220px);width:100%!important}
 
 /* ── Spinner ── */
 .spinner{
-  display:inline-block;width:16px;height:16px;
-  border:1.5px solid var(--border);border-top-color:var(--accent);
-  border-radius:50%;animation:spin .8s linear infinite;
+  display:inline-block;width:14px;height:14px;
+  border:1.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Notif ── */
-#notif{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:6px}
-.notif-item{background:var(--sb-bg);border:1px solid var(--sb-border);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--sb-text);min-width:240px;animation:slideIn .2s ease;font-family:'DM Sans',sans-serif;font-weight:300}
-.notif-item.success{border-left:2px solid var(--sb-text3)}.notif-item.error{border-left:2px solid var(--red)}
-@keyframes slideIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+#notif{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.notif-item{
+  background:var(--surface);border:1px solid var(--border2);
+  padding:11px 14px;font-size:11.5px;color:var(--text);
+  min-width:230px;animation:slideIn .15s ease;
+  font-family:'IBM Plex Sans',sans-serif;font-weight:300;
+}
+.notif-item.success{border-left:2px solid var(--green)}.notif-item.error{border-left:2px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 </head>
 <body>
@@ -393,35 +412,35 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
   </div>
   <div class="nav">
     <div class="nav-section">Visão Geral</div>
-    <div class="nav-item active" data-page="painel" onclick="nav(this)"><span class="icon">⚡</span> Painel Geral</div>
-    <div class="nav-item" data-page="alertas" onclick="nav(this)"><span class="icon">🚨</span> Alertas & Diagnóstico</div>
-    <div class="nav-item" data-page="importar" onclick="nav(this)"><span class="icon">⬆️</span> Importar Dados</div>
+    <div class="nav-item active" data-page="painel" onclick="nav(this)">Painel Geral</div>
+    <div class="nav-item" data-page="alertas" onclick="nav(this)">Alertas & Diagnóstico</div>
+    <div class="nav-item" data-page="importar" onclick="nav(this)">Importar Dados</div>
 
     <div class="nav-section">Projeção Matemática</div>
-    <div class="nav-item" data-page="projecao" onclick="nav(this)"><span class="icon">📊</span> Projeção de Votos</div>
-    <div class="nav-item" data-page="montecarlo" onclick="nav(this)"><span class="icon">🎲</span> Monte Carlo</div>
-    <div class="nav-item" data-page="crescimento" onclick="nav(this)"><span class="icon">📈</span> Crescimento & Metas</div>
+    <div class="nav-item" data-page="projecao" onclick="nav(this)">Projeção de Votos</div>
+    <div class="nav-item" data-page="montecarlo" onclick="nav(this)">Monte Carlo</div>
+    <div class="nav-item" data-page="crescimento" onclick="nav(this)">Crescimento & Metas</div>
 
     <div class="nav-section">Território</div>
-    <div class="nav-item" data-page="territorial" onclick="nav(this)"><span class="icon">🗺️</span> Mapa por Bairro</div>
-    <div class="nav-item" data-page="zonas" onclick="nav(this)"><span class="icon">📍</span> Zonas Eleitorais</div>
+    <div class="nav-item" data-page="territorial" onclick="nav(this)">Mapa por Bairro</div>
+    <div class="nav-item" data-page="zonas" onclick="nav(this)">Zonas Eleitorais</div>
 
     <div class="nav-section">Eleitorado</div>
-    <div class="nav-item" data-page="perfil" onclick="nav(this)"><span class="icon">👥</span> Perfil do Eleitor</div>
+    <div class="nav-item" data-page="perfil" onclick="nav(this)">Perfil do Eleitor</div>
 
     <div class="nav-section">Padrões Históricos</div>
-    <div class="nav-item" data-page="historico" onclick="nav(this)"><span class="icon">🏛️</span> Eleições Anteriores</div>
-    <div class="nav-item" data-page="analogos" onclick="nav(this)"><span class="icon">🔬</span> Candidatos Análogos</div>
-    <div class="nav-item" data-page="atlas" onclick="nav(this)"><span class="icon">📋</span> Atlas TSE 2018–2024</div>
+    <div class="nav-item" data-page="historico" onclick="nav(this)">Eleições Anteriores</div>
+    <div class="nav-item" data-page="analogos" onclick="nav(this)">Candidatos Análogos</div>
+    <div class="nav-item" data-page="atlas" onclick="nav(this)">Atlas TSE 2018–2024</div>
 
     <div class="nav-section">Inteligência Competitiva</div>
-    <div class="nav-item" data-page="concorrentes" onclick="nav(this)"><span class="icon">⚔️</span> Mapa de Concorrentes</div>
-    <div class="nav-item" data-page="estrategista" onclick="nav(this)"><span class="icon">🧠</span> Estrategista</div>
+    <div class="nav-item" data-page="concorrentes" onclick="nav(this)">Mapa de Concorrentes</div>
+    <div class="nav-item" data-page="estrategista" onclick="nav(this)">Estrategista</div>
 
     <div class="nav-section">Campanha & Digital</div>
-    <div class="nav-item" data-page="social" onclick="nav(this)"><span class="icon">📱</span> Redes Sociais</div>
-    <div class="nav-item" data-page="campanha" onclick="nav(this)"><span class="icon">🎯</span> Eventos & ROI</div>
-    <div class="nav-item" data-page="recomendacoes" onclick="nav(this)"><span class="icon">💡</span> Recomendações</div>
+    <div class="nav-item" data-page="social" onclick="nav(this)">Redes Sociais</div>
+    <div class="nav-item" data-page="campanha" onclick="nav(this)">Eventos & ROI</div>
+    <div class="nav-item" data-page="recomendacoes" onclick="nav(this)">Recomendações</div>
 
   </div>
   <div class="sidebar-footer">
@@ -449,7 +468,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ PAINEL GERAL ══════════ -->
     <div class="page active" id="page-painel">
-      <div class="page-title">⚡ Painel Geral</div>
+      <div class="page-title">Painel Geral</div>
       <div class="page-sub">Diagnóstico completo em tempo real · Eleição 2026 · ALEAM</div>
 
       <div class="grid g4" style="margin-bottom:14px">
@@ -513,14 +532,14 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ALERTAS ══════════ -->
     <div class="page" id="page-alertas">
-      <div class="page-title">🚨 Alertas & Diagnóstico</div>
+      <div class="page-title">Alertas & Diagnóstico</div>
       <div class="page-sub">Sinalizações automáticas geradas pelo motor analítico · atualizado em tempo real</div>
       <div id="alertas-list"></div>
     </div>
 
     <!-- ══════════ PROJEÇÃO ══════════ -->
     <div class="page" id="page-projecao">
-      <div class="page-title">📊 Projeção de Votos</div>
+      <div class="page-title">Projeção de Votos</div>
       <div class="page-sub">Modelo matemático multicamada calibrado pelo perfil demográfico real do cadastro</div>
       <div class="tabs">
         <div class="tab active" onclick="setCenario('pessimista',this)">😟 Pessimista</div>
@@ -559,7 +578,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ MONTE CARLO ══════════ -->
     <div class="page" id="page-montecarlo">
-      <div class="page-title">🎲 Simulação Monte Carlo</div>
+      <div class="page-title">Simulação Monte Carlo</div>
       <div class="page-sub">10.000 simulações estocásticas — distribui incerteza matematicamente em vez de assumir um número fixo</div>
       <div class="grid g4" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Probabilidade de Eleição</div><div class="kpi-val green" id="mc-prob">—</div><div class="kpi-delta">das 10k simulações</div></div>
@@ -584,7 +603,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ CRESCIMENTO ══════════ -->
     <div class="page" id="page-crescimento">
-      <div class="page-title">📈 Crescimento & Metas</div>
+      <div class="page-title">Crescimento & Metas</div>
       <div class="page-sub">Projeção mensal de cadastros → votos · trajetória Set/25 → Jun/26</div>
       <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados ao Longo do Tempo</div></div><canvas id="chart-cresc"></canvas></div>
       <div class="card"><div class="card-header"><div class="card-title">Calendário de Metas</div></div>
@@ -597,7 +616,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ TERRITORIAL ══════════ -->
     <div class="page" id="page-territorial">
-      <div class="page-title">🗺️ Mapa por Bairro</div>
+      <div class="page-title">Mapa por Bairro</div>
       <div class="page-sub">Penetração · ROI estratégico · potencial inexplorado · classe social</div>
       <div class="grid g3" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Bairros Cobertos</div><div class="kpi-val accent" id="t-cob">—</div></div>
@@ -618,7 +637,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ZONAS ══════════ -->
     <div class="page" id="page-zonas">
-      <div class="page-title">📍 Zonas Eleitorais</div>
+      <div class="page-title">Zonas Eleitorais</div>
       <div class="page-sub">Análise por zona · votos estimados · contribuição à meta · priorização estratégica</div>
       <div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">Votos Estimados por Zona</div></div><canvas id="chart-zonas"></canvas></div>
       <div class="card"><div class="card-header"><div class="card-title">Detalhamento</div></div>
@@ -631,7 +650,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ PERFIL ══════════ -->
     <div class="page" id="page-perfil">
-      <div class="page-title">👥 Perfil do Eleitor</div>
+      <div class="page-title">Perfil do Eleitor</div>
       <div class="page-sub">Análise demográfica da base cadastral vs. eleitorado amazonense (TSE 2024)</div>
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card"><div class="card-header"><div class="card-title">Gênero · Base vs. Eleitorado AM</div></div><canvas id="chart-gen2"></canvas></div>
@@ -645,7 +664,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ HISTÓRICO ══════════ -->
     <div class="page" id="page-historico">
-      <div class="page-title">🏛️ Eleições Anteriores · ALEAM</div>
+      <div class="page-title">Eleições Anteriores · ALEAM</div>
       <div class="page-sub">Quociente eleitoral histórico · padrões de votação · tendências quantitativas</div>
       <div class="grid g4" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Quociente 2022</div><div class="kpi-val gold">49.559</div></div>
@@ -665,7 +684,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ANÁLOGOS ══════════ -->
     <div class="page" id="page-analogos">
-      <div class="page-title">🔬 Candidatos Análogos</div>
+      <div class="page-title">Candidatos Análogos</div>
       <div class="page-sub">Candidatos históricos com perfil similar · extração de padrões · alertas de trajetória</div>
       <div class="grid g3" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Situação Atual (Projeção)</div><div class="kpi-val" id="an-sit">—</div></div>
@@ -693,7 +712,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ SOCIAL ══════════ -->
     <div class="page" id="page-social">
-      <div class="page-title">📱 Redes Sociais</div>
+      <div class="page-title">Redes Sociais</div>
       <div class="page-sub">Análise de alcance digital · correlação com crescimento de cadastros · ROI por rede</div>
       <div id="social-content">
         <div class="card" style="text-align:center;padding:40px">
@@ -727,7 +746,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ CAMPANHA ══════════ -->
     <div class="page" id="page-campanha">
-      <div class="page-title">🎯 Eventos & ROI de Campanha</div>
+      <div class="page-title">Eventos & ROI de Campanha</div>
       <div class="page-sub">Rastreamento de eventos físicos · custo por voto · ROI estratégico por tipo de ação</div>
       <div id="campanha-content">
         <div class="card" style="text-align:center;padding:40px;margin-bottom:14px">
@@ -759,7 +778,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ RECOMENDAÇÕES ══════════ -->
     <div class="page" id="page-recomendacoes">
-      <div class="page-title">💡 Recomendações Estratégicas</div>
+      <div class="page-title">Recomendações Estratégicas</div>
       <div class="page-sub">Direcionamentos gerados pelo motor analítico com base nos dados reais da campanha</div>
       <div id="rec-list" style="margin-bottom:20px"></div>
       <div class="card">
@@ -770,7 +789,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ IMPORTAR ══════════ -->
     <div class="page" id="page-importar">
-      <div class="page-title">⬆️ Importar Dados</div>
+      <div class="page-title">Importar Dados</div>
       <div class="page-sub">Upload de CSV ou JSON · auto-detecção de colunas · enriquecimento automático por bairro</div>
 
       <!-- Status sync -->
@@ -836,7 +855,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ATLAS TSE ══════════ -->
     <div class="page" id="page-atlas">
-      <div class="page-title">📋 Atlas Histórico TSE 2018–2024</div>
+      <div class="page-title">Atlas Histórico TSE 2018–2024</div>
       <div class="page-sub">Dados oficiais agregados · eleitorado manauara · abstenção capital vs interior · cláusula de desempenho</div>
 
       <!-- KPIs Cláusula -->
@@ -880,7 +899,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ CONCORRENTES ══════════ -->
     <div class="page" id="page-concorrentes">
-      <div class="page-title">⚔️ Mapa de Concorrentes</div>
+      <div class="page-title">Mapa de Concorrentes</div>
       <div class="page-sub">Duelo territorial · risco de colisão por bairro · eficiência financeira comparada · perfil de campo político</div>
 
       <div class="grid g4" style="margin-bottom:14px">
@@ -928,7 +947,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ESTRATEGISTA ══════════ -->
     <div class="page" id="page-estrategista">
-      <div class="page-title">🧠 Estrategista — Análise On-Demand</div>
+      <div class="page-title">Estrategista — Análise On-Demand</div>
       <div class="page-sub">Motor analítico com consciência de redutos rivais · gera diagnóstico territorial, janelas de oportunidade e recomendações priorizadas</div>
 
       <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#0c1f14 0%,#132819 100%);border-color:#1e3d26">
@@ -999,11 +1018,11 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 // ──────────────────────────────────────────────
 // CONFIG
 // ──────────────────────────────────────────────
-Chart.defaults.color = "#9c9485";
-Chart.defaults.borderColor = "#ddd9d0";
-Chart.defaults.font.family = "DM Sans, system-ui, sans-serif";
+Chart.defaults.color = "#8aaa98";
+Chart.defaults.borderColor = "#233029";
+Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
-Chart.defaults.font.weight = "300";
+Chart.defaults.font.weight = "400";
 Chart.defaults.maintainAspectRatio = true;
 Chart.defaults.aspectRatio = 2.4;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
