@@ -69,7 +69,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-app = FastAPI(title="Quolis — Inteligência Eleitoral AM", version="2.0")
+app = FastAPI(title="Qualis — Inteligência Eleitoral AM", version="2.0")
 app.add_middleware(AuthMiddleware)
 
 if (BASE_DIR / "static").exists():
@@ -103,7 +103,7 @@ _LOGIN_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Quolis — Acesso</title>
+<title>Qualis — Acesso</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
