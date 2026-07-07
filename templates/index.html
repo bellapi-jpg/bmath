@@ -185,6 +185,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
     <div class="nav-section">Visão Geral</div>
     <div class="nav-item active" data-page="painel" onclick="nav(this)"><span class="icon">⚡</span> Painel Geral</div>
     <div class="nav-item" data-page="alertas" onclick="nav(this)"><span class="icon">🚨</span> Alertas & Diagnóstico</div>
+    <div class="nav-item" data-page="importar" onclick="nav(this)"><span class="icon">⬆️</span> Importar Dados</div>
 
     <div class="nav-section">Projeção Matemática</div>
     <div class="nav-item" data-page="projecao" onclick="nav(this)"><span class="icon">📊</span> Projeção de Votos</div>
@@ -212,8 +213,6 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
     <div class="nav-item" data-page="campanha" onclick="nav(this)"><span class="icon">🎯</span> Eventos & ROI</div>
     <div class="nav-item" data-page="recomendacoes" onclick="nav(this)"><span class="icon">💡</span> Recomendações</div>
 
-    <div class="nav-section">Sistema</div>
-    <div class="nav-item" data-page="importar" onclick="nav(this)"><span class="icon">⬆️</span> Importar Dados</div>
   </div>
   <div class="sidebar-footer">
     <span class="status-dot"></span>Quolis v2.0 · AM · Dep. Estadual 2026
@@ -1659,9 +1658,7 @@ function renderEstrategista(data){
 // INIT
 // ──────────────────────────────────────────────
 window.addEventListener("DOMContentLoaded",()=>{
-  fetch("/api/demo/seed-cadastros",{method:"POST"}).then(()=>{
-    loadPage("painel");
-  });
+  loadPage("painel");
 });
 </script>
 </body>

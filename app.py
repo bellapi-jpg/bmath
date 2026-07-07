@@ -525,65 +525,31 @@ async def integracao_webhook(
     return {"ok": True, **result}
 
 
-# ── Demo seed (dados de demonstração) ─────────────────────────────────────────
+# ── Admin: re-seed referência (limpa e re-aplica dados TSE/concorrentes) ───────
 
-@app.post("/api/demo/seed-cadastros")
-def demo_seed(db: Session = Depends(get_db)):
-    """Injeta 10.000 cadastros demo para demonstração"""
-    import numpy as np
-    from core.database import BairroRef, Eleitor, LoteImportacao
-    from datetime import date, timedelta
-
-    if db.query(Eleitor).count() > 0:
-        return {"ok": True, "mensagem": "Cadastros já existem"}
-
-    bairros = db.query(BairroRef).all()
-    if not bairros:
-        return {"ok": False, "mensagem": "Rode seed TSE primeiro"}
-
-    rng = np.random.default_rng(42)
-    pesos = [b.total_eleitores_estimado for b in bairros]
-    soma = sum(pesos)
-    pesos_norm = [p/soma for p in pesos]
-
-    lote = LoteImportacao(
-        nome_arquivo="demo_10000.csv", total_registros=10000,
-        registros_validos=10000, colunas_detectadas={}, origem="demo"
-    )
-    db.add(lote)
-    db.flush()
-
-    generos = rng.choice(["M","F"], size=10000, p=[0.46,0.54])
-    idades = rng.integers(18, 76, size=10000)
-    escolhas = rng.choice(len(bairros), size=10000, p=pesos_norm)
-
-    faixa_map = {(0,17):"≤17",(18,24):"18-24",(25,34):"25-34",(35,44):"35-44",(45,59):"45-59",(60,69):"60-69",(70,120):"70+"}
-    score_map = {"≤17":0.58,"18-24":0.61,"25-34":0.72,"35-44":0.72,"45-59":0.78,"60-69":0.83,"70+":0.83}
-    mult_map = {"muito_alta":2.8,"alta":2.2,"media":1.9,"baixa":1.6}
-    orig = rng.choice(["evento","indicacao","online","porta-a-porta"], size=10000, p=[0.3,0.35,0.2,0.15])
-
-    inicio = date(2024, 1, 1)
-    datas = [inicio + timedelta(days=int(rng.integers(0, 540))) for _ in range(10000)]
-
-    for i in range(10000):
-        b = bairros[escolhas[i]]
-        idade = int(idades[i])
-        faixa = next((lbl for (lo,hi),lbl in faixa_map.items() if lo<=idade<=hi), "")
-        dens = b.densidade or "media"
-        el = Eleitor(
-            nome=f"Eleitor Demo {i+1}", bairro=b.nome,
-            zona_codigo=b.zona.codigo if b.zona else None,
-            genero=generos[i], idade=idade, faixa_etaria=faixa,
-            classe_social_estimada=b.classe_social,
-            score_fidelidade=score_map.get(faixa, 0.70),
-            multiplicador_influencia=mult_map.get(dens, 2.0),
-            origem_cadastro=orig[i], data_cadastro=datas[i],
-            lote_id=lote.id,
-        )
-        db.add(el)
-
+@app.post("/api/admin/reset-seed")
+def admin_reset_seed(db: Session = Depends(get_db)):
+    """Limpa dados de referência e re-aplica seed com dados reais. Não apaga cadastros importados."""
+    from core.database import ConcorrenteMapeado, AtlasTSE, CandidatoHistorico
+    db.query(ConcorrenteMapeado).delete()
+    db.query(AtlasTSE).delete()
+    db.query(CandidatoHistorico).delete()
     db.commit()
-    return {"ok": True, "cadastros_criados": 10000}
+    _seed_concorrentes = __import__("core.seed_tse", fromlist=["_seed_concorrentes"])._seed_concorrentes
+    _seed_atlas_tse   = __import__("core.seed_tse", fromlist=["_seed_atlas_tse"])._seed_atlas_tse
+    _seed_concorrentes(db)
+    _seed_atlas_tse(db)
+    from core.seed_tse import CANDIDATOS_2022
+    from core.database import CandidatoHistorico, EleicaoAgregada
+    for c in CANDIDATOS_2022:
+        db.add(CandidatoHistorico(
+            ano_eleicao=2022, nome=c["nome"], numero=c["numero"],
+            partido=c["partido"], cargo="Deputado Estadual",
+            votos_totais=c["votos"], situacao=c["situacao"],
+            campo_politico=c["campo"]
+        ))
+    db.commit()
+    return {"ok": True, "mensagem": "Dados de referência atualizados com dados reais."}
 
 
 if __name__ == "__main__":
