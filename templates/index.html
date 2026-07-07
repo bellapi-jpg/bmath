@@ -6,170 +6,380 @@
 <title>QUOLIS — Inteligência Eleitoral AM 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
 :root{
-  --bg:#f0f4f8;--surface:#ffffff;--surface2:#f1f5f9;--surface3:#e2e8f0;
-  --border:#e2e8f0;--shadow:0 1px 4px rgba(15,23,42,.07),0 4px 16px rgba(15,23,42,.05);
-  --accent:#2563eb;--accent2:#4f46e5;
-  --gold:#d97706;--green:#16a34a;--green2:#22c55e;--red:#dc2626;--orange:#ea580c;--purple:#7c3aed;
-  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
-  --sb-bg:#0c1f14;--sb-surface:#132819;--sb-border:#1e3d26;--sb-text:#d1fae5;--sb-text2:#6ee7b7;--sb-text3:#34d399;
-  --sidebar-w:252px;
+  /* Paleta editorial */
+  --bg:#f7f5f0;
+  --surface:#ffffff;
+  --surface2:#f2f0eb;
+  --surface3:#e8e4dc;
+  --border:#ddd9d0;
+  --accent:#1a3a5c;       /* azul-marinho profundo */
+  --accent2:#2d5a8e;
+  --gold:#b45309;
+  --green:#2d6a4f;
+  --green2:#40916c;
+  --red:#9b1c1c;
+  --orange:#92400e;
+  --purple:#4c1d95;
+  --text:#111008;
+  --text2:#5c5748;
+  --text3:#9c9485;
+
+  /* Sidebar — quase-preto editorial */
+  --sb-bg:#0e0d0b;
+  --sb-surface:#1a1916;
+  --sb-border:#2a2825;
+  --sb-text:#e8e4dc;
+  --sb-text2:#a09890;
+  --sb-text3:#c8b97a;     /* dourado discreto como accent */
+  --sidebar-w:256px;
+
+  --shadow:none;
+  --radius:4px;
+  --radius-lg:6px;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;display:flex;min-height:100vh}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-size:13px;
+  line-height:1.6;
+  display:flex;
+  min-height:100vh;
+}
 
 /* ── Sidebar ── */
-#sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--sb-bg);border-right:1px solid var(--sb-border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
-.logo{padding:20px 18px 16px;border-bottom:1px solid var(--sb-border)}
-.logo-title{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff}
+#sidebar{
+  width:var(--sidebar-w);min-height:100vh;
+  background:var(--sb-bg);
+  border-right:1px solid var(--sb-border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;z-index:100;
+}
+.logo{padding:28px 22px 20px;border-bottom:1px solid var(--sb-border)}
+.logo-title{
+  font-family:'Playfair Display',serif;
+  font-size:20px;font-weight:700;
+  letter-spacing:.5px;color:#fff;
+}
 .logo-title span{color:var(--sb-text3)}
-.logo-sub{font-size:9.5px;color:var(--sb-text2);margin-top:3px;text-transform:uppercase;letter-spacing:1.5px;opacity:.7}
-.nav{flex:1;padding:10px 0;overflow-y:auto}
-.nav::-webkit-scrollbar{width:4px}.nav::-webkit-scrollbar-track{background:transparent}.nav::-webkit-scrollbar-thumb{background:var(--sb-border);border-radius:4px}
-.nav-section{padding:14px 18px 4px;font-size:9.5px;color:var(--sb-text2);text-transform:uppercase;letter-spacing:1.4px;font-weight:700;opacity:.55}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;color:var(--sb-text);transition:all .15s;border-left:3px solid transparent;opacity:.75}
-.nav-item:hover{background:rgba(52,211,153,.06);color:#fff;opacity:1}
-.nav-item.active{background:rgba(52,211,153,.1);color:var(--sb-text3);border-left-color:var(--sb-text3);opacity:1;font-weight:600}
-.nav-item .icon{font-size:14px;width:18px;text-align:center}
-.sidebar-footer{padding:12px 18px;border-top:1px solid var(--sb-border);font-size:10.5px;color:var(--sb-text2);opacity:.6}
-.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--sb-text3);margin-right:6px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.logo-sub{
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;color:var(--sb-text2);
+  margin-top:5px;text-transform:uppercase;
+  letter-spacing:2px;font-weight:400;
+}
+.nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav::-webkit-scrollbar{width:3px}
+.nav::-webkit-scrollbar-track{background:transparent}
+.nav::-webkit-scrollbar-thumb{background:var(--sb-border);border-radius:2px}
+.nav-section{
+  padding:18px 22px 5px;
+  font-size:8.5px;color:var(--sb-text2);
+  text-transform:uppercase;letter-spacing:2px;
+  font-weight:500;opacity:.5;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 22px;cursor:pointer;
+  font-size:12.5px;font-weight:400;
+  color:var(--sb-text2);
+  transition:all .12s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover{color:var(--sb-text);background:rgba(255,255,255,.04)}
+.nav-item.active{
+  color:var(--sb-text3);
+  border-left-color:var(--sb-text3);
+  background:rgba(200,185,122,.06);
+  font-weight:500;
+}
+.nav-item .icon{font-size:13px;width:16px;text-align:center;opacity:.7}
+.sidebar-footer{
+  padding:16px 22px;
+  border-top:1px solid var(--sb-border);
+  font-size:10px;color:var(--sb-text2);opacity:.5;
+}
+.status-dot{
+  display:inline-block;width:5px;height:5px;
+  border-radius:50%;background:var(--sb-text3);
+  margin-right:6px;animation:pulse 3s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* ── Main ── */
 #main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
-#header{height:58px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:50;box-shadow:0 1px 0 var(--border)}
-.header-right{display:flex;align-items:center;gap:8px}
-.badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:rgba(37,99,235,.08);color:var(--accent);border:1px solid rgba(37,99,235,.2)}
-.badge.gold{background:rgba(217,119,6,.09);color:var(--gold);border-color:rgba(217,119,6,.25)}
-.badge.red{background:rgba(220,38,38,.09);color:var(--red);border-color:rgba(220,38,38,.2)}
-.badge.green{background:rgba(22,163,74,.09);color:var(--green);border-color:rgba(22,163,74,.25)}
+#header{
+  height:56px;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;position:sticky;top:0;z-index:50;
+}
+.header-right{display:flex;align-items:center;gap:10px}
+.badge{
+  padding:3px 10px;border-radius:2px;
+  font-size:10px;font-weight:500;
+  font-family:'DM Sans',sans-serif;
+  letter-spacing:.5px;text-transform:uppercase;
+  background:transparent;color:var(--accent);
+  border:1px solid var(--accent);
+}
+.badge.gold{color:var(--gold);border-color:var(--gold)}
+.badge.red{color:var(--red);border-color:var(--red)}
+.badge.green{color:var(--green);border-color:var(--green)}
 
-#content{padding:24px;flex:1}
+#content{padding:32px 36px;flex:1}
 .page{display:none}.page.active{display:block}
 
 /* ── Grid ── */
-.grid{display:grid;gap:14px}
+.grid{display:grid;gap:16px}
 .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
 .g4{grid-template-columns:repeat(4,1fr)}.g12{grid-template-columns:1fr 2fr}
 .g21{grid-template-columns:2fr 1fr}.g13{grid-template-columns:1fr 3fr}
 @media(max-width:900px){.g2,.g3,.g4,.g12,.g21,.g13{grid-template-columns:1fr}}
 
-/* ── Cards ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
-.card-sm{padding:15px 17px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px}
-.card-badge{font-size:10.5px;padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--text2);font-weight:600;border:1px solid var(--border)}
+/* ── Cards — flat editorial ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+}
+.card-sm{padding:18px 20px}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.card-title{
+  font-size:10px;font-weight:500;
+  color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.2px;
+  font-family:'DM Sans',sans-serif;
+}
+.card-badge{
+  font-size:10px;padding:2px 8px;
+  border-radius:2px;
+  background:transparent;color:var(--text3);
+  font-weight:400;border:1px solid var(--border);
+}
 
-/* ── KPI ── */
-.kpi-val{font-size:30px;font-weight:800;color:var(--text);line-height:1.05;margin:4px 0}
-.kpi-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.kpi-delta{font-size:11px;margin-top:5px;color:var(--text2)}
+/* ── KPI — números grandes em DM Mono ── */
+.kpi-val{
+  font-family:'DM Mono',monospace;
+  font-size:32px;font-weight:500;
+  color:var(--text);line-height:1;
+  margin:6px 0 2px;
+  letter-spacing:-1px;
+}
+.kpi-label{
+  font-size:9.5px;color:var(--text3);
+  font-weight:500;text-transform:uppercase;letter-spacing:1.2px;
+}
+.kpi-delta{font-size:11px;margin-top:6px;color:var(--text2);font-weight:400}
 .accent{color:var(--accent)}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.purple{color:var(--purple)}
 
 /* ── Progress ── */
-.progress-wrap{margin:8px 0}
-.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:500}
-.progress-bar{height:6px;background:var(--surface3);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.pf-blue{background:linear-gradient(90deg,#2563eb,#4f46e5)}
-.pf-gold{background:linear-gradient(90deg,#d97706,#f59e0b)}
-.pf-green{background:linear-gradient(90deg,#16a34a,#22c55e)}
-.pf-red{background:linear-gradient(90deg,#dc2626,#ef4444)}
-.pf-purple{background:linear-gradient(90deg,#7c3aed,#a855f7)}
+.progress-wrap{margin:10px 0}
+.progress-label{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--text2);
+  margin-bottom:6px;font-weight:400;
+}
+.progress-bar{height:3px;background:var(--surface3);overflow:hidden}
+.progress-fill{height:100%;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.pf-blue{background:var(--accent)}
+.pf-gold{background:var(--gold)}
+.pf-green{background:var(--green)}
+.pf-red{background:var(--red)}
+.pf-purple{background:var(--purple)}
 
 /* ── Tabs ── */
-.tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--surface2);padding:4px;border-radius:10px;border:1px solid var(--border)}
-.tab{flex:1;padding:7px 8px;border-radius:7px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s}
-.tab.active{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+.tabs{
+  display:flex;gap:0;margin-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.tab{
+  padding:9px 18px;
+  font-size:11.5px;font-weight:500;
+  cursor:pointer;color:var(--text3);
+  transition:all .12s;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* ── Table ── */
-.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+/* ── Table — estilo FT/Economist ── */
+.table-wrap{overflow-x:auto;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;padding:9px 12px;background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
-td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+th{
+  text-align:left;padding:10px 14px;
+  background:var(--surface2);
+  color:var(--text3);
+  font-size:9.5px;font-weight:500;
+  text-transform:uppercase;letter-spacing:1px;
+  border-bottom:2px solid var(--border);
+}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);font-weight:300}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#f8fafc}
+tr:hover td{background:var(--surface2)}
 
 /* ── Tags ── */
-.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin:1px}
-.tag-red{background:rgba(220,38,38,.1);color:var(--red)}
-.tag-orange{background:rgba(234,88,12,.1);color:var(--orange)}
-.tag-gold{background:rgba(217,119,6,.12);color:var(--gold)}
-.tag-green{background:rgba(22,163,74,.1);color:var(--green)}
-.tag-blue{background:rgba(37,99,235,.1);color:var(--accent)}
-.tag-purple{background:rgba(124,58,237,.1);color:var(--purple)}
+.tag{
+  display:inline-block;padding:1px 7px;
+  border-radius:2px;font-size:10px;
+  font-weight:500;letter-spacing:.3px;margin:1px;
+}
+.tag-red{background:rgba(155,28,28,.08);color:var(--red);border:1px solid rgba(155,28,28,.2)}
+.tag-orange{background:rgba(146,64,14,.08);color:var(--orange);border:1px solid rgba(146,64,14,.2)}
+.tag-gold{background:rgba(180,83,9,.08);color:var(--gold);border:1px solid rgba(180,83,9,.2)}
+.tag-green{background:rgba(45,106,79,.08);color:var(--green);border:1px solid rgba(45,106,79,.2)}
+.tag-blue{background:rgba(26,58,92,.08);color:var(--accent);border:1px solid rgba(26,58,92,.2)}
+.tag-purple{background:rgba(76,29,149,.08);color:var(--purple);border:1px solid rgba(76,29,149,.2)}
 
-/* ── Alert / Rec cards ── */
-.alert-card{border-radius:12px;padding:15px 17px;border-left:4px solid;margin-bottom:10px;border:1px solid var(--border);border-left-width:4px}
-.alert-card.critico{background:#fef2f2;border-color:#fca5a5;border-left-color:var(--red)}
-.alert-card.atencao{background:#fff7ed;border-color:#fed7aa;border-left-color:var(--orange)}
-.alert-card.info{background:#eff6ff;border-color:#bfdbfe;border-left-color:var(--accent)}
-.alert-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px}
-.alert-desc{font-size:12px;color:var(--text2);line-height:1.55}
-.alert-acao{font-size:11px;color:var(--gold);margin-top:7px;font-weight:700}
-.alert-impact{font-size:11px;color:var(--green);margin-top:4px;font-weight:700}
+/* ── Alert cards ── */
+.alert-card{
+  padding:16px 18px;
+  border-left:3px solid;margin-bottom:10px;
+  border:1px solid var(--border);border-left-width:3px;
+  border-radius:var(--radius);
+}
+.alert-card.critico{background:#fdf8f8;border-left-color:var(--red)}
+.alert-card.atencao{background:#fdf9f4;border-left-color:var(--gold)}
+.alert-card.info{background:#f6f8fb;border-left-color:var(--accent)}
+.alert-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
+.alert-desc{font-size:12px;color:var(--text2);line-height:1.6;font-weight:300}
+.alert-acao{font-size:11px;color:var(--gold);margin-top:8px;font-weight:500}
+.alert-impact{font-size:11px;color:var(--green);margin-top:4px;font-weight:500}
 
 /* ── Upload ── */
-.upload-area{border:2px dashed var(--border);border-radius:14px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
-.upload-area:hover{border-color:var(--accent);background:rgba(37,99,235,.03)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(37,99,235,.3)}.btn-primary:hover{background:#1d4ed8}
+.upload-area{
+  border:1px dashed var(--border);
+  padding:44px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--surface2);
+  border-radius:var(--radius);
+}
+.upload-area:hover{border-color:var(--accent);background:#f0eee8}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 20px;border-radius:var(--radius);
+  font-size:12px;font-weight:500;
+  cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;
+  transition:all .12s;letter-spacing:.3px;
+}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
 .btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 input[type=file]{display:none}
 
 /* ── Gauge ── */
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0}
-.gauge-val{font-size:48px;font-weight:800;margin-top:6px;color:var(--text)}
-.gauge-lbl{font-size:13px;font-weight:700;letter-spacing:.8px;margin-top:3px}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:16px 0}
+.gauge-val{
+  font-family:'DM Mono',monospace;
+  font-size:52px;font-weight:500;
+  margin-top:8px;color:var(--text);
+  letter-spacing:-2px;
+}
+.gauge-lbl{font-size:11px;font-weight:500;letter-spacing:1.5px;margin-top:4px;text-transform:uppercase;color:var(--text2)}
 
 /* ── Hist bars ── */
-.hist-row{display:flex;align-items:center;gap:6px;margin:2px 0}
-.hist-lbl{font-size:9px;color:var(--text3);width:58px;text-align:right;flex-shrink:0}
-.hist-track{flex:1;height:11px;background:var(--surface2);border-radius:2px;overflow:hidden;border:1px solid var(--border)}
-.hist-fill{height:100%;border-radius:2px;transition:width .4s}
-.hf-below{background:rgba(37,99,235,.55)}
-.hf-above{background:rgba(22,163,74,.65)}
+.hist-row{display:flex;align-items:center;gap:8px;margin:3px 0}
+.hist-lbl{font-size:9px;color:var(--text3);width:60px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace}
+.hist-track{flex:1;height:8px;background:var(--surface2);overflow:hidden;border:1px solid var(--border)}
+.hist-fill{height:100%;transition:width .4s}
+.hf-below{background:var(--accent);opacity:.6}
+.hf-above{background:var(--green)}
 
 /* ── Scenario box ── */
-.sc-box{background:var(--surface2);border-radius:12px;padding:15px;text-align:center;border:1px solid var(--border)}
-.sc-val{font-size:26px;font-weight:800;margin:5px 0;color:var(--text)}
-.sc-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.sc-box{
+  background:var(--surface2);
+  padding:18px;text-align:center;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.sc-val{
+  font-family:'DM Mono',monospace;
+  font-size:28px;font-weight:500;
+  margin:6px 0;color:var(--text);letter-spacing:-1px;
+}
+.sc-lbl{font-size:9.5px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-weight:500}
 
-/* ── Page header ── */
-.page-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
-.page-sub{font-size:12px;color:var(--text3);margin-bottom:22px;font-weight:400}
-.divider{height:1px;background:var(--border);margin:16px 0}
+/* ── Page header — editorial ── */
+.page-title{
+  font-family:'Playfair Display',serif;
+  font-size:26px;font-weight:600;
+  color:var(--text);margin-bottom:4px;
+  letter-spacing:-.3px;
+}
+.page-sub{
+  font-size:11.5px;color:var(--text3);
+  margin-bottom:28px;font-weight:300;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.divider{height:1px;background:var(--border);margin:20px 0}
 
 /* ── Insight card ── */
-.insight-card{background:var(--surface2);border-radius:10px;padding:13px 15px;margin-bottom:8px;font-size:12px;color:var(--text2);line-height:1.65;border-left:3px solid var(--accent);border:1px solid var(--border);border-left-width:3px}
+.insight-card{
+  background:var(--surface2);
+  border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:8px;
+  font-size:12px;color:var(--text2);
+  line-height:1.7;font-weight:300;
+  border-left:2px solid var(--accent);
+  border:1px solid var(--border);border-left-width:2px;
+}
 
-/* ── Code / mono blocks ── */
-.mono-block{font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;color:var(--accent);margin-bottom:10px;line-height:1.7}
+/* ── Mono blocks ── */
+.mono-block{
+  font-family:'DM Mono',monospace;
+  font-size:11px;background:var(--sb-bg);
+  color:#c8b97a;
+  border:none;border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:12px;line-height:1.8;
+}
 
 /* ── Estrategista buttons ── */
-.btn-est{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.08);color:#86efac;transition:all .15s}
-.btn-est:hover,.btn-est.active-est{background:#22c55e;color:#fff;border-color:#22c55e}
+.btn-est{
+  padding:7px 16px;border-radius:var(--radius);
+  font-size:11.5px;font-weight:500;cursor:pointer;
+  border:1px solid var(--sb-border);
+  background:rgba(200,185,122,.08);color:var(--sb-text3);
+  transition:all .12s;font-family:'DM Sans',sans-serif;
+}
+.btn-est:hover,.btn-est.active-est{
+  background:var(--sb-text3);color:var(--sb-bg);border-color:var(--sb-text3);
+}
 
 /* ── Oportunidade item ── */
-.op-item{padding:10px 12px;border-radius:9px;border:1px solid var(--border);margin-bottom:7px;background:var(--surface2)}
+.op-item{
+  padding:12px 14px;border-radius:var(--radius);
+  border:1px solid var(--border);margin-bottom:8px;
+  background:var(--surface2);font-weight:300;
+}
 .op-item:last-child{margin-bottom:0}
 
 /* ── Chart proportional sizing ── */
-.chart-sm{max-height:180px}
-.chart-md{max-height:220px}
-.chart-lg{max-height:260px}
 canvas{max-height:var(--chart-h,220px);width:100%!important}
 
 /* ── Spinner ── */
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:1.5px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Notif ── */
-#notif{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:7px}
-.notif-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:12px;color:var(--text);min-width:240px;animation:slideIn .2s ease;box-shadow:0 6px 24px rgba(15,23,42,.12)}
-.notif-item.success{border-left:3px solid var(--green)}.notif-item.error{border-left:3px solid var(--red)}
+#notif{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.notif-item{background:var(--sb-bg);border:1px solid var(--sb-border);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--sb-text);min-width:240px;animation:slideIn .2s ease;font-family:'DM Sans',sans-serif;font-weight:300}
+.notif-item.success{border-left:2px solid var(--sb-text3)}.notif-item.error{border-left:2px solid var(--red)}
 @keyframes slideIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 </head>
@@ -224,8 +434,8 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 <div id="main">
   <div id="header">
     <div>
-      <div style="font-size:15px;font-weight:700;color:var(--text)" id="header-title">Painel Geral</div>
-      <div style="font-size:11px;color:var(--text3)" id="header-sub">Visão consolidada da campanha</div>
+      <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.2px" id="header-title">Painel Geral</div>
+      <div style="font-size:10.5px;color:var(--text3);font-weight:300;letter-spacing:.3px;margin-top:2px" id="header-sub">Visão consolidada da campanha</div>
     </div>
     <div class="header-right">
       <div class="badge gold">Dep. Estadual · ALEAM 2026</div>
@@ -789,12 +999,15 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 // ──────────────────────────────────────────────
 // CONFIG
 // ──────────────────────────────────────────────
-Chart.defaults.color = "#64748b";
-Chart.defaults.borderColor = "#e2e8f0";
-Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+Chart.defaults.color = "#9c9485";
+Chart.defaults.borderColor = "#ddd9d0";
+Chart.defaults.font.family = "DM Sans, system-ui, sans-serif";
 Chart.defaults.font.size = 11;
+Chart.defaults.font.weight = "300";
 Chart.defaults.maintainAspectRatio = true;
 Chart.defaults.aspectRatio = 2.4;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 16;
 const charts = {};
 
 const PAGE_META = {
@@ -937,7 +1150,7 @@ async function loadPainel(){
   mkChart("chart-bairros","bar",{
     labels:top10.map(b=>b[0]),
     datasets:[{data:top10.map(b=>b[1]),backgroundColor:"rgba(59,130,246,.75)",borderRadius:6,borderSkipped:false}]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:32,minRotation:32}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:32,minRotation:32}}}});
 
   // Gênero
   const gen=resumo.por_genero||{};
@@ -950,7 +1163,7 @@ async function loadPainel(){
       {label:"Sua Base",data:[pm_,pf_],backgroundColor:"rgba(59,130,246,.75)",borderRadius:6,borderSkipped:false},
       {label:"Eleitorado AM",data:[47.5,52.5],backgroundColor:"rgba(245,158,11,.55)",borderRadius:6,borderSkipped:false},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{max:70,grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{max:70,grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1009,7 +1222,7 @@ function renderProj(c){
       backgroundColor:["rgba(99,102,241,.7)","rgba(59,130,246,.7)","rgba(245,158,11,.7)","rgba(34,197,94,.7)",col+"cc"],
       borderRadius:6,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 
   mkChart("chart-cenarios","bar",{
     labels:["Pessimista","Realista","Otimista","Meta Mínima","Meta Segura","Quociente 2026"],
@@ -1018,7 +1231,7 @@ function renderProj(c){
       backgroundColor:["rgba(239,68,68,.75)","rgba(245,158,11,.75)","rgba(34,197,94,.75)","rgba(99,102,241,.4)","rgba(99,102,241,.6)","rgba(99,102,241,.9)"],
       borderRadius:6,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1048,7 +1261,7 @@ async function loadMC(){
     const col=v>0?"var(--green)":"var(--red)";
     return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
       <span style="width:150px;color:var(--text2)">${senslabels[k]||k}</span>
-      <div style="flex:1;height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden">
+      <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden">
         <div style="height:100%;width:${pct.toFixed(1)}%;background:${col};border-radius:4px"></div>
       </div>
       <span style="color:${col};font-size:11px;width:44px;text-align:right">${v>0?"+":""}${(v*100).toFixed(1)}%</span>
@@ -1082,7 +1295,7 @@ async function loadCrescimento(){
       {label:"Quociente",data:p.map(()=>52500),borderColor:"#f59e0b",borderDash:[6,4],pointRadius:0},
       {label:"Meta Segura",data:p.map(()=>45000),borderColor:"#22c55e",borderDash:[4,4],pointRadius:0},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 
   document.getElementById("cresc-table").innerHTML=p.map(x=>{
     const st=x.pct_meta>=100?"🟢 Eleito":x.pct_meta>=85?"🟡 Provável":x.pct_meta>=60?"🟠 Em disputa":"🔴 Risco";
@@ -1108,13 +1321,13 @@ async function loadTerritorial(){
   mkChart("chart-pen","bar",{
     labels:top12p.map(b=>b[0]),
     datasets:[{data:top12p.map(b=>b[1].penetracao_pct),backgroundColor:"rgba(99,102,241,.75)",borderRadius:5,borderSkipped:false}]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
 
   const top12r=Object.entries(bairros).sort((a,b)=>b[1].roi_potencial-a[1].roi_potencial).slice(0,12);
   mkChart("chart-roi","bar",{
     labels:top12r.map(b=>b[0]),
     datasets:[{data:top12r.map(b=>b[1].roi_potencial),backgroundColor:"rgba(245,158,11,.75)",borderRadius:5,borderSkipped:false}]
-  },{scales:{y:{grid:{color:"#e2e8f0"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
+  },{scales:{y:{grid:{color:"var(--border)"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
 
   const cmap={"A/B":"tag-green","B/C":"tag-blue","C":"tag-blue","C/D":"tag-gold","D/E":"tag-red"};
   document.getElementById("t-table").innerHTML=sorted.map(([b,d])=>
@@ -1137,7 +1350,7 @@ async function loadZonas(){
       {label:"Votos Estimados",data:zonas.map(([,z])=>z.votos_estimados_candidato),backgroundColor:"rgba(59,130,246,.75)",borderRadius:4,borderSkipped:false},
       {label:"Cadastros",data:zonas.map(([,z])=>z.cadastros),backgroundColor:"rgba(99,102,241,.5)",borderRadius:4,borderSkipped:false},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 
   const pc={"ALTA":"tag-orange","MEDIA":"tag-gold","BAIXA":"tag-green"};
   document.getElementById("zonas-table").innerHTML=zonas.map(([id,z])=>
@@ -1164,7 +1377,7 @@ async function loadPerfil(){
       {label:"Sua Base (%)",data:[pm_,pf_],backgroundColor:"rgba(59,130,246,.8)",borderRadius:6,borderSkipped:false},
       {label:"Eleitorado AM (%)",data:[47.5,52.5],backgroundColor:"rgba(245,158,11,.55)",borderRadius:6,borderSkipped:false},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{max:70,grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{max:70,grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   const faixa=r.por_faixa_etaria||{};
   const labels_f=["18-24","25-34","35-44","45-59","60-69","70+"];
@@ -1176,19 +1389,19 @@ async function loadPerfil(){
       {label:"Sua Base",data:labels_f.map(l=>(faixa[l]||0)/tf*100),backgroundColor:"rgba(99,102,241,.8)",borderRadius:5,borderSkipped:false},
       {label:"Eleitorado AM",data:labels_f.map(l=>am_[l]||0),backgroundColor:"rgba(245,158,11,.5)",borderRadius:5,borderSkipped:false},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v.toFixed(0)+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v.toFixed(0)+"%"}},x:{grid:{display:false}}}});
 
   const orig=r.por_origem||{};
   mkChart("chart-origem","doughnut",{
     labels:Object.keys(orig),
     datasets:[{data:Object.values(orig),backgroundColor:["#3b82f6","#6366f1","#f59e0b","#22c55e","#ef4444","#a855f7"],borderWidth:2,borderColor:"#f1f5f9"}]
-  },{plugins:{legend:{display:true,position:"right",labels:{color:"#64748b",boxWidth:10,padding:8}}},cutout:"60%"});
+  },{plugins:{legend:{display:true,position:"right",labels:{color:"#9c9485",boxWidth:10,padding:8}}},cutout:"60%"});
 
   const cls=r.por_classe_social||{};
   mkChart("chart-classe","bar",{
     labels:Object.keys(cls),
     datasets:[{data:Object.values(cls),backgroundColor:["rgba(34,197,94,.75)","rgba(59,130,246,.75)","rgba(245,158,11,.75)","rgba(239,68,68,.75)","rgba(99,102,241,.75)"],borderRadius:5,borderSkipped:false}]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1211,12 +1424,12 @@ async function loadHistorico(){
       {label:"Quociente Eleitoral",type:"bar",data:quocs_h,backgroundColor:[...anos.map(()=>"rgba(59,130,246,.7)"),"rgba(245,158,11,.85)"],borderRadius:6,borderSkipped:false},
       {label:"Tendência",type:"line",data:quocs_h,borderColor:"rgba(99,102,241,.7)",borderDash:[4,4],pointRadius:0,tension:.3,yAxisID:"y"},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 
   mkChart("chart-hp","line",{
     labels:anos,
     datasets:[{label:"Participação (%)",data:partic,borderColor:"#22c55e",backgroundColor:"rgba(34,197,94,.1)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#22c55e"}]
-  },{plugins:{legend:{display:false}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:false}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   document.getElementById("hist-insights").innerHTML=`
     <div class="insight-card">📈 O quociente eleitoral cresceu de 43.696 (2014) para 49.559 (2022), um aumento de ${((49559/43696-1)*100).toFixed(0)}% em 8 anos. Projeção 2026: <strong>~52.500</strong></div>
@@ -1255,7 +1468,7 @@ async function loadAnalogos(){
       backgroundColor:todos.map(c=>c.eleito?"rgba(34,197,94,.75)":"rgba(239,68,68,.55)"),
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:40,minRotation:40}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:40,minRotation:40}}}});
 
   document.getElementById("an-table").innerHTML=todos.map(c=>
     `<tr><td>${c.candidato}</td><td>${c.partido}</td><td>${c.ano}</td>
@@ -1276,7 +1489,7 @@ function loadSocial(){
       backgroundColor:["rgba(34,197,94,.8)","rgba(59,130,246,.75)","rgba(99,102,241,.75)","rgba(245,158,11,.75)","rgba(168,85,247,.75)","rgba(249,115,22,.6)"],
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"× eng."}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"× eng."}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1290,7 +1503,7 @@ function loadCampanha(){
       backgroundColor:["rgba(34,197,94,.85)","rgba(59,130,246,.75)","rgba(245,158,11,.75)","rgba(249,115,22,.65)","rgba(99,102,241,.7)","rgba(168,85,247,.7)"],
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"× ROI"}},x:{grid:{display:false},ticks:{maxRotation:30,minRotation:30}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"× ROI"}},x:{grid:{display:false},ticks:{maxRotation:30,minRotation:30}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1316,7 +1529,7 @@ async function loadRecs(){
       backgroundColor:["rgba(34,197,94,.85)","rgba(59,130,246,.75)","rgba(99,102,241,.7)","rgba(245,158,11,.65)","rgba(34,197,94,.6)"],
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>"+"+v+"%"}},x:{grid:{display:false}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>"+"+v+"%"}},x:{grid:{display:false}}}});
 }
 
 // ──────────────────────────────────────────────
@@ -1411,7 +1624,7 @@ async function loadAtlas(){
 
   const manaus = dem.manaus || [];
   const faixas = ["18-24","25-34","35-44","45-59","60-69","70+"];
-  const cores = ["#2563eb","#16a34a","#d97706","#7c3aed","#dc2626","#0891b2"];
+  const cores = ["#1a3a5c","#2d6a4f","#b45309","#4c1d95","#9b1c1c","#0e7490"];
 
   // Evolução faixa etária Manaus (grouped bar)
   mkChart("chart-atlas-faixa","bar",{
@@ -1425,26 +1638,26 @@ async function loadAtlas(){
       borderRadius: 4,
       borderSkipped: false,
     }))
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10,padding:6}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10,padding:6}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   // Abstenção capital vs interior
   const comp = abst.comparativo;
   mkChart("chart-atlas-abstencao","line",{
     labels: comp.map(c=>c.ano),
     datasets:[
-      {label:"Manaus",data:comp.map(c=>c.manaus_pct),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#2563eb"},
-      {label:"Interior AM",data:comp.map(c=>c.interior_pct),borderColor:"#dc2626",backgroundColor:"rgba(220,38,38,.08)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#dc2626"},
+      {label:"Manaus",data:comp.map(c=>c.manaus_pct),borderColor:"#1a3a5c",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#1a3a5c"},
+      {label:"Interior AM",data:comp.map(c=>c.interior_pct),borderColor:"#9b1c1c",backgroundColor:"rgba(220,38,38,.08)",fill:true,tension:.4,pointRadius:5,pointBackgroundColor:"#9b1c1c"},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   // Gênero Manaus
   mkChart("chart-atlas-genero","line",{
     labels: manaus.map(m=>m.ano),
     datasets:[
-      {label:"Masculino %",data:manaus.map(m=>m.genero_pct.M),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:4},
-      {label:"Feminino %",data:manaus.map(m=>m.genero_pct.F),borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.08)",fill:true,tension:.4,pointRadius:4},
+      {label:"Masculino %",data:manaus.map(m=>m.genero_pct.M),borderColor:"#1a3a5c",backgroundColor:"rgba(37,99,235,.1)",fill:true,tension:.4,pointRadius:4},
+      {label:"Feminino %",data:manaus.map(m=>m.genero_pct.F),borderColor:"#2d6a4f",backgroundColor:"rgba(22,163,74,.08)",fill:true,tension:.4,pointRadius:4},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{min:44,max:56,grid:{color:"#e2e8f0"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{min:44,max:56,grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   // Box cláusula
   const a22 = clausula.analise_2022;
@@ -1494,20 +1707,20 @@ async function loadConcorrentes(){
     labels: sorted.map(c=>c.nome.split(" ").slice(0,3).join(" ")),
     datasets:[
       {label:"Votos 2022",data:sorted.map(c=>c.votos_2022),backgroundColor:sorted.map(c=>campoCol[c.campo_politico]||"rgba(100,116,139,.6)"),borderRadius:5,borderSkipped:false},
-      {label:"QE 2022 (49.559)",data:sorted.map(()=>49559),type:"line",borderColor:"#d97706",borderDash:[5,4],pointRadius:0},
+      {label:"QE 2022 (49.559)",data:sorted.map(()=>49559),type:"line",borderColor:"#b45309",borderDash:[5,4],pointRadius:0},
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
 
   // Gráfico CPV
   const tabcpv = roi.tabela_comparativa.filter(t=>t.custo_por_voto);
-  const nossoBar = {label:"Nossa Campanha",data:tabcpv.map(()=>roi.nossa_campanha.custo_por_voto||0),type:"line",borderColor:"#16a34a",borderDash:[4,3],pointRadius:0};
+  const nossoBar = {label:"Nossa Campanha",data:tabcpv.map(()=>roi.nossa_campanha.custo_por_voto||0),type:"line",borderColor:"#2d6a4f",borderDash:[4,3],pointRadius:0};
   mkChart("chart-cc-cpv","bar",{
     labels: tabcpv.map(t=>t.concorrente.split(" ").slice(0,3).join(" ")),
     datasets:[
       {label:"Custo/Voto R$",data:tabcpv.map(t=>t.custo_por_voto),backgroundColor:"rgba(37,99,235,.65)",borderRadius:5,borderSkipped:false},
       nossoBar,
     ]
-  },{plugins:{legend:{display:true,labels:{color:"#64748b",boxWidth:10}}},scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>"R$"+v}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+  },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>"R$"+v}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
 
   // Gráfico colisão por bairro
   const colBairros = Object.entries(colisao.colisao_por_bairro)
@@ -1521,7 +1734,7 @@ async function loadConcorrentes(){
       backgroundColor:colBairros.map(([,d])=>nivelCor[d.nivel_geral]||"rgba(100,116,139,.6)"),
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+  },{scales:{y:{grid:{color:"var(--border)"}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
 
   // Oportunidades
   document.getElementById("cc-oportunidades").innerHTML = colisao.oportunidades_territoriais.map(o=>
@@ -1609,7 +1822,7 @@ function renderEstrategista(data){
   mkChart("chart-est-territorio","doughnut",{
     labels: classCount.map(c=>c.label),
     datasets:[{data:classCount.map(c=>c.val),backgroundColor:classCount.map(c=>c.color),borderWidth:2,borderColor:"#f1f5f9"}]
-  },{plugins:{legend:{display:true,position:"right",labels:{color:"#64748b",boxWidth:12,padding:10}}},cutout:"55%"});
+  },{plugins:{legend:{display:true,position:"right",labels:{color:"#9c9485",boxWidth:12,padding:10}}},cutout:"55%"});
 
   const ops = data.oportunidades_territoriais.slice(0,8);
   mkChart("chart-est-oport","bar",{
@@ -1619,7 +1832,7 @@ function renderEstrategista(data){
       backgroundColor:ops.map(o=>o.prioridade==="ALTA"?"rgba(22,163,74,.8)":"rgba(37,99,235,.65)"),
       borderRadius:5,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"#e2e8f0"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false},ticks:{maxRotation:38,minRotation:38}}}});
 
   // Nichos
   const n = data.nichos;
