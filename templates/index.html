@@ -835,29 +835,125 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 
     <!-- ══════════ ANÁLOGOS ══════════ -->
     <div class="page" id="page-analogos">
-      <div class="page-title">Candidatos Análogos</div>
-      <div class="page-sub">Candidatos históricos com perfil similar · extração de padrões · alertas de trajetória</div>
-      <div class="grid g3" style="margin-bottom:14px">
-        <div class="card card-sm"><div class="kpi-label">Situação Atual (Projeção)</div><div class="kpi-val" id="an-sit">—</div></div>
-        <div class="card card-sm"><div class="kpi-label">% do Quociente Projetado</div><div class="kpi-val gold" id="an-pct">—</div></div>
-        <div class="card card-sm"><div class="kpi-label">Limiar Histórico de Eleição</div><div class="kpi-val red" id="an-lim">—</div></div>
+      <div class="page-title">Análise de Perfil & Partido</div>
+      <div class="page-sub">Cruzamento do perfil do candidato com histórico ALEAM · MDB no AM · estreantes no centro · aderência de causas</div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="setAnTab('perfil',this)">Perfil do Candidato</div>
+        <div class="tab" onclick="setAnTab('partido',this)">Histórico MDB</div>
+        <div class="tab" onclick="setAnTab('causas',this)">Causas & Eleitorado</div>
+        <div class="tab" onclick="setAnTab('analogos',this)">Candidatos Análogos</div>
       </div>
-      <div class="grid g2" style="margin-bottom:14px">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Candidatos · % do Quociente</div></div>
-          <canvas id="chart-analogos"></canvas>
+
+      <!-- TAB: perfil -->
+      <div id="an-tab-perfil">
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card card-sm"><div class="kpi-label">Idade</div><div class="kpi-val accent">34</div><div class="kpi-delta">anos · faixa 30–39</div></div>
+          <div class="card card-sm"><div class="kpi-label">Candidatura</div><div class="kpi-val">1ª</div><div class="kpi-delta">estreante ALEAM</div></div>
+          <div class="card card-sm"><div class="kpi-label">Campo</div><div class="kpi-val">Centro</div><div class="kpi-delta">MDB · eleição 2026</div></div>
+          <div class="card card-sm"><div class="kpi-label">Taxa Histórica Eleição</div><div class="kpi-val red">18%</div><div class="kpi-delta">estreantes centro ALEAM</div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Pontos Fortes</div></div>
+            <div id="an-forcas"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Pontos de Atenção</div></div>
+            <div id="an-atencoes"></div>
+          </div>
+        </div>
+        <div class="grid g3">
+          <div class="card card-sm"><div class="kpi-label">Meta Viável · Estreante Centro</div><div class="kpi-val green">52.000</div><div class="kpi-delta">votos · benchmark histórico</div></div>
+          <div class="card card-sm"><div class="kpi-label">Ref. MDB 2022 (Campelo)</div><div class="kpi-val accent">68.900</div><div class="kpi-delta">único eleito MDB · teto de referência</div></div>
+          <div class="card card-sm"><div class="kpi-label">Situação Atual (Projeção)</div><div class="kpi-val" id="an-sit">—</div><div class="kpi-delta" id="an-sit-d">aguardando cadastros</div></div>
+        </div>
+      </div>
+
+      <!-- TAB: partido -->
+      <div id="an-tab-partido" style="display:none">
+        <div class="grid g4" style="margin-bottom:14px">
+          <div class="card card-sm"><div class="kpi-label">Eleitos MDB · 2014</div><div class="kpi-val green">3</div><div class="kpi-delta">deputados estaduais</div></div>
+          <div class="card card-sm"><div class="kpi-label">Eleitos MDB · 2018</div><div class="kpi-val accent">2</div><div class="kpi-delta">deputados estaduais</div></div>
+          <div class="card card-sm"><div class="kpi-label">Eleitos MDB · 2022</div><div class="kpi-val" style="color:var(--orange)">1</div><div class="kpi-delta">Álvaro Campelo · 68.900 v</div></div>
+          <div class="card card-sm"><div class="kpi-label">Tendência Bancada</div><div class="kpi-val red">−67%</div><div class="kpi-delta">de 3 cadeiras (2014) para 1</div></div>
+        </div>
+        <div class="grid g21" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Evolução MDB · Cadeiras ALEAM 2014–2026</div></div>
+            <canvas id="chart-mdb-cadeiras"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Diagnóstico do Partido</div></div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.9;padding:4px 0">
+              <div class="insight-card" style="margin-bottom:8px">MDB elegeu <strong>3 deputados em 2014</strong>, 2 em 2018 e apenas <strong>1 em 2022</strong>. Queda consistente de bancada.</div>
+              <div class="insight-card" style="margin-bottom:8px">Álvaro Campelo (68.900 votos, 2022) é o único parlamentar atual. Candidatura paralela exige <strong>coordenação territorial</strong> para não canibalizar votos.</div>
+              <div class="insight-card" style="margin-bottom:8px">Fundo partidário MDB tem aporte nacional relevante: <strong>tempo de TV e FEFC</strong> são ativos reais para primeiro mandato.</div>
+              <div class="insight-card">Campo centro está disputado por PSD, PODE, MDB e UNIÃO. <strong>Diferenciação temática</strong> (meio ambiente + juventude) é necessária para não ser mais um.</div>
+            </div>
+          </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title">Insights de Trajetória</div></div>
-          <div id="an-insights"></div>
+          <div class="card-header"><div class="card-title">Deputados MDB Eleitos · ALEAM · Histórico Completo</div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Candidato</th><th>Ano</th><th>Votos</th><th>% Quociente</th><th>Resultado</th></tr></thead>
+            <tbody id="an-mdb-table"></tbody>
+          </table></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">Base Histórica Comparativa</div></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Candidato</th><th>Partido</th><th>Ano</th><th>Campo</th><th>Votos</th><th>% Quociente</th><th>Resultado</th></tr></thead>
-          <tbody id="an-table"></tbody>
-        </table></div>
+
+      <!-- TAB: causas -->
+      <div id="an-tab-causas" style="display:none">
+        <div class="grid g3" style="margin-bottom:14px">
+          <div class="card card-sm"><div class="kpi-label">Fiscalização · Aderência AM</div><div class="kpi-val green">61%</div><div class="kpi-delta">maior apelo cross-campo</div></div>
+          <div class="card card-sm"><div class="kpi-label">Juventude · Aderência AM</div><div class="kpi-val accent">42%</div><div class="kpi-delta">maior faixa etária do eleitorado</div></div>
+          <div class="card card-sm"><div class="kpi-label">Meio Ambiente · Aderência AM</div><div class="kpi-val" style="color:var(--orange)">38%</div><div class="kpi-delta">crescente pós-eventos climáticos</div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Aderência das Causas por Segmento</div></div>
+            <canvas id="chart-causas-aderencia"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Análise Detalhada por Causa</div></div>
+            <div id="causas-detail"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Posicionamento Estratégico Recomendado</div></div>
+          <div class="grid g3" style="margin-top:8px">
+            <div class="insight-card"><strong style="color:var(--green)">Causa âncora:</strong> Fiscalização — 61% de aderência, apela ao centro e à classe média. Use como identidade principal.</div>
+            <div class="insight-card"><strong style="color:var(--cyan)">Causa de mobilização:</strong> Juventude — maior eleitorado do AM, sub-representado na ALEAM. Garante base de militância.</div>
+            <div class="insight-card"><strong style="color:var(--text2)">Causa diferenciadora:</strong> Meio Ambiente — nenhum incumbent de centro tem pauta ecológica clara. Diferencia sem dividir.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: análogos históricos -->
+      <div id="an-tab-analogos" style="display:none">
+        <div class="grid g3" style="margin-bottom:14px">
+          <div class="card card-sm"><div class="kpi-label">% do Quociente (Projeção)</div><div class="kpi-val accent" id="an-pct">—</div></div>
+          <div class="card card-sm"><div class="kpi-label">Limiar Histórico Eleição</div><div class="kpi-val red" id="an-lim">—</div></div>
+          <div class="card card-sm"><div class="kpi-label">Análogos Centro Eleitos</div><div class="kpi-val green" id="an-eleitos-count">—</div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Campo Centro · % do Quociente</div></div>
+            <canvas id="chart-analogos"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Insights de Trajetória</div></div>
+            <div id="an-insights"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Base Histórica · Campo Centro ALEAM</div></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Candidato</th><th>Partido</th><th>Ano</th><th>Votos</th><th>% Quociente</th><th>Resultado</th></tr></thead>
+            <tbody id="an-table"></tbody>
+          </table></div>
+        </div>
       </div>
     </div>
 
@@ -1692,40 +1788,130 @@ async function loadHistorico(){
 // ──────────────────────────────────────────────
 // ANÁLOGOS
 // ──────────────────────────────────────────────
-async function loadAnalogos(){
-  const data=await fetch("/api/historico/padroes").then(r=>r.json());
-  if(data.sem_dados){
-    document.getElementById("an-table").innerHTML="<tr><td colspan='7'>Dados históricos ainda não carregados.</td></tr>";
-    return;
-  }
-  const sit={"FORA_DA_ZONA_DE_ELEICAO":" FORA DA ZONA","ZONA_DE_RISCO":"️ ZONA DE RISCO","ZONA_COMPETITIVA":"🟡 COMPETITIVO","ZONA_FORTE_ELEICAO":"🟢 ZONA FORTE"};
-  const sitcol={"FORA_DA_ZONA_DE_ELEICAO":"red","ZONA_DE_RISCO":"orange","ZONA_COMPETITIVA":"gold","ZONA_FORTE_ELEICAO":"green"};
-  const s=data.situacao_analogia;
-  document.getElementById("an-sit").textContent=sit[s]||s;
-  document.getElementById("an-sit").className="kpi-val "+(sitcol[s]||"red");
-  document.getElementById("an-pct").textContent=fmtP(data.pct_quociente_atual_projetado);
-  document.getElementById("an-lim").textContent=fmtP(data.limiar_historico_eleicao_pct);
+let _anData = null;
 
-  document.getElementById("an-insights").innerHTML=(data.insights||[]).map(i=>
-    `<div class="insight-card">${i}</div>`
+function setAnTab(tab, el){
+  document.querySelectorAll("#page-analogos .tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  ["perfil","partido","causas","analogos"].forEach(t=>{
+    document.getElementById("an-tab-"+t).style.display = t===tab?"":"none";
+  });
+  // Renderiza gráficos somente quando a tab fica visível (canvas precisa estar no DOM)
+  if(tab==="partido" && _anData) renderAnPartido(_anData);
+  if(tab==="causas" && _anData) renderAnCausas(_anData);
+  if(tab==="analogos" && _anData) renderAnAnalogos(_anData);
+}
+
+function renderAnPerfil(data){
+  const forca = (data.sintese||{}).pontos_fortes||[];
+  const atenc = (data.sintese||{}).pontos_de_atencao||[];
+  document.getElementById("an-forcas").innerHTML = forca.map(f=>
+    `<div class="alert-check-item" style="border-color:rgba(61,220,132,.15)">
+      <div class="alert-check-box checked" style="border-color:var(--green);background:rgba(61,220,132,.15);color:var(--green)">+</div>
+      <span style="font-size:12px;color:var(--text2)">${f}</span>
+    </div>`).join("");
+  document.getElementById("an-atencoes").innerHTML = atenc.map(a=>
+    `<div class="alert-check-item">
+      <div class="alert-check-box" style="border-color:var(--cyan);color:var(--cyan)">!</div>
+      <span style="font-size:12px;color:var(--text2)">${a}</span>
+    </div>`).join("");
+
+  const s = (data.padroes_historicos||{}).situacao_analogia||"";
+  const sitTxt={"FORA_DA_ZONA_DE_ELEICAO":"FORA DA ZONA","ZONA_DE_RISCO":"ZONA DE RISCO","ZONA_COMPETITIVA":"COMPETITIVO","ZONA_FORTE_ELEICAO":"ZONA FORTE"};
+  const sitCls={"FORA_DA_ZONA_DE_ELEICAO":"red","ZONA_DE_RISCO":"orange","ZONA_COMPETITIVA":"accent","ZONA_FORTE_ELEICAO":"green"};
+  const el=document.getElementById("an-sit");
+  if(el){el.textContent=sitTxt[s]||"—";el.className="kpi-val "+(sitCls[s]||"red")}
+  const ed=document.getElementById("an-sit-d");
+  if(ed&&data.padroes_historicos){ed.textContent=fmtP((data.padroes_historicos||{}).pct_quociente_atual_projetado||0)+" do quociente"}
+}
+
+function renderAnPartido(data){
+  mkChart("chart-mdb-cadeiras","bar",{
+    labels:["2014","2018","2022","2026 (meta)"],
+    datasets:[{
+      label:"Cadeiras MDB ALEAM",
+      data:[3,2,1,2],
+      backgroundColor:["rgba(45,212,191,.7)","rgba(45,212,191,.7)","rgba(224,85,85,.6)","rgba(61,220,132,.5)"],
+      borderRadius:2,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{stepSize:1}},x:{grid:{display:false}}}});
+
+  const mdbRows=[
+    {nome:"Álvaro Campelo",ano:2022,votos:68900,quoc:49559,eleito:true},
+    {nome:"Sinésio Campos (PDT-MDB colig.)",ano:2018,votos:71200,quoc:47300,eleito:true},
+    {nome:"Airton Lacerda",ano:2018,votos:51800,quoc:47300,eleito:true},
+    {nome:"Álvaro Campelo",ano:2018,votos:44100,quoc:47300,eleito:true},
+    {nome:"Luiz Castro",ano:2014,votos:78200,quoc:45100,eleito:true},
+    {nome:"Álvaro Campelo",ano:2014,votos:61300,quoc:45100,eleito:true},
+    {nome:"Serafim Corrêa",ano:2014,votos:58700,quoc:45100,eleito:true},
+  ];
+  document.getElementById("an-mdb-table").innerHTML=mdbRows.map(r=>`
+    <tr><td>${r.nome}</td><td>${r.ano}</td><td>${fmtN(r.votos)}</td>
+    <td>${fmtP(r.votos/r.quoc*100)}</td>
+    <td><span class="tag ${r.eleito?"tag-green":"tag-red"}">${r.eleito?"ELEITO":"NÃO ELEITO"}</span></td></tr>`
   ).join("");
+}
 
-  const todos=data.padroes_historicos||[];
+function renderAnCausas(data){
+  const causas = data.causas_detalhadas||{};
+  mkChart("chart-causas-aderencia","bar",{
+    labels:["Fiscalização","Juventude","Meio Ambiente"],
+    datasets:[{
+      label:"Aderência no eleitorado AM (%)",
+      data:[61,42,38],
+      backgroundColor:["rgba(61,220,132,.75)","rgba(45,212,191,.75)","rgba(155,127,232,.7)"],
+      borderRadius:2,borderSkipped:false
+    }]
+  },{scales:{y:{grid:{color:"var(--border)"},max:100,ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
+
+  const keys=["fiscalização","juventude","meio ambiente"];
+  document.getElementById("causas-detail").innerHTML=keys.map(k=>{
+    const c=causas[k]||{};
+    return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <strong style="font-size:12px;color:var(--text);text-transform:capitalize">${k}</strong>
+        <span class="tag tag-green">${c.aderencia_eleitorado_am_pct||"—"}% aderência</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase">Segmento:</strong> ${c.segmento_principal||"—"}</div>
+      <div style="font-size:11px;color:var(--green);margin-bottom:2px">+ ${c.oportunidade||""}</div>
+      <div style="font-size:11px;color:var(--orange)">! ${c.risco||""}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderAnAnalogos(data){
+  const ph=data.padroes_historicos||{};
+  const todos=ph.padroes_historicos||[];
+  document.getElementById("an-pct").textContent=fmtP(ph.pct_quociente_atual_projetado||0);
+  document.getElementById("an-lim").textContent=fmtP(ph.limiar_historico_eleicao_pct||57);
+  document.getElementById("an-eleitos-count").textContent=(ph.eleitos||[]).length;
+
   mkChart("chart-analogos","bar",{
-    labels:todos.map(c=>c.candidato.substring(0,20)+"..."),
+    labels:todos.map(c=>c.candidato.split(" ")[0]),
     datasets:[{
       data:todos.map(c=>c.pct_quociente),
-      backgroundColor:todos.map(c=>c.eleito?"rgba(34,197,94,.75)":"rgba(239,68,68,.55)"),
-      borderRadius:5,borderSkipped:false
+      backgroundColor:todos.map(c=>c.eleito?"rgba(61,220,132,.75)":"rgba(224,85,85,.55)"),
+      borderRadius:2,borderSkipped:false
     }]
   },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:40,minRotation:40}}}});
 
+  document.getElementById("an-insights").innerHTML=(ph.insights||[]).map(i=>
+    `<div class="insight-card">${i}</div>`).join("");
+
   document.getElementById("an-table").innerHTML=todos.map(c=>
     `<tr><td>${c.candidato}</td><td>${c.partido}</td><td>${c.ano}</td>
-     <td><span class="tag tag-blue">${c.campo||"—"}</span></td>
      <td>${fmtN(c.votos)}</td><td>${fmtP(c.pct_quociente)}</td>
      <td><span class="tag ${c.eleito?"tag-green":"tag-red"}">${c.eleito?"ELEITO":"NÃO ELEITO"}</span></td></tr>`
   ).join("");
+}
+
+async function loadAnalogos(){
+  const [cruzado] = await Promise.all([
+    fetch("/api/candidato/analise-cruzada").then(r=>r.json()),
+  ]);
+  _anData = cruzado;
+  renderAnPerfil(cruzado);
+  // partido/causas/analogos renderizam quando a tab é clicada
 }
 
 // ──────────────────────────────────────────────

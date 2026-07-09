@@ -24,6 +24,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 from core.database import init_db, get_db, SessionLocal
 from core.seed_tse import seed
+from core.candidato import PERFIL as CANDIDATO_PERFIL
 from ingestion.pipeline import CadastroIngestion, SocialIngestion, EventoIngestion
 from analytics.engine import (
     CadastroAnalytics, ProjecaoAnalytics, TerritorialAnalytics,
@@ -360,6 +361,62 @@ def score(db: Session = Depends(get_db)):
 @app.get("/api/alertas")
 def alertas(db: Session = Depends(get_db)):
     return AlertasAnalytics(db).gerar_alertas()
+
+
+@app.get("/api/candidato/perfil")
+def candidato_perfil():
+    return CANDIDATO_PERFIL
+
+
+@app.get("/api/candidato/analise-cruzada")
+def analise_cruzada(db: Session = Depends(get_db)):
+    """
+    Cruza o perfil do candidato com dados históricos:
+    - MDB no AM (histórico de bancada e votos)
+    - Estreantes no campo centro (taxa de eleição, votos médios)
+    - Causas do candidato vs. aderência do eleitorado AM
+    - Análogos mais próximos no banco histórico
+    """
+    from analytics.engine import HistoricoAnalytics
+    hist = HistoricoAnalytics(db)
+    analogos = hist.candidatos_analogos(campo_politico="centro")
+    padroes = hist.padroes_candidatos_analogos()
+
+    # Filtra análogos por partido MDB para cruzamento direto
+    analogos_mdb = [a for a in analogos if a["partido"] == "MDB"]
+
+    # Score de compatibilidade de causas (soma de aderência ponderada)
+    causas_score = sum(
+        CANDIDATO_PERFIL["analise_causas"].get(c, {}).get("aderencia_eleitorado_am_pct", 0)
+        for c in CANDIDATO_PERFIL["causas"]
+    ) / len(CANDIDATO_PERFIL["causas"])
+
+    return {
+        "perfil": CANDIDATO_PERFIL,
+        "historico_mdb_am": CANDIDATO_PERFIL["historico_partido"]["MDB"],
+        "benchmark_estreante": CANDIDATO_PERFIL["benchmark_primeira_candidatura"],
+        "causas_detalhadas": CANDIDATO_PERFIL["analise_causas"],
+        "score_aderencia_causas_pct": round(causas_score, 1),
+        "analogos_campo_centro": analogos[:10],
+        "analogos_mdb": analogos_mdb,
+        "padroes_historicos": padroes,
+        "sintese": {
+            "pontos_fortes": [
+                "Perfil jovem (34 anos) e pré-candidatura estreante são diferenciais em campo centro saturado",
+                f"Fiscalização tem {CANDIDATO_PERFIL['analise_causas']['fiscalização']['aderencia_eleitorado_am_pct']}% de aderência — a causa com maior cross-appeal no eleitorado AM",
+                "MDB tem estrutura nacional e coligação favorável para tempo de TV e acesso ao fundo partidário",
+                "Causa ambiental diferencia no campo centro onde nenhum incumbent tem pauta ecológica forte",
+            ],
+            "pontos_de_atencao": [
+                "MDB elegeu apenas 1 deputado em 2022 (vs. 3 em 2014): bancada enfraquecida reduz transferência de votos",
+                "Estreantes no centro têm taxa de eleição histórica de ~18% na ALEAM: base cadastral é decisiva",
+                "Causa de juventude atinge eleitorado com menor comparecimento (16-29 anos): mobilização é crítica",
+                "Álvaro Campelo (MDB, 68.900 votos) já ocupa o espaço de centro no partido — coordenação necessária",
+            ],
+            "votos_referencia_mdb_2022": 68_900,
+            "meta_viavel_estreante_centro": 52_000,
+        }
+    }
 
 
 @app.get("/api/recomendacoes")
