@@ -259,18 +259,120 @@ tr:hover td{background:var(--surface2)}
 .tag-purple{background:rgba(155,127,232,.1);color:var(--purple);border:1px solid rgba(155,127,232,.25)}
 
 /* ── Alert cards ── */
-.alert-card{
-  padding:14px 16px;
-  border-left:2px solid;margin-bottom:8px;
-  border:1px solid var(--border);border-left-width:2px;
+.alert-filters{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.alert-filter-btn{
+  padding:4px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:400;cursor:pointer;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--text3);letter-spacing:.8px;text-transform:uppercase;
+  transition:all .1s;
 }
-.alert-card.critico{background:rgba(224,85,85,.04);border-left-color:var(--red)}
-.alert-card.atencao{background:rgba(45,212,191,.04);border-left-color:var(--cyan)}
-.alert-card.info{background:rgba(61,220,132,.03);border-left-color:var(--green)}
-.alert-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:5px}
-.alert-desc{font-size:11.5px;color:var(--text2);line-height:1.6;font-weight:300}
-.alert-acao{font-size:10.5px;color:var(--cyan);margin-top:7px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
-.alert-impact{font-size:10.5px;color:var(--green);margin-top:4px;font-weight:400;font-family:'JetBrains Mono',monospace}
+.alert-filter-btn:hover{color:var(--text2);border-color:var(--border2)}
+.alert-filter-btn.active{background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.alert-filter-btn.f-critico.active{color:var(--red);border-color:rgba(224,85,85,.4)}
+.alert-filter-btn.f-atencao.active{color:var(--cyan);border-color:rgba(45,212,191,.4)}
+.alert-filter-btn.f-info.active{color:var(--green);border-color:rgba(61,220,132,.4)}
+.alert-count-row{
+  display:flex;gap:14px;margin-bottom:18px;
+}
+.alert-count-tile{
+  flex:1;padding:12px 14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  display:flex;flex-direction:column;gap:4px;
+}
+.alert-count-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:28px;font-weight:700;line-height:1;
+}
+.alert-count-lbl{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;
+}
+.alert-card{
+  margin-bottom:8px;
+  border:1px solid var(--border);border-left:2px solid;
+  cursor:pointer;
+  transition:background .12s,border-color .12s;
+  overflow:hidden;
+}
+.alert-card:hover{background:var(--surface2)}
+.alert-card.critico{background:rgba(224,85,85,.03);border-left-color:var(--red)}
+.alert-card.critico:hover{background:rgba(224,85,85,.06)}
+.alert-card.atencao{background:rgba(45,212,191,.03);border-left-color:var(--cyan)}
+.alert-card.atencao:hover{background:rgba(45,212,191,.06)}
+.alert-card.info{background:rgba(61,220,132,.02);border-left-color:var(--green)}
+.alert-card.info:hover{background:rgba(61,220,132,.05)}
+.alert-card-header{
+  padding:14px 16px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.alert-card-left{flex:1}
+.alert-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px;font-family:'Space Grotesk',sans-serif}
+.alert-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.alert-chevron{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--text3);
+  flex-shrink:0;margin-top:2px;
+  transition:transform .2s;
+}
+.alert-card.open .alert-chevron{transform:rotate(90deg)}
+.alert-body{
+  display:none;
+  padding:0 16px 16px;
+  border-top:1px solid var(--border);
+  margin-top:0;
+}
+.alert-card.open .alert-body{display:block}
+.alert-desc{font-size:12px;color:var(--text2);line-height:1.7;font-weight:400;padding-top:12px}
+.alert-detail-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-top:14px;
+}
+.alert-detail-box{
+  background:var(--surface3);padding:10px 12px;
+  border:1px solid var(--border);
+}
+.alert-detail-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:6px;
+}
+.alert-acao{font-size:11.5px;color:var(--text);line-height:1.6;font-weight:400}
+.alert-impact{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:20px;font-weight:700;
+  color:var(--green);
+}
+.alert-checklist{margin-top:14px}
+.alert-checklist-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin-bottom:8px;
+}
+.alert-check-item{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border);
+  font-size:11.5px;color:var(--text2);line-height:1.5;
+}
+.alert-check-item:last-child{border-bottom:none}
+.alert-check-box{
+  width:14px;height:14px;flex-shrink:0;margin-top:1px;
+  border:1px solid var(--border2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--green);
+  transition:background .1s;
+}
+.alert-check-box.checked{background:rgba(61,220,132,.15);border-color:var(--green)}
+.alert-urgency-bar{
+  height:2px;margin-top:10px;
+  background:var(--surface3);
+}
+.alert-urgency-fill{height:100%;transition:width .4s}
 
 /* ── Upload ── */
 .upload-area{
@@ -533,7 +635,37 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
     <!-- ══════════ ALERTAS ══════════ -->
     <div class="page" id="page-alertas">
       <div class="page-title">Alertas & Diagnóstico</div>
-      <div class="page-sub">Sinalizações automáticas geradas pelo motor analítico · atualizado em tempo real</div>
+      <div class="page-sub">Sinalizações automáticas geradas pelo motor analítico · clique em cada alerta para ver detalhes e ações</div>
+
+      <!-- Contadores -->
+      <div class="alert-count-row" id="alert-counts">
+        <div class="alert-count-tile">
+          <div class="alert-count-num" id="ac-total" style="color:var(--text)">—</div>
+          <div class="alert-count-lbl">Total de alertas</div>
+        </div>
+        <div class="alert-count-tile">
+          <div class="alert-count-num" id="ac-critico" style="color:var(--red)">—</div>
+          <div class="alert-count-lbl">Críticos</div>
+        </div>
+        <div class="alert-count-tile">
+          <div class="alert-count-num" id="ac-atencao" style="color:var(--cyan)">—</div>
+          <div class="alert-count-lbl">Atenção</div>
+        </div>
+        <div class="alert-count-tile">
+          <div class="alert-count-num" id="ac-info" style="color:var(--green)">—</div>
+          <div class="alert-count-lbl">Informativos</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="alert-filters">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-right:4px">Filtrar:</span>
+        <button class="alert-filter-btn active" onclick="filterAlertas('todos',this)">Todos</button>
+        <button class="alert-filter-btn f-critico" onclick="filterAlertas('CRITICO',this)">Crítico</button>
+        <button class="alert-filter-btn f-atencao" onclick="filterAlertas('ATENCAO',this)">Atenção</button>
+        <button class="alert-filter-btn f-info" onclick="filterAlertas('INFO',this)">Informativo</button>
+      </div>
+
       <div id="alertas-list"></div>
     </div>
 
@@ -1188,22 +1320,97 @@ async function loadPainel(){
 // ──────────────────────────────────────────────
 // ALERTAS
 // ──────────────────────────────────────────────
-async function loadAlertas(){
-  const alertas = await fetch("/api/alertas").then(r=>r.json());
-  const levels = {CRITICO:{cls:"critico",icon:"",tag:"tag-red"},ATENCAO:{cls:"atencao",icon:"️",tag:"tag-orange"},INFO:{cls:"info",icon:"ℹ️",tag:"tag-blue"}};
-  document.getElementById("alertas-list").innerHTML = alertas.map(a=>{
-    const L=levels[a.nivel]||levels.INFO;
-    return `<div class="alert-card ${L.cls}">
-      <div class="alert-title">${L.icon} ${a.titulo} <span class="tag ${L.tag}" style="margin-left:8px">${a.nivel}</span> <span class="tag tag-blue" style="margin-left:4px">${a.categoria}</span></div>
-      <div class="alert-desc">${a.descricao}</div>
-      ${a.acao?`<div class="alert-acao">→ ${a.acao}</div>`:""}
-      ${a.impacto_estimado?`<div class="alert-impact">↗ Impacto estimado: +${fmtN(a.impacto_estimado)} votos</div>`:""}
-    </div>`;
-  }).join("");
+let _alertasData = [];
 
-  if(!alertas.length){
-    document.getElementById("alertas-list").innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"> Nenhum alerta crítico no momento.</div>`;
+const NIVEL_META = {
+  CRITICO:{cls:"critico",tag:"tag-red",tagLbl:"CRÍTICO",barColor:"var(--red)",urgencia:100,
+    checklist:["Reunião de emergência com equipe de campo","Realocar orçamento para captação imediata","Definir meta semanal de novos cadastros","Monitorar progresso a cada 48h"]},
+  ATENCAO:{cls:"atencao",tag:"tag-blue",tagLbl:"ATENÇÃO",barColor:"var(--cyan)",urgencia:60,
+    checklist:["Analisar dados detalhados do problema","Designar responsável pela correção","Criar plano de ação com prazo de 15 dias","Revisar resultado na próxima reunião de campanha"]},
+  INFO:{cls:"info",tag:"tag-green",tagLbl:"INFO",barColor:"var(--green)",urgencia:25,
+    checklist:["Registrar no planejamento estratégico","Compartilhar insight com coordenadores","Monitorar evolução no próximo ciclo"]}
+};
+
+const CAT_LABEL = {volume:"Volume Cadastral",territorial:"Território",demografico:"Demográfico",estrategia:"Estratégia",campanha:"Campanha"};
+
+function renderAlertaCard(a, idx){
+  const M = NIVEL_META[a.nivel] || NIVEL_META.INFO;
+  const checks = M.checklist.map((c,i)=>`
+    <div class="alert-check-item">
+      <div class="alert-check-box" id="chk-${idx}-${i}" onclick="toggleCheck(this)"></div>
+      <span>${c}</span>
+    </div>`).join("");
+  return `<div class="alert-card ${M.cls}" data-nivel="${a.nivel}" onclick="toggleAlerta(this)">
+    <div class="alert-card-header">
+      <div class="alert-card-left">
+        <div class="alert-title">${a.titulo}</div>
+        <div class="alert-meta">
+          <span class="tag ${M.tag}">${M.tagLbl}</span>
+          <span class="tag tag-blue">${CAT_LABEL[a.categoria]||a.categoria}</span>
+          ${a.impacto_estimado?`<span class="tag tag-green">+${fmtN(a.impacto_estimado)} votos potenciais</span>`:""}
+        </div>
+      </div>
+      <div class="alert-chevron">&#9658;</div>
+    </div>
+    <div class="alert-body">
+      <div class="alert-desc">${a.descricao}</div>
+      <div class="alert-detail-grid">
+        ${a.acao?`<div class="alert-detail-box">
+          <div class="alert-detail-label">Ação recomendada</div>
+          <div class="alert-acao">${a.acao}</div>
+        </div>`:""}
+        ${a.impacto_estimado?`<div class="alert-detail-box">
+          <div class="alert-detail-label">Impacto estimado</div>
+          <div class="alert-impact">+${fmtN(a.impacto_estimado)}</div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace">votos adicionais</div>
+        </div>`:""}
+      </div>
+      <div class="alert-urgency-bar"><div class="alert-urgency-fill" style="width:${M.urgencia}%;background:${M.barColor}"></div></div>
+      <div class="alert-checklist">
+        <div class="alert-checklist-title">Lista de ações</div>
+        ${checks}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleAlerta(card){
+  card.classList.toggle("open");
+}
+
+function toggleCheck(box){
+  event.stopPropagation();
+  box.classList.toggle("checked");
+  box.textContent = box.classList.contains("checked") ? "✓" : "";
+}
+
+function filterAlertas(nivel, btn){
+  document.querySelectorAll(".alert-filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  const cards = document.querySelectorAll(".alert-card");
+  cards.forEach(c=>{
+    if(nivel==="todos" || c.dataset.nivel===nivel) c.style.display="";
+    else c.style.display="none";
+  });
+}
+
+async function loadAlertas(){
+  _alertasData = await fetch("/api/alertas").then(r=>r.json());
+
+  // contadores
+  const counts = {CRITICO:0,ATENCAO:0,INFO:0};
+  _alertasData.forEach(a=>{ if(counts[a.nivel]!==undefined) counts[a.nivel]++; });
+  document.getElementById("ac-total").textContent = _alertasData.length;
+  document.getElementById("ac-critico").textContent = counts.CRITICO;
+  document.getElementById("ac-atencao").textContent = counts.ATENCAO;
+  document.getElementById("ac-info").textContent = counts.INFO;
+
+  if(!_alertasData.length){
+    document.getElementById("alertas-list").innerHTML =
+      `<div style="text-align:center;padding:60px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase">Nenhum alerta no momento</div>`;
+    return;
   }
+  document.getElementById("alertas-list").innerHTML = _alertasData.map((a,i)=>renderAlertaCard(a,i)).join("");
 }
 
 // ──────────────────────────────────────────────
