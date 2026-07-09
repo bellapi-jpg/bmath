@@ -6,7 +6,7 @@
 <title>QUALIS — Inteligência Eleitoral AM 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root{
   --bg:#0b0f0e;
@@ -21,7 +21,7 @@
   --green:#3ddc84;
   --green2:#2ab06a;
   --red:#e05555;
-  --orange:#e07c2a;
+  
   --purple:#9b7fe8;
   --cyan:#2dd4bf;
 
@@ -44,7 +44,7 @@
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  font-family:'Inter',system-ui,sans-serif;
   font-size:13px;
   line-height:1.55;
   display:flex;
@@ -61,14 +61,14 @@ body{
 }
 .logo{padding:22px 20px 18px;border-bottom:1px solid var(--sb-border)}
 .logo-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:22px;font-weight:600;
-  letter-spacing:3px;text-transform:uppercase;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:21px;font-weight:700;
+  letter-spacing:4px;text-transform:uppercase;
   color:#fff;
 }
-.logo-title span{color:var(--sb-text3)}
+.logo-title span{color:inherit}
 .logo-sub{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:8.5px;color:var(--sb-text2);
   margin-top:6px;text-transform:uppercase;
   letter-spacing:1.8px;
@@ -79,7 +79,7 @@ body{
 .nav::-webkit-scrollbar-thumb{background:var(--sb-border)}
 .nav-section{
   padding:16px 20px 4px;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:8px;color:var(--sb-text2);
   text-transform:uppercase;letter-spacing:2.5px;
   opacity:.6;
@@ -87,7 +87,7 @@ body{
 .nav-item{
   display:flex;align-items:center;gap:10px;
   padding:8px 20px;cursor:pointer;
-  font-family:'IBM Plex Sans',sans-serif;
+  font-family:'Inter',sans-serif;
   font-size:12px;font-weight:400;
   color:var(--sb-text2);
   transition:color .1s,background .1s;
@@ -97,11 +97,11 @@ body{
 .nav-item.active{
   color:var(--sb-text3);
   border-left-color:var(--sb-text3);
-  background:rgba(232,184,75,.05);
+  background:rgba(45,212,191,.05);
   font-weight:500;
 }
 .nav-item .icon{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:10px;width:18px;
   color:var(--sb-text3);opacity:.5;
   flex-shrink:0;letter-spacing:0;
@@ -110,7 +110,7 @@ body{
 .sidebar-footer{
   padding:14px 20px;
   border-top:1px solid var(--sb-border);
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9px;color:var(--sb-text2);opacity:.4;
 }
 .status-dot{
@@ -131,13 +131,13 @@ body{
 .header-right{display:flex;align-items:center;gap:8px}
 .badge{
   padding:3px 9px;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9.5px;font-weight:400;
   letter-spacing:.8px;text-transform:uppercase;
   background:transparent;color:var(--accent);
-  border:1px solid rgba(232,184,75,.35);
+  border:1px solid rgba(45,212,191,.35);
 }
-.badge.gold{color:var(--gold);border-color:rgba(232,184,75,.35)}
+.badge.gold{color:var(--cyan);border-color:rgba(45,212,191,.35)}
 .badge.red{color:var(--red);border-color:rgba(224,85,85,.35)}
 .badge.green{color:var(--green);border-color:rgba(61,220,132,.35)}
 
@@ -166,13 +166,13 @@ body{
   border-bottom:1px solid var(--border);
 }
 .card-title{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9.5px;font-weight:400;
   color:var(--text3);
   text-transform:uppercase;letter-spacing:1.5px;
 }
 .card-badge{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9px;padding:2px 7px;
   background:transparent;color:var(--text3);
   border:1px solid var(--border);letter-spacing:.5px;
@@ -180,32 +180,32 @@ body{
 
 /* ── KPI ── */
 .kpi-val{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:30px;font-weight:500;
   color:var(--text);line-height:1;
   margin:6px 0 2px;
   letter-spacing:-1px;
 }
 .kpi-label{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:8.5px;color:var(--text3);
   text-transform:uppercase;letter-spacing:1.5px;
 }
 .kpi-delta{font-size:11px;margin-top:6px;color:var(--text2);font-weight:300}
-.accent{color:var(--accent)}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.purple{color:var(--purple)}
+.accent{color:var(--accent)}.gold{color:var(--cyan)}.green{color:var(--green)}.red{color:var(--red)}.purple{color:var(--purple)}
 
 /* ── Progress ── */
 .progress-wrap{margin:9px 0}
 .progress-label{
   display:flex;justify-content:space-between;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:10px;color:var(--text3);
   margin-bottom:5px;
 }
 .progress-bar{height:3px;background:var(--surface3);overflow:hidden}
 .progress-fill{height:100%;transition:width .9s cubic-bezier(.4,0,.2,1)}
 .pf-blue{background:var(--accent)}
-.pf-gold{background:var(--gold)}
+.pf-cyan{background:var(--cyan)}
 .pf-green{background:var(--green)}
 .pf-red{background:var(--red)}
 .pf-purple{background:var(--purple)}
@@ -217,7 +217,7 @@ body{
 }
 .tab{
   padding:8px 16px;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:10.5px;font-weight:400;
   letter-spacing:.5px;text-transform:uppercase;
   cursor:pointer;color:var(--text3);
@@ -235,7 +235,7 @@ th{
   text-align:left;padding:9px 13px;
   background:var(--surface2);
   color:var(--text3);
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9px;font-weight:400;
   text-transform:uppercase;letter-spacing:1.2px;
   border-bottom:1px solid var(--border2);
@@ -247,15 +247,15 @@ tr:hover td{background:var(--surface2)}
 /* ── Tags ── */
 .tag{
   display:inline-block;padding:1px 6px;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:9.5px;font-weight:400;
   letter-spacing:.3px;margin:1px;
 }
 .tag-red{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.25)}
 .tag-orange{background:rgba(224,124,42,.1);color:var(--orange);border:1px solid rgba(224,124,42,.25)}
-.tag-gold{background:rgba(232,184,75,.1);color:var(--gold);border:1px solid rgba(232,184,75,.25)}
+.tag-gold{background:rgba(45,212,191,.1);color:var(--cyan);border:1px solid rgba(45,212,191,.25)}
 .tag-green{background:rgba(61,220,132,.1);color:var(--green);border:1px solid rgba(61,220,132,.25)}
-.tag-blue{background:rgba(232,184,75,.08);color:var(--accent);border:1px solid rgba(232,184,75,.2)}
+.tag-blue{background:rgba(45,212,191,.08);color:var(--accent);border:1px solid rgba(45,212,191,.2)}
 .tag-purple{background:rgba(155,127,232,.1);color:var(--purple);border:1px solid rgba(155,127,232,.25)}
 
 /* ── Alert cards ── */
@@ -265,12 +265,12 @@ tr:hover td{background:var(--surface2)}
   border:1px solid var(--border);border-left-width:2px;
 }
 .alert-card.critico{background:rgba(224,85,85,.04);border-left-color:var(--red)}
-.alert-card.atencao{background:rgba(232,184,75,.04);border-left-color:var(--gold)}
+.alert-card.atencao{background:rgba(45,212,191,.04);border-left-color:var(--cyan)}
 .alert-card.info{background:rgba(61,220,132,.03);border-left-color:var(--green)}
 .alert-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:5px}
 .alert-desc{font-size:11.5px;color:var(--text2);line-height:1.6;font-weight:300}
-.alert-acao{font-size:10.5px;color:var(--gold);margin-top:7px;font-weight:500;font-family:'IBM Plex Mono',monospace;letter-spacing:.3px}
-.alert-impact{font-size:10.5px;color:var(--green);margin-top:4px;font-weight:400;font-family:'IBM Plex Mono',monospace}
+.alert-acao{font-size:10.5px;color:var(--cyan);margin-top:7px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.alert-impact{font-size:10.5px;color:var(--green);margin-top:4px;font-weight:400;font-family:'JetBrains Mono',monospace}
 
 /* ── Upload ── */
 .upload-area{
@@ -278,11 +278,11 @@ tr:hover td{background:var(--surface2)}
   padding:40px;text-align:center;cursor:pointer;
   transition:all .15s;background:var(--surface2);
 }
-.upload-area:hover{border-color:var(--accent);background:rgba(232,184,75,.04)}
+.upload-area:hover{border-color:var(--accent);background:rgba(45,212,191,.04)}
 .btn{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 18px;
-  font-family:'IBM Plex Sans',sans-serif;
+  font-family:'Inter',sans-serif;
   font-size:12px;font-weight:500;
   cursor:pointer;border:none;
   transition:all .12s;letter-spacing:.2px;
@@ -294,16 +294,16 @@ input[type=file]{display:none}
 /* ── Gauge ── */
 .gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0}
 .gauge-val{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:48px;font-weight:500;
   margin-top:6px;color:var(--text);
   letter-spacing:-2px;
 }
-.gauge-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;margin-top:4px;text-transform:uppercase;color:var(--accent)}
+.gauge-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;margin-top:4px;text-transform:uppercase;color:var(--accent)}
 
 /* ── Hist bars ── */
 .hist-row{display:flex;align-items:center;gap:8px;margin:2px 0}
-.hist-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);width:62px;text-align:right;flex-shrink:0}
+.hist-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);width:62px;text-align:right;flex-shrink:0}
 .hist-track{flex:1;height:6px;background:var(--surface3);overflow:hidden;border:1px solid var(--border)}
 .hist-fill{height:100%;transition:width .4s}
 .hf-below{background:var(--accent);opacity:.7}
@@ -316,21 +316,21 @@ input[type=file]{display:none}
   border:1px solid var(--border);
 }
 .sc-val{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:26px;font-weight:500;
   margin:5px 0;color:var(--text);letter-spacing:-1px;
 }
-.sc-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px}
 
 /* ── Page header ── */
 .page-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:28px;font-weight:600;
-  letter-spacing:1.5px;text-transform:uppercase;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:26px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
   color:var(--text);margin-bottom:3px;
 }
 .page-sub{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:10.5px;color:var(--text3);
   margin-bottom:24px;font-weight:400;
   padding-bottom:16px;
@@ -351,7 +351,7 @@ input[type=file]{display:none}
 
 /* ── Mono blocks ── */
 .mono-block{
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:11px;background:var(--sb-bg);
   color:var(--accent);
   border:1px solid var(--sb-border);
@@ -361,7 +361,7 @@ input[type=file]{display:none}
 /* ── Estrategista buttons ── */
 .btn-est{
   padding:6px 14px;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'JetBrains Mono',monospace;
   font-size:10.5px;font-weight:400;cursor:pointer;
   border:1px solid var(--border2);
   background:transparent;color:var(--text2);
@@ -396,7 +396,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
   background:var(--surface);border:1px solid var(--border2);
   padding:11px 14px;font-size:11.5px;color:var(--text);
   min-width:230px;animation:slideIn .15s ease;
-  font-family:'IBM Plex Sans',sans-serif;font-weight:300;
+  font-family:'Inter',sans-serif;font-weight:300;
 }
 .notif-item.success{border-left:2px solid var(--green)}.notif-item.error{border-left:2px solid var(--red)}
 @keyframes slideIn{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
@@ -407,7 +407,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 <!-- SIDEBAR -->
 <nav id="sidebar">
   <div class="logo">
-    <div class="logo-title">Q<span>UALIS</span></div>
+    <div class="logo-title">QUALIS</div>
     <div class="logo-sub">Inteligência Eleitoral · AM 2026</div>
   </div>
   <div class="nav">
@@ -488,7 +488,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
           <div style="margin-top:10px">
             <div class="progress-wrap"><div class="progress-label"><span>Volume cadastral</span><span id="sc-vol">—</span></div><div class="progress-bar"><div class="progress-fill pf-blue" id="pb-vol" style="width:0%"></div></div></div>
             <div class="progress-wrap"><div class="progress-label"><span>Dispersão territorial</span><span id="sc-disp">—</span></div><div class="progress-bar"><div class="progress-fill pf-purple" id="pb-disp" style="width:0%"></div></div></div>
-            <div class="progress-wrap"><div class="progress-label"><span>Presença campanha</span><span id="sc-camp">—</span></div><div class="progress-bar"><div class="progress-fill pf-gold" id="pb-camp" style="width:0%"></div></div></div>
+            <div class="progress-wrap"><div class="progress-label"><span>Presença campanha</span><span id="sc-camp">—</span></div><div class="progress-bar"><div class="progress-fill pf-cyan" id="pb-camp" style="width:0%"></div></div></div>
             <div class="progress-wrap"><div class="progress-label"><span>Digital</span><span id="sc-dig">—</span></div><div class="progress-bar"><div class="progress-fill pf-green" id="pb-dig" style="width:0%"></div></div></div>
           </div>
         </div>
@@ -504,7 +504,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
           </div>
           <div class="progress-wrap">
             <div class="progress-label"><span>Meta Mínima (30.000)</span><span id="pm-m">—</span></div>
-            <div class="progress-bar"><div class="progress-fill pf-gold" id="pb-m" style="width:0%"></div></div>
+            <div class="progress-bar"><div class="progress-fill pf-cyan" id="pb-m" style="width:0%"></div></div>
           </div>
           <div class="divider"></div>
           <div style="font-size:12px;color:var(--text2)">
@@ -517,9 +517,9 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
         <div class="card">
           <div class="card-header"><div class="card-title">3 Cenários</div></div>
           <div class="grid" style="gap:8px;margin-top:4px">
-            <div class="sc-box"><div class="sc-lbl">😟 Pessimista</div><div class="sc-val red" id="sc-pess">—</div><div style="font-size:11px;color:var(--text2)" id="sc-pess-p">—</div></div>
-            <div class="sc-box"><div class="sc-lbl">📊 Realista</div><div class="sc-val gold" id="sc-real">—</div><div style="font-size:11px;color:var(--text2)" id="sc-real-p">—</div></div>
-            <div class="sc-box"><div class="sc-lbl">🚀 Otimista</div><div class="sc-val green" id="sc-otim">—</div><div style="font-size:11px;color:var(--text2)" id="sc-otim-p">—</div></div>
+            <div class="sc-box"><div class="sc-lbl"> Pessimista</div><div class="sc-val red" id="sc-pess">—</div><div style="font-size:11px;color:var(--text2)" id="sc-pess-p">—</div></div>
+            <div class="sc-box"><div class="sc-lbl"> Realista</div><div class="sc-val gold" id="sc-real">—</div><div style="font-size:11px;color:var(--text2)" id="sc-real-p">—</div></div>
+            <div class="sc-box"><div class="sc-lbl"> Otimista</div><div class="sc-val green" id="sc-otim">—</div><div style="font-size:11px;color:var(--text2)" id="sc-otim-p">—</div></div>
           </div>
         </div>
       </div>
@@ -542,9 +542,9 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
       <div class="page-title">Projeção de Votos</div>
       <div class="page-sub">Modelo matemático multicamada calibrado pelo perfil demográfico real do cadastro</div>
       <div class="tabs">
-        <div class="tab active" onclick="setCenario('pessimista',this)">😟 Pessimista</div>
-        <div class="tab" onclick="setCenario('realista',this)">📊 Realista</div>
-        <div class="tab" onclick="setCenario('otimista',this)">🚀 Otimista</div>
+        <div class="tab active" onclick="setCenario('pessimista',this)"> Pessimista</div>
+        <div class="tab" onclick="setCenario('realista',this)"> Realista</div>
+        <div class="tab" onclick="setCenario('otimista',this)"> Otimista</div>
       </div>
       <div class="grid g4" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Taxa de Conversão</div><div class="kpi-val accent" id="pj-conv">—</div><div class="kpi-delta">cadastro → voto real</div></div>
@@ -565,7 +565,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
             <div>Abstinência projetada: <strong>28,5%</strong></div>
             <div>Quociente 2026 est.: <strong>52.500</strong></div>
             <div>Déficit atual: <strong id="pj-deficit" style="color:var(--red)">—</strong></div>
-            <div>Cadastros necessários: <strong id="pj-cad-nec" style="color:var(--gold)">—</strong></div>
+            <div>Cadastros necessários: <strong id="pj-cad-nec" style="color:var(--cyan)">—</strong></div>
             <div style="margin-top:10px">
               <div class="progress-label"><span>% do Quociente</span><span id="pj-pct-lbl">—</span></div>
               <div class="progress-bar"><div class="progress-fill pf-blue" id="pb-proj" style="width:0%"></div></div>
@@ -716,7 +716,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
       <div class="page-sub">Análise de alcance digital · correlação com crescimento de cadastros · ROI por rede</div>
       <div id="social-content">
         <div class="card" style="text-align:center;padding:40px">
-          <div style="font-size:32px;margin-bottom:12px">📊</div>
+          <div style="font-size:32px;margin-bottom:12px"></div>
           <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Importe métricas de redes sociais</div>
           <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Use a API <code style="background:var(--surface2);padding:2px 7px;border-radius:5px;border:1px solid var(--border);color:var(--accent)">POST /api/upload/social</code> para enviar dados diários de alcance, engajamento e seguidores.</div>
           <div style="font-size:12px;color:var(--text3)">Campos: data, rede, seguidores, alcance_organico, alcance_pago, engajamento_total, novos_seguidores</div>
@@ -750,7 +750,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
       <div class="page-sub">Rastreamento de eventos físicos · custo por voto · ROI estratégico por tipo de ação</div>
       <div id="campanha-content">
         <div class="card" style="text-align:center;padding:40px;margin-bottom:14px">
-          <div style="font-size:32px;margin-bottom:12px">🎪</div>
+          <div style="font-size:32px;margin-bottom:12px"></div>
           <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">Registre seus eventos de campanha</div>
           <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Use <code style="background:var(--surface2);padding:2px 7px;border-radius:5px;border:1px solid var(--border);color:var(--accent)">POST /api/upload/evento</code> para registrar cada atividade de campanha e calcular automaticamente o ROI em votos.</div>
           <div style="font-size:12px;color:var(--text3)">Campos: nome, tipo, data, bairro, publico_estimado, cadastros_gerados, custo_estimado</div>
@@ -763,11 +763,11 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
           <div class="card">
             <div class="card-header"><div class="card-title">Custo por Voto Estimado (Mercado AM)</div></div>
             <div style="font-size:13px;color:var(--text2);line-height:2.2;padding:4px 0">
-              <div>🚶 Porta a Porta: <strong style="color:var(--green)">R$ 0,80 – R$ 2,00</strong> por voto</div>
-              <div>🎤 Evento comunitário: <strong style="color:var(--gold)">R$ 2,00 – R$ 5,00</strong> por voto</div>
-              <div>📱 Impulsionamento digital: <strong style="color:var(--accent)">R$ 3,00 – R$ 8,00</strong> por voto</div>
-              <div>📄 Panfletagem: <strong style="color:var(--orange)">R$ 1,50 – R$ 4,00</strong> por voto</div>
-              <div>📺 Rádio/TV: <strong style="color:var(--red)">R$ 8,00 – R$ 20,00</strong> por voto</div>
+              <div> Porta a Porta: <strong style="color:var(--green)">R$ 0,80 – R$ 2,00</strong> por voto</div>
+              <div> Evento comunitário: <strong style="color:var(--cyan)">R$ 2,00 – R$ 5,00</strong> por voto</div>
+              <div> Impulsionamento digital: <strong style="color:var(--accent)">R$ 3,00 – R$ 8,00</strong> por voto</div>
+              <div> Panfletagem: <strong style="color:var(--orange)">R$ 1,50 – R$ 4,00</strong> por voto</div>
+              <div> Rádio/TV: <strong style="color:var(--red)">R$ 8,00 – R$ 20,00</strong> por voto</div>
               <div class="divider"></div>
               <div style="font-size:11px;color:var(--text3)">Fonte: benchmarks eleitorais históricos AM e pesquisa de campanhas municipais 2020–2022</div>
             </div>
@@ -807,7 +807,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
                ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
                ondragleave="this.style.borderColor='var(--border)'"
                ondrop="handleDrop(event)">
-            <div style="font-size:36px;margin-bottom:10px">📂</div>
+            <div style="font-size:36px;margin-bottom:10px"></div>
             <div style="font-size:15px;font-weight:600;color:var(--text)">Arraste seu CSV aqui</div>
             <div style="font-size:12px;color:var(--text2);margin-top:4px">ou clique para selecionar</div>
           </div>
@@ -822,10 +822,10 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
               João Silva,Cidade Nova,02,M,34,92 9xxxx-xxxx,Médio,evento<br>
               Maria Souza,Compensa,06,F,28,92 9xxxx-xxxx,Superior,online
             </div>
-            <div>✅ Detecta variações de nomes de colunas automaticamente</div>
-            <div>✅ Enriquece com classe social, densidade e mult. pelo bairro</div>
-            <div>✅ Calcula score de fidelidade por faixa etária</div>
-            <div>✅ Aceita acentuação e capitalização variadas</div>
+            <div> Detecta variações de nomes de colunas automaticamente</div>
+            <div> Enriquece com classe social, densidade e mult. pelo bairro</div>
+            <div> Calcula score de fidelidade por faixa etária</div>
+            <div> Aceita acentuação e capitalização variadas</div>
             <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
               <strong style="font-size:11px;color:var(--text3)">COLUNAS OPCIONAIS</strong><br>
               <span style="font-size:11px">telefone · escolaridade · classe · zona · origem · multiplicador</span>
@@ -1020,7 +1020,7 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
 // ──────────────────────────────────────────────
 Chart.defaults.color = "#8aaa98";
 Chart.defaults.borderColor = "#233029";
-Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.font.weight = "400";
 Chart.defaults.maintainAspectRatio = true;
@@ -1190,7 +1190,7 @@ async function loadPainel(){
 // ──────────────────────────────────────────────
 async function loadAlertas(){
   const alertas = await fetch("/api/alertas").then(r=>r.json());
-  const levels = {CRITICO:{cls:"critico",icon:"🚨",tag:"tag-red"},ATENCAO:{cls:"atencao",icon:"⚠️",tag:"tag-orange"},INFO:{cls:"info",icon:"ℹ️",tag:"tag-blue"}};
+  const levels = {CRITICO:{cls:"critico",icon:"",tag:"tag-red"},ATENCAO:{cls:"atencao",icon:"️",tag:"tag-orange"},INFO:{cls:"info",icon:"ℹ️",tag:"tag-blue"}};
   document.getElementById("alertas-list").innerHTML = alertas.map(a=>{
     const L=levels[a.nivel]||levels.INFO;
     return `<div class="alert-card ${L.cls}">
@@ -1202,7 +1202,7 @@ async function loadAlertas(){
   }).join("");
 
   if(!alertas.length){
-    document.getElementById("alertas-list").innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)">✅ Nenhum alerta crítico no momento.</div>`;
+    document.getElementById("alertas-list").innerHTML = `<div style="text-align:center;padding:40px;color:var(--text2)"> Nenhum alerta crítico no momento.</div>`;
   }
 }
 
@@ -1222,7 +1222,7 @@ function setCenario(c,el){
 function renderProj(c){
   if(!_cenarios) return;
   const d=_cenarios[c];
-  const col={pessimista:"var(--red)",realista:"var(--gold)",otimista:"var(--green)"}[c];
+  const col={pessimista:"var(--red)",realista:"var(--cyan)",otimista:"var(--green)"}[c];
   document.getElementById("pj-conv").textContent=(d.taxa_conversao*100).toFixed(1)+"%";
   document.getElementById("pj-dir").textContent=fmtN(d.votos_diretos_estimados);
   document.getElementById("pj-ind").textContent=fmtN(d.votos_indiretos_estimados);
@@ -1267,7 +1267,7 @@ async function loadMC(){
 
   // Percentis
   const p=mc.percentis;
-  const prows=[[5,"p5","var(--red)"],[10,"p10","var(--orange)"],[25,"p25","var(--gold)"],[50,"p50","var(--text2)"],[75,"p75","var(--green)"],[90,"p90","#4ade80"],[95,"p95","#86efac"]];
+  const prows=[[5,"p5","var(--red)"],[10,"p10","var(--orange)"],[25,"p25","var(--cyan)"],[50,"p50","var(--text2)"],[75,"p75","var(--green)"],[90,"p90","#4ade80"],[95,"p95","#86efac"]];
   document.getElementById("percentis-box").innerHTML=prows.map(([pct,key,col])=>
     `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;padding:5px 0"><span style="color:var(--text2)">P${pct}</span><span style="color:${col};font-weight:700">${fmtN(p[key])}</span></div>`
   ).join("");
@@ -1317,7 +1317,7 @@ async function loadCrescimento(){
   },{plugins:{legend:{display:true,labels:{color:"#9c9485",boxWidth:10}}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>fmtN(v)}},x:{grid:{display:false}}}});
 
   document.getElementById("cresc-table").innerHTML=p.map(x=>{
-    const st=x.pct_meta>=100?"🟢 Eleito":x.pct_meta>=85?"🟡 Provável":x.pct_meta>=60?"🟠 Em disputa":"🔴 Risco";
+    const st=x.pct_meta>=100?"🟢 Eleito":x.pct_meta>=85?"🟡 Provável":x.pct_meta>=60?"🟠 Em disputa":" Risco";
     return `<tr><td><strong>${x.mes}</strong></td><td>+${fmtN(x.cadastros_novos)}</td><td>${fmtN(x.cadastros_acumulados)}</td><td>${fmtN(x.votos_estimados)}</td><td>${fmtP(x.pct_meta)}</td><td>${st}</td></tr>`;
   }).join("");
 }
@@ -1451,10 +1451,10 @@ async function loadHistorico(){
   },{plugins:{legend:{display:false}},scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   document.getElementById("hist-insights").innerHTML=`
-    <div class="insight-card">📈 O quociente eleitoral cresceu de 43.696 (2014) para 49.559 (2022), um aumento de ${((49559/43696-1)*100).toFixed(0)}% em 8 anos. Projeção 2026: <strong>~52.500</strong></div>
-    <div class="insight-card">🗳️ Menor votado eleito em 2022 foi 28.340 votos (57% do quociente). Em 2018 foi 24.100. A tendência é de aumento desse piso.</div>
-    <div class="insight-card">📊 A taxa de participação eleitoral em Manaus caiu de 75,9% (2014) para 70,9% (2022). Abstenção crescente reduz o quociente efetivo — favorável para candidatos com base fiel.</div>
-    <div class="insight-card">⚡ Candidatos que constroem base territorial ampla (≥ 15 zonas cobertas) têm ${proj.slope_por_ano ? "consistentemente" : ""} desempenho acima da média. Dispersão territorial é o fator mais correlacionado com eleição.</div>
+    <div class="insight-card"> O quociente eleitoral cresceu de 43.696 (2014) para 49.559 (2022), um aumento de ${((49559/43696-1)*100).toFixed(0)}% em 8 anos. Projeção 2026: <strong>~52.500</strong></div>
+    <div class="insight-card">️ Menor votado eleito em 2022 foi 28.340 votos (57% do quociente). Em 2018 foi 24.100. A tendência é de aumento desse piso.</div>
+    <div class="insight-card"> A taxa de participação eleitoral em Manaus caiu de 75,9% (2014) para 70,9% (2022). Abstenção crescente reduz o quociente efetivo — favorável para candidatos com base fiel.</div>
+    <div class="insight-card"> Candidatos que constroem base territorial ampla (≥ 15 zonas cobertas) têm ${proj.slope_por_ano ? "consistentemente" : ""} desempenho acima da média. Dispersão territorial é o fator mais correlacionado com eleição.</div>
   `;
 }
 
@@ -1467,7 +1467,7 @@ async function loadAnalogos(){
     document.getElementById("an-table").innerHTML="<tr><td colspan='7'>Dados históricos ainda não carregados.</td></tr>";
     return;
   }
-  const sit={"FORA_DA_ZONA_DE_ELEICAO":"🔴 FORA DA ZONA","ZONA_DE_RISCO":"⚠️ ZONA DE RISCO","ZONA_COMPETITIVA":"🟡 COMPETITIVO","ZONA_FORTE_ELEICAO":"🟢 ZONA FORTE"};
+  const sit={"FORA_DA_ZONA_DE_ELEICAO":" FORA DA ZONA","ZONA_DE_RISCO":"️ ZONA DE RISCO","ZONA_COMPETITIVA":"🟡 COMPETITIVO","ZONA_FORTE_ELEICAO":"🟢 ZONA FORTE"};
   const sitcol={"FORA_DA_ZONA_DE_ELEICAO":"red","ZONA_DE_RISCO":"orange","ZONA_COMPETITIVA":"gold","ZONA_FORTE_ELEICAO":"green"};
   const s=data.situacao_analogia;
   document.getElementById("an-sit").textContent=sit[s]||s;
@@ -1531,7 +1531,7 @@ function loadCampanha(){
 async function loadRecs(){
   const recs=await fetch("/api/recomendacoes").then(r=>r.json());
   const pcol={"URGENTE":"critico","ALTA":"atencao","MEDIA":"info","BAIXA":"info"};
-  const pico={"URGENTE":"🚨","ALTA":"⚠️","MEDIA":"💡","BAIXA":"ℹ️"};
+  const pico={"URGENTE":"","ALTA":"️","MEDIA":"","BAIXA":"ℹ️"};
   document.getElementById("rec-list").innerHTML=recs.map(r=>
     `<div class="alert-card ${pcol[r.prioridade]||"info"}">
       <div class="alert-title">${pico[r.prioridade]||""} ${r.titulo} <span class="tag tag-${r.prioridade==="URGENTE"?"red":r.prioridade==="ALTA"?"orange":"gold"}" style="margin-left:8px">${r.prioridade}</span></div>
@@ -1567,8 +1567,8 @@ async function uploadCSV(file){
     const r=await fetch("/api/upload/cadastros",{method:"POST",body:fd});
     const d=await r.json();
     if(d.ok){
-      document.getElementById("upload-status").innerHTML=`✅ ${fmtN(d.validos)} cadastros importados · ${d.erros} erros`;
-      notify(`✅ ${fmtN(d.validos)} cadastros importados com sucesso!`);
+      document.getElementById("upload-status").innerHTML=` ${fmtN(d.validos)} cadastros importados · ${d.erros} erros`;
+      notify(` ${fmtN(d.validos)} cadastros importados com sucesso!`);
       loaded.clear();
       loadPage(currentPage);
       // preview
@@ -1581,7 +1581,7 @@ async function uploadCSV(file){
       document.getElementById("prev-count").textContent="primeiras 5 linhas";
     }
   }catch(e){
-    document.getElementById("upload-status").innerHTML="❌ Erro ao importar.";
+    document.getElementById("upload-status").innerHTML=" Erro ao importar.";
     notify("Erro ao importar arquivo.","error");
   }
 }
@@ -1602,14 +1602,14 @@ async function uploadJSON(){
     const d=await r.json();
     if(d.ok||d.importados){
       const n=d.importados||d.validos||data.length;
-      document.getElementById("json-status").innerHTML=`✅ ${fmtN(n)} cadastros importados com sucesso!`;
-      notify(`✅ ${fmtN(n)} cadastros importados!`);
+      document.getElementById("json-status").innerHTML=` ${fmtN(n)} cadastros importados com sucesso!`;
+      notify(` ${fmtN(n)} cadastros importados!`);
       loaded.clear(); loadPage(currentPage);
     } else {
-      document.getElementById("json-status").innerHTML="❌ "+(d.detail||"Erro ao importar.");
+      document.getElementById("json-status").innerHTML=" "+(d.detail||"Erro ao importar.");
     }
   }catch(e){
-    document.getElementById("json-status").innerHTML="❌ Erro de conexão.";
+    document.getElementById("json-status").innerHTML=" Erro de conexão.";
     notify("Erro ao importar JSON.","error");
   }
 }
