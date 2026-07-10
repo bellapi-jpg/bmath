@@ -84,18 +84,22 @@ def _ensure_init():
     if _initialized:
         return
     _initialized = True
-    init_db()
-    db = SessionLocal()
     try:
+        init_db()
+    except Exception as e:
+        print(f"[WARN] init_db falhou: {e}")
+    try:
+        db = SessionLocal()
         seed(db)
-    finally:
         db.close()
-
-_ensure_init()
+    except Exception as e:
+        print(f"[WARN] seed falhou: {e}")
 
 @app.on_event("startup")
-def startup():
-    _ensure_init()
+async def startup():
+    import asyncio
+    # Roda init em background para não bloquear o healthcheck
+    asyncio.get_event_loop().run_in_executor(None, _ensure_init)
 
 
 # ── Login / Logout ─────────────────────────────────────────────────────────────
