@@ -98,8 +98,12 @@ def _ensure_init():
 @app.on_event("startup")
 async def startup():
     import asyncio
-    # Roda init em background para não bloquear o healthcheck
     asyncio.get_event_loop().run_in_executor(None, _ensure_init)
+
+
+@app.get("/health")
+def health():
+    return {"ok": True}
 
 
 # ── Login / Logout ─────────────────────────────────────────────────────────────
