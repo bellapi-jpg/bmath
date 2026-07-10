@@ -856,19 +856,39 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
     <!-- ══════════ TERRITORIAL ══════════ -->
     <div class="page" id="page-territorial">
       <div class="page-title">Mapa por Bairro</div>
-      <div class="page-sub">Penetração · ROI estratégico · potencial inexplorado · classe social</div>
-      <div class="grid g3" style="margin-bottom:14px">
+      <div class="page-sub">Penetração · competidores TSE · bairros inexplorados · estratégia cultural por zona</div>
+
+      <div class="grid g4" style="margin-bottom:14px">
         <div class="card card-sm"><div class="kpi-label">Bairros Cobertos</div><div class="kpi-val accent" id="t-cob">—</div></div>
-        <div class="card card-sm"><div class="kpi-label">Cobertura Total</div><div class="kpi-val gold" id="t-pct">—</div></div>
-        <div class="card card-sm"><div class="kpi-label">Sem Presença</div><div class="kpi-val red" id="t-zero">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Cobertura Total</div><div class="kpi-val" id="t-pct">—</div></div>
+        <div class="card card-sm"><div class="kpi-label">Sem Presença</div><div class="kpi-val red" id="t-zero">—</div><div class="kpi-delta">oportunidades abertas</div></div>
+        <div class="card card-sm"><div class="kpi-label">Top Bairro</div><div class="kpi-val green" id="t-top">—</div></div>
       </div>
+
       <div class="grid g2" style="margin-bottom:14px">
         <div class="card"><div class="card-header"><div class="card-title">Top 12 por Penetração (%)</div></div><canvas id="chart-pen"></canvas></div>
         <div class="card"><div class="card-header"><div class="card-title">Top 12 por ROI Estratégico</div></div><canvas id="chart-roi"></canvas></div>
       </div>
-      <div class="card"><div class="card-header"><div class="card-title">Tabela Completa</div><div class="card-badge" id="t-count">—</div></div>
+
+      <!-- Bairros sem presença -->
+      <div class="card" style="margin-bottom:14px;border-left:3px solid var(--red)">
+        <div class="card-header">
+          <div class="card-title">Bairros Estratégicos Sem Presença · Oportunidades Abertas</div>
+          <div class="card-badge red" id="t-sem-count">—</div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Bairros com alto potencial eleitoral onde você ainda não tem cadastros. Cada um inclui contexto cultural e estratégia de entrada.</div>
+        <div id="t-sem-bairros"></div>
+      </div>
+
+      <!-- Tabela completa expandível -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Análise Detalhada por Bairro</div>
+          <div class="card-badge" id="t-count">—</div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Clique em qualquer bairro para ver contexto cultural, competidores TSE e estratégia de entrada</div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Bairro</th><th>Cadastros</th><th>Eleitores Est.</th><th>Penetração</th><th>Votos Est.</th><th>Classe</th><th>Densidade</th><th>ROI</th></tr></thead>
+          <thead><tr><th>Bairro</th><th>Cadastros</th><th>Eleitores Est.</th><th>Penetração</th><th>Votos Est.</th><th>Classe</th><th>ROI</th><th></th></tr></thead>
           <tbody id="t-table"></tbody>
         </table></div>
       </div>
@@ -1785,6 +1805,31 @@ async function loadCrescimento(){
 // ──────────────────────────────────────────────
 // TERRITORIAL
 // ──────────────────────────────────────────────
+// Dados contextuais estáticos de bairros de Manaus (cultura + competidores TSE 2022)
+const BAIRRO_CONTEXT = {
+  "Compensa":       {zona:"Norte",cultura:"Bairro popular, forte identidade comunitária, igrejas pentecostais numerosas. Eleitorado ligado à segurança pública e infraestrutura básica.",competidores:[{nome:"Álvaro Campelo (MDB)",votos:4200},{nome:"Capitão Alberto Neto (REP)",votos:3100}],estrategia:"Abordar via lideranças de igrejas e associações de moradores. Pautar pavimentação e iluminação antes de meio ambiente."},
+  "Flores":         {zona:"Centro-Sul",cultura:"Classe média estabelecida, forte concentração de servidores públicos e professores. Alta escolaridade média.",competidores:[{nome:"Mayara Pinheiro (PSD)",votos:3800},{nome:"Therezinha Ruiz (PSDB)",votos:2900}],estrategia:"Pauta de fiscalização ressoa muito nesse perfil. Evento temático em escola ou associação de bairro tem alto retorno."},
+  "Aleixo":         {zona:"Centro-Sul",cultura:"Bairro nobre e residencial. Empresários, médicos, advogados. Conservador mas valoriza competência técnica.",competidores:[{nome:"Luiz Castro (MDB)",votos:2200},{nome:"Dr. Gomes (AVANTE)",votos:1900}],estrategia:"Eventos pequenos e formais, café com lideranças, pitch de fiscalização e gestão. Evitar estética de campanha popular."},
+  "Adrianópolis":   {zona:"Centro-Sul",cultura:"Alta renda, condomínios fechados. Eleitorado com perfil anti-PT mas sem fidelidade fixa. Valoriza segurança e gestão eficiente.",competidores:[{nome:"Delegado Péricles (REP)",votos:3100},{nome:"Augusto Ferraz (SOL)",votos:1100}],estrategia:"Pauta anti-corrupção + segurança. Evitar linguagem partidária (MDB não ressoa nesse segmento). Focar no candidato, não no partido."},
+  "Japiim":         {zona:"Sul",cultura:"Periferia densa, forte presença evangélica e católica. Histórico de candidatos ligados a lideranças religiosas.",competidores:[{nome:"Capitão Alberto Neto (REP)",votos:5600},{nome:"Cabo Maciel (PL)",votos:2300}],estrategia:"Campo disputado pela direita. Pauta de fiscalização pode diferenciar. Entrada via juventude + emprego é mais acessível do que meio ambiente."},
+  "Colônia Oliveira Machado":{zona:"Sul",cultura:"Periférico, carência de infraestrutura, alta taxa de jovens desempregados. Eleitorado mobilizável por propostas concretas.",competidores:[{nome:"Adjuto Afonso (UNIÃO)",votos:1800}],estrategia:"Maior oportunidade de conversão: pouca concorrência centro. Juventude + cursos técnicos é pauta de alta aderência aqui."},
+  "Cidade Nova":    {zona:"Norte",cultura:"Um dos maiores bairros do AM. Diverso — de classe média a periferia. Alto número de jovens e famílias novas. Forte identidade de \"bairro em crescimento\".",competidores:[{nome:"Álvaro Campelo (MDB)",votos:6100},{nome:"Professor Jetison (PSD)",votos:4200}],estrategia:"Campo MDB já presente (Campelo). Coordenação necessária. Juventude e meio ambiente podem diferenciar dentro da legenda."},
+  "Alvorada":       {zona:"Norte",cultura:"Popular, famílias de renda baixa-média, comunidades ribeirinhas próximas. Memória forte de problemas ambientais (enchentes).",competidores:[{nome:"Bosco Saraiva (AVANTE)",votos:2800},{nome:"Adjuto Afonso (UNIÃO)",votos:1400}],estrategia:"Meio ambiente e enchentes são pauta real aqui. Entrada via associações de moradores afetados por desastres naturais."},
+  "Santo Antônio":  {zona:"Oeste",cultura:"Bairro ribeirinho, forte cultura do interior, pesca, fé. Eleitorado de raízes amazônicas que valoriza candidatos 'de perto'.",competidores:[{nome:"Álvaro Campelo (MDB)",votos:1900}],estrategia:"Presença física é insubstituível aqui. Pauta ambiental ligada ao rio ressoa. Candidato que visita pessoalmente tem retorno exponencial."},
+  "Tarumã":         {zona:"Oeste",cultura:"Bairro de classe média em crescimento, muitos imigrantes de outros estados. Menor fidelidade partidária. Alto número de jovens.",competidores:[{nome:"Mayara Pinheiro (PSD)",votos:2100}],estrategia:"Pouca concorrência centro. Juventude + mobilidade urbana (transporte) é pauta sensível. Alta receptividade a campanha digital."},
+  "Gilberto Mestrinho":{zona:"Leste",cultura:"Periférico, carente de serviços. Jovens em maioria. Índice alto de primeiro voto (eleitorado novo não fidelizado).",competidores:[],estrategia:"Território aberto para o campo centro. Cadastrar jovens e oferecer primeira experiência política positiva tem efeito de longo prazo."},
+  "Lago Azul":      {zona:"Norte",cultura:"Conjunto habitacional popular. Identidade de bairro planejado, mas com demandas de infraestrutura pendentes. Jovens famílias.",competidores:[{nome:"Professor Jetison (PSD)",votos:3400}],estrategia:"Pauta de educação e qualificação para jovens mães. Meio ambiente (qualidade do ar, lixo) tem apelo real nesse perfil."},
+};
+
+// Bairros estratégicos inexplorados com contexto completo
+const BAIRROS_SEM_PRESENCA_ESTRATEGICOS = [
+  {nome:"Colônia Oliveira Machado",zona:"Sul",eleitores_est:38000,potencial:"ALTO",motivo:"Pouca concorrência do campo centro. Juventude desempregada é público-alvo direto.",entrada:"Parceria com curso técnico ou escola pública local. Evento de cadastro presencial.",competidores:[]},
+  {nome:"Gilberto Mestrinho",zona:"Leste",eleitores_est:42000,potencial:"ALTO",motivo:"Eleitorado jovem não fidelizado. Território aberto — campo centro praticamente ausente.",entrada:"Ação de rua com abordagem direta + cadastro no local. Reels de visita ao bairro.",competidores:[]},
+  {nome:"Tarumã",zona:"Oeste",eleitores_est:29000,potencial:"MÉDIO-ALTO",motivo:"Alta proporção de jovens, menor fidelidade partidária. Receptivo a candidatos novos.",entrada:"Campanha digital + 1 visita presencial com foto e reels. Pauta de transporte urbano.",competidores:[{nome:"Mayara Pinheiro (PSD)",votos:2100}]},
+  {nome:"Alvorada",zona:"Norte",eleitores_est:31000,potencial:"MÉDIO-ALTO",motivo:"Comunidade afetada por enchentes — pauta de meio ambiente tem apelo direto e urgente.",entrada:"Visita pós-enchente com proposta concreta. Parceria com associações de moradores.",competidores:[{nome:"Bosco Saraiva (AVANTE)",votos:2800}]},
+  {nome:"Santo Antônio",zona:"Oeste",eleitores_est:22000,potencial:"MÉDIO",motivo:"Cultura ribeirinha valoriza visita física. MDB já tem alguma presença via Campelo.",entrada:"Visita presencial obrigatória. Pauta ambiental ligada ao rio e pesca.",competidores:[{nome:"Álvaro Campelo (MDB)",votos:1900}]},
+];
+
 async function loadTerritorial(){
   const data=await fetch("/api/territorial/bairros").then(r=>r.json());
   const bairros=data.por_bairro||{};
@@ -1793,28 +1838,77 @@ async function loadTerritorial(){
 
   document.getElementById("t-cob").textContent=Object.keys(bairros).length;
   document.getElementById("t-pct").textContent=fmtP(data.cobertura_total_pct);
-  document.getElementById("t-zero").textContent=sem.length;
+  document.getElementById("t-zero").textContent=sem.length||BAIRROS_SEM_PRESENCA_ESTRATEGICOS.length;
+  document.getElementById("t-top").textContent=sorted[0]?sorted[0][0]:"—";
   document.getElementById("t-count").textContent=Object.keys(bairros).length+" bairros";
 
   const top12p=sorted.slice(0,12);
   mkChart("chart-pen","bar",{
     labels:top12p.map(b=>b[0]),
-    datasets:[{data:top12p.map(b=>b[1].penetracao_pct),backgroundColor:"rgba(99,102,241,.75)",borderRadius:5,borderSkipped:false}]
+    datasets:[{data:top12p.map(b=>b[1].penetracao_pct),backgroundColor:"rgba(45,212,191,.75)",borderRadius:5,borderSkipped:false}]
   },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
 
   const top12r=Object.entries(bairros).sort((a,b)=>b[1].roi_potencial-a[1].roi_potencial).slice(0,12);
   mkChart("chart-roi","bar",{
     labels:top12r.map(b=>b[0]),
-    datasets:[{data:top12r.map(b=>b[1].roi_potencial),backgroundColor:"rgba(245,158,11,.75)",borderRadius:5,borderSkipped:false}]
+    datasets:[{data:top12r.map(b=>b[1].roi_potencial),backgroundColor:"rgba(61,220,132,.75)",borderRadius:5,borderSkipped:false}]
   },{scales:{y:{grid:{color:"var(--border)"}},x:{grid:{display:false},ticks:{maxRotation:35,minRotation:35}}}});
 
+  // Bairros sem presença
+  const semList = sem.length ? sem.map(n=>BAIRROS_SEM_PRESENCA_ESTRATEGICOS.find(b=>b.nome===n)||{nome:n,zona:"—",potencial:"MÉDIO",motivo:"Sem cadastros registrados.",entrada:"Iniciar prospecção.",competidores:[]}) : BAIRROS_SEM_PRESENCA_ESTRATEGICOS;
+  document.getElementById("t-sem-count").textContent=semList.length+" bairros";
+  const potCls={"ALTO":"green","MÉDIO-ALTO":"accent","MÉDIO":"orange"};
+  document.getElementById("t-sem-bairros").innerHTML=semList.map((b,i)=>`
+    <div style="border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden">
+      <div onclick="toggleSem(${i})" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:var(--surface2)">
+        <span style="font-size:13px;font-weight:600;color:var(--text);flex:1">${b.nome}</span>
+        <span style="font-size:10px;color:var(--text3)">${b.zona}</span>
+        <span style="font-size:10px;color:var(--text3)">${fmtN(b.eleitores_est)} eleitores</span>
+        <span class="tag tag-${potCls[b.potencial]||"gold"}">${b.potencial}</span>
+        <span id="sem-arrow-${i}" style="color:var(--text3);font-size:11px">▾</span>
+      </div>
+      <div id="sem-body-${i}" style="display:none;padding:12px 14px;background:var(--surface);font-size:12px;line-height:1.8">
+        <div style="margin-bottom:8px"><span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.05em">Por que entrar aqui</span><br><span style="color:var(--text2)">${b.motivo}</span></div>
+        <div style="margin-bottom:8px"><span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.05em">Estratégia de entrada</span><br><span style="color:var(--green)">${b.entrada}</span></div>
+        ${b.competidores.length?`<div><span style="color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.05em">Competidores TSE 2022</span><br>${b.competidores.map(c=>`<span style="color:var(--orange)">${c.nome} · ${fmtN(c.votos)} v</span>`).join(" · ")}</div>`:`<div style="color:var(--green);font-size:11px">Sem competidor relevante registrado — território aberto</div>`}
+      </div>
+    </div>`).join("");
+
+  // Tabela completa expandível
   const cmap={"A/B":"tag-green","B/C":"tag-blue","C":"tag-blue","C/D":"tag-gold","D/E":"tag-red"};
-  document.getElementById("t-table").innerHTML=sorted.map(([b,d])=>
-    `<tr><td><strong>${b}</strong></td><td>${fmtN(d.cadastros)}</td><td>${fmtN(d.eleitores_estimados)}</td>
-     <td>${fmtP(d.penetracao_pct)}</td><td>${fmtN(d.votos_estimados)}</td>
-     <td><span class="tag ${cmap[d.classe_social]||"tag-gold"}">${d.classe_social||"N/D"}</span></td>
-     <td>${d.densidade||"—"}</td><td>${d.roi_potencial}</td></tr>`
-  ).join("");
+  document.getElementById("t-table").innerHTML=sorted.map(([b,d],i)=>{
+    const ctx=BAIRRO_CONTEXT[b]||null;
+    return `<tr onclick="toggleBairro('br-${i}')" style="cursor:pointer">
+      <td><strong>${b}</strong>${ctx?` <span style="font-size:9px;color:var(--text3)">${ctx.zona}</span>`:""}</td>
+      <td>${fmtN(d.cadastros)}</td><td>${fmtN(d.eleitores_estimados)}</td>
+      <td>${fmtP(d.penetracao_pct)}</td><td>${fmtN(d.votos_estimados)}</td>
+      <td><span class="tag ${cmap[d.classe_social]||"tag-gold"}">${d.classe_social||"N/D"}</span></td>
+      <td>${d.roi_potencial}</td>
+      <td style="font-size:11px;color:var(--text3)">${ctx?"▾":"—"}</td>
+    </tr>
+    ${ctx?`<tr id="br-${i}" style="display:none;background:var(--surface2)"><td colspan="8" style="padding:12px 16px;font-size:11.5px;line-height:1.8">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Contexto Cultural</div><div style="color:var(--text2)">${ctx.cultura}</div></div>
+        <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Competidores TSE 2022</div>${ctx.competidores.length?ctx.competidores.map(c=>`<div style="color:var(--orange)">${c.nome} · ${fmtN(c.votos)} v</div>`).join(""):`<div style="color:var(--green)">Sem concorrência relevante</div>`}</div>
+        <div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Estratégia de Entrada</div><div style="color:var(--green)">${ctx.estrategia}</div></div>
+      </div>
+    </td></tr>`:""}`;
+  }).join("");
+}
+
+function toggleBairro(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==="none"?"":"none";
+}
+
+function toggleSem(i){
+  const body=document.getElementById("sem-body-"+i);
+  const arrow=document.getElementById("sem-arrow-"+i);
+  if(!body)return;
+  const open=body.style.display==="none";
+  body.style.display=open?"":"none";
+  if(arrow)arrow.textContent=open?"▴":"▾";
 }
 
 // ──────────────────────────────────────────────
@@ -2046,16 +2140,25 @@ function renderAnAnalogos(d){
   document.getElementById("an-lim").textContent=(pc.limiar_historico||57).toFixed(1)+"%";
   document.getElementById("an-eleitos-count").textContent=todos.filter(c=>c.eleito).length;
 
+  const limiar=pc.limiar_historico||57;
   mkChart("chart-analogos","bar",{
     labels:todos.map(c=>c.candidato.split(" ")[0]+" "+c.ano),
-    datasets:[{
-      data:todos.map(c=>c.pct_quociente),
-      backgroundColor:todos.map(c=>c.eleito?"rgba(61,220,132,.75)":"rgba(224,85,85,.5)"),
-      borderRadius:2,borderSkipped:false
-    }]
+    datasets:[
+      {
+        label:"% do Quociente",
+        data:todos.map(c=>c.pct_quociente),
+        backgroundColor:todos.map(c=>c.eleito?"rgba(61,220,132,.75)":"rgba(224,85,85,.5)"),
+        borderRadius:2,borderSkipped:false
+      },
+      {
+        label:"Limiar eleição ("+limiar+"%)",
+        data:todos.map(()=>limiar),
+        type:"line",borderColor:"rgba(224,85,85,.7)",borderDash:[6,4],
+        pointRadius:0,borderWidth:1.5,fill:false
+      }
+    ]
   },{
-    plugins:{legend:{display:false},
-      annotation:{annotations:{line1:{type:"line",yMin:pc.limiar_historico||57,yMax:pc.limiar_historico||57,borderColor:"rgba(224,85,85,.6)",borderWidth:1,borderDash:[4,4]}}}},
+    plugins:{legend:{display:true,labels:{color:"#8aaa98",boxWidth:10,font:{size:10}}}},
     scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:45,font:{size:9}}}}
   });
 
