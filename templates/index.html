@@ -730,24 +730,112 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
     <!-- ══════════ MONTE CARLO ══════════ -->
     <div class="page" id="page-montecarlo">
       <div class="page-title">Simulação Monte Carlo</div>
-      <div class="page-sub">10.000 simulações estocásticas — distribui incerteza matematicamente em vez de assumir um número fixo</div>
-      <div class="grid g4" style="margin-bottom:14px">
-        <div class="card card-sm"><div class="kpi-label">Probabilidade de Eleição</div><div class="kpi-val green" id="mc-prob">—</div><div class="kpi-delta">das 10k simulações</div></div>
-        <div class="card card-sm"><div class="kpi-label">Mediana</div><div class="kpi-val accent" id="mc-med">—</div><div class="kpi-delta">valor central</div></div>
-        <div class="card card-sm"><div class="kpi-label">IC 90% · Mínimo</div><div class="kpi-val" id="mc-ic-min">—</div><div class="kpi-delta">cenário desfavorável</div></div>
-        <div class="card card-sm"><div class="kpi-label">IC 90% · Máximo</div><div class="kpi-val" id="mc-ic-max">—</div><div class="kpi-delta">cenário favorável</div></div>
+      <div class="page-sub">10.000 cenários possíveis simulados — probabilidade matemática de eleição baseada na sua realidade atual</div>
+
+      <!-- O que é Monte Carlo -->
+      <div class="card" style="margin-bottom:14px;border-left:3px solid var(--accent)">
+        <div style="display:flex;gap:20px;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;letter-spacing:.03em">O QUE É ESSA SIMULAÇÃO?</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.8">
+              Em vez de assumir "vou ter X votos", o sistema simula <strong style="color:var(--accent)">10.000 cenários diferentes</strong> — variando taxa de conversão dos cadastros, espalhamento boca a boca, abstenção eleitoral e outros fatores. O resultado é uma <strong style="color:var(--text)">distribuição de probabilidades</strong>: quantos dos 10k cenários terminam com você eleito.
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;letter-spacing:.03em">POR QUE É MAIS ÚTIL QUE UMA PROJEÇÃO SIMPLES?</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.8">
+              Uma projeção diz "você vai ter 42.000 votos". Monte Carlo diz "em <strong style="color:var(--green)">34% dos cenários você se elege</strong>, e no pior dos casos terá 18.000, no melhor, 67.000". Isso permite tomar decisões com <strong style="color:var(--text)">consciência do risco real</strong>, não uma falsa certeza.
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- KPIs principais com contexto -->
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="card card-sm">
+          <div class="kpi-label">Probabilidade de Eleição</div>
+          <div class="kpi-val green" id="mc-prob">—</div>
+          <div class="kpi-delta" id="mc-prob-ctx">dos 10k cenários simulados</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5">Abaixo de 30% = risco alto · 30–60% = disputa · Acima de 60% = favorável</div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">Mediana dos Cenários</div>
+          <div class="kpi-val accent" id="mc-med">—</div>
+          <div class="kpi-delta">resultado mais provável</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5">50% dos cenários ficam abaixo e 50% acima desse número</div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">Piso Realista (IC 90%)</div>
+          <div class="kpi-val" id="mc-ic-min">—</div>
+          <div class="kpi-delta">cenário desfavorável</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5">Em 95% dos cenários você terá pelo menos esse resultado</div>
+        </div>
+        <div class="card card-sm">
+          <div class="kpi-label">Teto Realista (IC 90%)</div>
+          <div class="kpi-val" id="mc-ic-max">—</div>
+          <div class="kpi-delta">cenário favorável</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5">Em 95% dos cenários você não ultrapassará esse número</div>
+        </div>
+      </div>
+
+      <!-- Diagnóstico dinâmico -->
+      <div id="mc-diagnostico" class="card" style="margin-bottom:14px;display:none">
+        <div class="card-header"><div class="card-title">Diagnóstico Estratégico</div></div>
+        <div id="mc-diag-body" style="font-size:12px;line-height:1.9;color:var(--text2)"></div>
+      </div>
+
+      <!-- Histograma + Percentis -->
       <div class="grid g21" style="margin-bottom:14px">
         <div class="card">
-          <div class="card-header"><div class="card-title">Distribuição de Resultados</div><div class="card-badge" id="mc-above">—</div></div>
-          <div id="hist-wrap" style="max-height:340px;overflow-y:auto;padding:4px 0"></div>
+          <div class="card-header">
+            <div class="card-title">Distribuição dos 10.000 Cenários</div>
+            <div class="card-badge" id="mc-above">—</div>
+          </div>
+          <!-- Legenda do histograma -->
+          <div style="display:flex;gap:16px;margin-bottom:10px;font-size:10px;color:var(--text3)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block"></span>Abaixo do quociente · não eleito</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block"></span>Acima do quociente · eleito</span>
+            <span style="display:flex;align-items:center;gap:4px;margin-left:auto;color:var(--text3)">Cada barra = faixa de votos · largura = frequência dos cenários</span>
+          </div>
+          <div id="hist-wrap" style="max-height:360px;overflow-y:auto;padding:4px 0"></div>
+          <!-- Como ler -->
+          <div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:var(--radius);font-size:11px;color:var(--text3);line-height:1.7">
+            <strong style="color:var(--text2)">Como ler:</strong> Cada linha é uma faixa de votos. Barras verdes = cenários onde você se elege; barras vermelhas = cenários onde fica abaixo do quociente. Quanto mais votos concentrados à direita (barras verdes), melhor sua situação.
+          </div>
         </div>
+
         <div class="card">
-          <div class="card-header"><div class="card-title">Percentis</div></div>
+          <div class="card-header"><div class="card-title">Percentis · O Que Esperar</div></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">Cada percentil responde: "em X% dos cenários, você teria pelo menos esses votos"</div>
           <div id="percentis-box"></div>
-          <div class="divider"></div>
-          <div style="font-size:12px;color:var(--text2);margin-top:4px"><strong>Análise de Sensibilidade</strong></div>
-          <div id="sens-box" style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.9"></div>
+          <div class="divider" style="margin:12px 0"></div>
+
+          <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:6px;letter-spacing:.03em">ANÁLISE DE SENSIBILIDADE</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">Qual fator mais impacta seu resultado? Barra verde = aumenta votos se melhorar · vermelha = reduz</div>
+          <div id="sens-box" style="font-size:12px;color:var(--text2);margin-top:4px;line-height:1.9"></div>
+
+          <div class="divider" style="margin:12px 0"></div>
+          <!-- O que fazer -->
+          <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px;letter-spacing:.03em">O QUE FAZER COM ISSO</div>
+          <div id="mc-acoes" style="font-size:11px;color:var(--text2);line-height:1.8"></div>
+        </div>
+      </div>
+
+      <!-- Referência do quociente -->
+      <div class="card" style="border-left:3px solid var(--border2)">
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10px;color:var(--text3);letter-spacing:.05em">QUOCIENTE REFERÊNCIA 2026</div>
+            <div style="font-size:20px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace" id="mc-quoc-ref">~52.500</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);flex:1;line-height:1.7">
+            Estimativa do quociente eleitoral para ALEAM 2026 com base na tendência histórica (2010–2022). O quociente é o número mínimo de votos para garantir uma cadeira. Candidatos com votação própria abaixo dele dependem do quociente partidário — o que exige que o MDB como um todo some votos suficientes.
+          </div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.7">
+            <strong style="color:var(--text2)">Menor eleito 2022:</strong> 28.340 votos<br>
+            <strong style="color:var(--text2)">Quociente real 2022:</strong> 49.559 votos<br>
+            <strong style="color:var(--text2)">Meta segura projetada:</strong> 45.000 votos
+          </div>
         </div>
       </div>
     </div>
@@ -1582,18 +1670,65 @@ function renderProj(c){
 // ──────────────────────────────────────────────
 async function loadMC(){
   const mc=await fetch("/api/monte-carlo").then(r=>r.json());
-  document.getElementById("mc-prob").textContent=fmtP(mc.prob_eleicao_pct);
-  document.getElementById("mc-prob").className="kpi-val "+(mc.prob_eleicao_pct>=60?"green":mc.prob_eleicao_pct>=35?"gold":"red");
+  const prob=mc.prob_eleicao_pct;
+
+  document.getElementById("mc-prob").textContent=fmtP(prob);
+  document.getElementById("mc-prob").className="kpi-val "+(prob>=60?"green":prob>=35?"accent":"red");
   document.getElementById("mc-med").textContent=fmtN(mc.mediana_votos);
   document.getElementById("mc-ic-min").textContent=fmtN(mc.intervalo_confianca_90.min);
   document.getElementById("mc-ic-max").textContent=fmtN(mc.intervalo_confianca_90.max);
-  document.getElementById("mc-above").textContent=mc.prob_eleicao_pct+"% acima do quociente";
+  document.getElementById("mc-above").textContent=prob+"% acima do quociente";
+  if(mc.quociente_referencia) document.getElementById("mc-quoc-ref").textContent="~"+fmtN(mc.quociente_referencia);
 
-  // Percentis
+  // Diagnóstico dinâmico
+  const diagEl=document.getElementById("mc-diagnostico");
+  const diagBody=document.getElementById("mc-diag-body");
+  let diagLines=[];
+  if(prob>=60){
+    diagLines.push(`<span style="color:var(--green);font-weight:600">Situação favorável.</span> Em ${fmtP(prob)} dos cenários simulados você se elege. O trabalho agora é consolidar a base e não perder votos por diluição de campanha.`);
+    diagLines.push(`A mediana de <strong style="color:var(--accent)">${fmtN(mc.mediana_votos)} votos</strong> já supera ou está próxima do quociente. Mantenha o ritmo de cadastros e conversão.`);
+  } else if(prob>=35){
+    diagLines.push(`<span style="color:var(--accent);font-weight:600">Situação de disputa.</span> Você se elege em ${fmtP(prob)} dos cenários — zona de incerteza real. Uma melhora consistente na taxa de conversão pode mudar o quadro.`);
+    diagLines.push(`Com mediana de <strong>${fmtN(mc.mediana_votos)} votos</strong>, a diferença para o quociente ainda é relevante. Foque nos bairros de maior ROI e na eficiência do multiplicador boca a boca.`);
+    diagLines.push(`O piso realista (IC 90% mínimo) de <strong>${fmtN(mc.intervalo_confianca_90.min)}</strong> indica que no cenário ruim você fica distante da eleição — o que exige ação agora, não em 2026.`);
+  } else {
+    diagLines.push(`<span style="color:var(--red);font-weight:600">Alerta: cenário de risco.</span> Apenas ${fmtP(prob)} dos cenários resultam em eleição com os parâmetros atuais.`);
+    diagLines.push(`É necessário aumentar a base de cadastros, melhorar a taxa de conversão ou ampliar o multiplicador de boca a boca. Veja a análise de sensibilidade para saber qual alavanca tem mais impacto.`);
+  }
+  diagBody.innerHTML=diagLines.map(l=>`<p style="margin:0 0 6px">${l}</p>`).join("");
+  diagEl.style.display="block";
+
+  // Ações recomendadas
+  const acoes=document.getElementById("mc-acoes");
+  const sensKeys=Object.entries(mc.sensibilidade||{}).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  const topSens=sensKeys[0];
+  const senslabels2={"taxa_conversao":"taxa de conversão dos cadastros","multiplicador_boca_a_boca":"alcance boca a boca","eficiencia_multiplicador":"eficiência do multiplicador","abstencao":"abstenção eleitoral"};
+  const acaoItems=[
+    `O fator de maior impacto é <strong style="color:var(--accent)">${topSens?senslabels2[topSens[0]]||topSens[0]:"conversão"}</strong> — priorize melhorias nessa frente.`,
+    prob<50?`Com ${fmtP(prob)} de probabilidade, cada novo cadastro qualificado conta mais. Meta: aumentar base em pelo menos 30% antes de outubro/2025.`:`Probabilidade acima de 50% — consolide os redutos atuais antes de expandir para novos territórios.`,
+    `Use os percentis abaixo para definir metas internas: P25 é o piso conservador, P75 é o alvo realista.`,
+  ];
+  acoes.innerHTML=acaoItems.map(a=>`<div style="display:flex;gap:6px;margin-bottom:6px"><span style="color:var(--accent);flex-shrink:0">›</span><span>${a}</span></div>`).join("");
+
+  // Percentis com labels didáticos
   const p=mc.percentis;
-  const prows=[[5,"p5","var(--red)"],[10,"p10","var(--orange)"],[25,"p25","var(--cyan)"],[50,"p50","var(--text2)"],[75,"p75","var(--green)"],[90,"p90","#4ade80"],[95,"p95","#86efac"]];
-  document.getElementById("percentis-box").innerHTML=prows.map(([pct,key,col])=>
-    `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;padding:5px 0"><span style="color:var(--text2)">P${pct}</span><span style="color:${col};font-weight:700">${fmtN(p[key])}</span></div>`
+  const prows=[
+    [5,"p5","var(--red)","Cenário muito ruim — só 5% dos casos são piores"],
+    [10,"p10","var(--orange)","Piso pessimista — 1 em cada 10 cenários fica abaixo"],
+    [25,"p25","var(--cyan)","Piso conservador — 1 em cada 4 cenários fica abaixo"],
+    [50,"p50","var(--text)","Mediana — metade dos cenários acima, metade abaixo"],
+    [75,"p75","var(--green)","Alvo realista — 3 em 4 cenários ficam abaixo disso"],
+    [90,"p90","#4ade80","Cenário otimista — apenas 10% dos casos chegam aqui"],
+    [95,"p95","#86efac","Cenário muito otimista — apenas 5% dos casos chegam aqui"],
+  ];
+  document.getElementById("percentis-box").innerHTML=prows.map(([pct,key,col,desc])=>
+    `<div style="padding:5px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:1px">
+        <span style="color:var(--text2)">P${pct}</span>
+        <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace">${fmtN(p[key])}</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3)">${desc}</div>
+    </div>`
   ).join("");
 
   // Sensibilidade
@@ -1602,12 +1737,12 @@ async function loadMC(){
   document.getElementById("sens-box").innerHTML=Object.entries(sens).map(([k,v])=>{
     const pct=Math.abs(v)*100;
     const col=v>0?"var(--green)":"var(--red)";
-    return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
-      <span style="width:150px;color:var(--text2)">${senslabels[k]||k}</span>
-      <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-        <div style="height:100%;width:${pct.toFixed(1)}%;background:${col};border-radius:4px"></div>
+    return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+      <span style="width:140px;color:var(--text2);font-size:11px">${senslabels[k]||k}</span>
+      <div style="flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(pct,100).toFixed(1)}%;background:${col};border-radius:4px"></div>
       </div>
-      <span style="color:${col};font-size:11px;width:44px;text-align:right">${v>0?"+":""}${(v*100).toFixed(1)}%</span>
+      <span style="color:${col};font-size:11px;width:40px;text-align:right;font-family:'JetBrains Mono',monospace">${v>0?"+":""}${(v*100).toFixed(1)}%</span>
     </div>`;
   }).join("");
 
@@ -1617,10 +1752,11 @@ async function loadMC(){
   document.getElementById("hist-wrap").innerHTML=mc.histograma.map(h=>{
     const mid=(h.bin_inicio+h.bin_fim)/2;
     const pct=(h.freq/maxF*100).toFixed(1);
-    return `<div class="hist-row">
+    const isQuocLim=quoc&&mid>=quoc-2000&&mid<=quoc+2000;
+    return `<div class="hist-row" title="${fmtN(Math.round(h.bin_inicio))}–${fmtN(Math.round(h.bin_fim))} votos · ${h.freq} cenários">
       <div class="hist-lbl">${fmtN(Math.round(mid))}</div>
-      <div class="hist-track"><div class="hist-fill ${h.above_quociente?"hf-above":"hf-below"}" style="width:${pct}%"></div></div>
-      <div style="font-size:9px;color:var(--text3);width:32px;text-align:right">${h.freq}</div>
+      <div class="hist-track"><div class="hist-fill ${h.above_quociente?"hf-above":"hf-below"}" style="width:${pct}%"></div>${isQuocLim?`<span style="font-size:9px;color:var(--accent);margin-left:4px">quociente</span>`:""}</div>
+      <div style="font-size:9px;color:var(--text3);width:36px;text-align:right">${h.freq}</div>
     </div>`;
   }).join("");
 }
