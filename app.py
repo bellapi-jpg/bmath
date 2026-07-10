@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import uvicorn
 
 BASE_DIR = Path(__file__).parent
@@ -533,7 +534,6 @@ def integracao_status(
 ):
     """Retorna estatísticas para o sistema externo verificar a sync."""
     from core.database import Eleitor, LoteImportacao
-    from sqlalchemy import func
     total = db.query(func.count(Eleitor.id)).scalar() or 0
     ultimo_lote = db.query(LoteImportacao).order_by(LoteImportacao.data_upload.desc()).first()
     return {
@@ -580,6 +580,27 @@ async def integracao_webhook(
     ingestor = CadastroIngestion(db)
     result = ingestor.ingest(df, nome_arquivo="webhook", origem=origem)
     return {"ok": True, **result}
+
+
+# ── Diagnóstico de banco ──────────────────────────────────────────────────────
+
+@app.get("/api/admin/db-status")
+def db_status(db: Session = Depends(get_db)):
+    """Mostra qual banco está em uso e quantidade de dados persistidos."""
+    from core.database import engine, Eleitor
+    db_url = str(engine.url)
+    # Oculta senha para exibição
+    import re
+    db_url_safe = re.sub(r':([^@]+)@', ':***@', db_url)
+    total_cadastros = db.query(func.count(Eleitor.id)).scalar() or 0
+    usando_postgres = "postgresql" in db_url or "postgres" in db_url
+    return {
+        "banco": "PostgreSQL (Supabase)" if usando_postgres else "SQLite (local — dados não persistem no Railway)",
+        "url_resumida": db_url_safe,
+        "persistente": usando_postgres,
+        "total_cadastros": total_cadastros,
+        "aviso": None if usando_postgres else "DATABASE_URL não configurada no Railway. Dados somem no redeploy.",
+    }
 
 
 # ── Admin: re-seed referência (limpa e re-aplica dados TSE/concorrentes) ───────
