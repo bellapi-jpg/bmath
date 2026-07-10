@@ -864,10 +864,14 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
             <div id="an-atencoes"></div>
           </div>
         </div>
-        <div class="grid g3">
+        <div class="grid g3" style="margin-bottom:14px">
           <div class="card card-sm"><div class="kpi-label">Meta Viável · Estreante Centro</div><div class="kpi-val green">52.000</div><div class="kpi-delta">votos · benchmark histórico</div></div>
           <div class="card card-sm"><div class="kpi-label">Ref. MDB 2022 (Campelo)</div><div class="kpi-val accent">68.900</div><div class="kpi-delta">único eleito MDB · teto de referência</div></div>
           <div class="card card-sm"><div class="kpi-label">Situação Atual (Projeção)</div><div class="kpi-val" id="an-sit">—</div><div class="kpi-delta" id="an-sit-d">aguardando cadastros</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Candidatos com Perfil Similar · Lições Diretas</div><div class="card-badge">eleitos e não eleitos</div></div>
+          <div id="an-similares" style="padding:4px 0"></div>
         </div>
       </div>
 
@@ -921,12 +925,8 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title">Posicionamento Estratégico Recomendado</div></div>
-          <div class="grid g3" style="margin-top:8px">
-            <div class="insight-card"><strong style="color:var(--green)">Causa âncora:</strong> Fiscalização — 61% de aderência, apela ao centro e à classe média. Use como identidade principal.</div>
-            <div class="insight-card"><strong style="color:var(--cyan)">Causa de mobilização:</strong> Juventude — maior eleitorado do AM, sub-representado na ALEAM. Garante base de militância.</div>
-            <div class="insight-card"><strong style="color:var(--text2)">Causa diferenciadora:</strong> Meio Ambiente — nenhum incumbent de centro tem pauta ecológica clara. Diferencia sem dividir.</div>
-          </div>
+          <div class="card-header"><div class="card-title">Posicionamento Estratégico das Causas</div></div>
+          <div id="causas-posicionamento" style="padding:4px 0"></div>
         </div>
       </div>
 
@@ -937,15 +937,13 @@ canvas{max-height:var(--chart-h,220px);width:100%!important}
           <div class="card card-sm"><div class="kpi-label">Limiar Histórico Eleição</div><div class="kpi-val red" id="an-lim">—</div></div>
           <div class="card card-sm"><div class="kpi-label">Análogos Centro Eleitos</div><div class="kpi-val green" id="an-eleitos-count">—</div></div>
         </div>
-        <div class="grid g2" style="margin-bottom:14px">
-          <div class="card">
-            <div class="card-header"><div class="card-title">Campo Centro · % do Quociente</div></div>
-            <canvas id="chart-analogos"></canvas>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">Insights de Trajetória</div></div>
-            <div id="an-insights"></div>
-          </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-header"><div class="card-title">Campo Centro ALEAM · % do Quociente por Candidato (2014–2022)</div><div class="card-badge">verde = eleito · vermelho = não eleito</div></div>
+          <canvas id="chart-analogos"></canvas>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-header"><div class="card-title">Insights Estratégicos Cruzados</div></div>
+          <div id="an-insights" style="padding:4px 0"></div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Base Histórica · Campo Centro ALEAM</div></div>
@@ -1795,122 +1793,164 @@ function setAnTab(tab, el){
   ["perfil","partido","causas","analogos"].forEach(t=>{
     document.getElementById("an-tab-"+t).style.display = t===tab?"":"none";
   });
-  // Renderiza gráficos somente quando a tab fica visível (canvas precisa estar no DOM)
-  if(tab==="partido" && _anData) renderAnPartido(_anData);
-  if(tab==="causas" && _anData) renderAnCausas(_anData);
-  if(tab==="analogos" && _anData) renderAnAnalogos(_anData);
+  if(!_anData) return;
+  if(tab==="partido") renderAnPartido(_anData);
+  if(tab==="causas")  renderAnCausas(_anData);
+  if(tab==="analogos") renderAnAnalogos(_anData);
 }
 
-function renderAnPerfil(data){
-  const forca = (data.sintese||{}).pontos_fortes||[];
-  const atenc = (data.sintese||{}).pontos_de_atencao||[];
-  document.getElementById("an-forcas").innerHTML = forca.map(f=>
-    `<div class="alert-check-item" style="border-color:rgba(61,220,132,.15)">
-      <div class="alert-check-box checked" style="border-color:var(--green);background:rgba(61,220,132,.15);color:var(--green)">+</div>
-      <span style="font-size:12px;color:var(--text2)">${f}</span>
+function renderAnPerfil(d){
+  const s = d.sintese||{};
+  document.getElementById("an-forcas").innerHTML=(s.pontos_fortes||[]).map(f=>`
+    <div class="alert-check-item" style="border-color:rgba(61,220,132,.12)">
+      <div style="width:14px;height:14px;flex-shrink:0;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--green);background:rgba(61,220,132,.12)">+</div>
+      <span style="font-size:11.5px;color:var(--text2)">${f}</span>
     </div>`).join("");
-  document.getElementById("an-atencoes").innerHTML = atenc.map(a=>
-    `<div class="alert-check-item">
-      <div class="alert-check-box" style="border-color:var(--cyan);color:var(--cyan)">!</div>
-      <span style="font-size:12px;color:var(--text2)">${a}</span>
+  document.getElementById("an-atencoes").innerHTML=(s.pontos_de_atencao||[]).map(a=>`
+    <div class="alert-check-item">
+      <div style="width:14px;height:14px;flex-shrink:0;border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--cyan)">!</div>
+      <span style="font-size:11.5px;color:var(--text2)">${a}</span>
     </div>`).join("");
 
-  const s = (data.padroes_historicos||{}).situacao_analogia||"";
+  const pc = d.projecao_cruzada||{};
   const sitTxt={"FORA_DA_ZONA_DE_ELEICAO":"FORA DA ZONA","ZONA_DE_RISCO":"ZONA DE RISCO","ZONA_COMPETITIVA":"COMPETITIVO","ZONA_FORTE_ELEICAO":"ZONA FORTE"};
   const sitCls={"FORA_DA_ZONA_DE_ELEICAO":"red","ZONA_DE_RISCO":"orange","ZONA_COMPETITIVA":"accent","ZONA_FORTE_ELEICAO":"green"};
-  const el=document.getElementById("an-sit");
-  if(el){el.textContent=sitTxt[s]||"—";el.className="kpi-val "+(sitCls[s]||"red")}
-  const ed=document.getElementById("an-sit-d");
-  if(ed&&data.padroes_historicos){ed.textContent=fmtP((data.padroes_historicos||{}).pct_quociente_atual_projetado||0)+" do quociente"}
+  const elSit=document.getElementById("an-sit");
+  if(elSit){elSit.textContent=sitTxt[pc.situacao]||"—";elSit.className="kpi-val "+(sitCls[pc.situacao]||"red")}
+  const elSitD=document.getElementById("an-sit-d");
+  if(elSitD){elSitD.textContent=(pc.pct_quociente_atual||0).toFixed(1)+"% do quociente"}
+
+  // Painel de similares diretos
+  const sim = d.similares_diretos||[];
+  const simEl = document.getElementById("an-similares");
+  if(simEl) simEl.innerHTML = sim.map(c=>`
+    <div class="alert-card ${c.eleito?"info":"critico"}" style="margin-bottom:8px;cursor:default">
+      <div class="alert-card-header" style="padding:12px 14px">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">${c.candidato}</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${c.similaridade}</div>
+          <div style="font-size:11.5px;color:var(--text2);line-height:1.6;padding:8px;background:var(--surface3);border-left:2px solid ${c.eleito?"var(--green)":"var(--red)"}">
+            <strong style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Licao:</strong><br>${c.licao}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:14px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:${c.eleito?"var(--green)":"var(--red)"}">${fmtN(c.votos)}</div>
+          <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text3);text-transform:uppercase">votos</div>
+          <span class="tag ${c.eleito?"tag-green":"tag-red"}" style="margin-top:6px;display:inline-block">${c.eleito?"ELEITO":"NÃO ELEITO"}</span>
+        </div>
+      </div>
+    </div>`).join("");
 }
 
-function renderAnPartido(data){
+function renderAnPartido(d){
+  const h = d.historico_mdb||{};
+  const cad = h.cadeiras||[];
   mkChart("chart-mdb-cadeiras","bar",{
-    labels:["2014","2018","2022","2026 (meta)"],
+    labels: cad.map(c=>c.ano+(c.ano===2026?" (meta)":"")),
     datasets:[{
       label:"Cadeiras MDB ALEAM",
-      data:[3,2,1,2],
-      backgroundColor:["rgba(45,212,191,.7)","rgba(45,212,191,.7)","rgba(224,85,85,.6)","rgba(61,220,132,.5)"],
+      data: cad.map(c=>c.eleitos||0),
+      backgroundColor:["rgba(45,212,191,.7)","rgba(45,212,191,.6)","rgba(224,85,85,.6)","rgba(61,220,132,.5)"],
       borderRadius:2,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"var(--border)"},ticks:{stepSize:1}},x:{grid:{display:false}}}});
+  },{scales:{y:{grid:{color:"var(--border)"},ticks:{stepSize:1},max:4},x:{grid:{display:false}}}});
 
-  const mdbRows=[
-    {nome:"Álvaro Campelo",ano:2022,votos:68900,quoc:49559,eleito:true},
-    {nome:"Sinésio Campos (PDT-MDB colig.)",ano:2018,votos:71200,quoc:47300,eleito:true},
-    {nome:"Airton Lacerda",ano:2018,votos:51800,quoc:47300,eleito:true},
-    {nome:"Álvaro Campelo",ano:2018,votos:44100,quoc:47300,eleito:true},
-    {nome:"Luiz Castro",ano:2014,votos:78200,quoc:45100,eleito:true},
-    {nome:"Álvaro Campelo",ano:2014,votos:61300,quoc:45100,eleito:true},
-    {nome:"Serafim Corrêa",ano:2014,votos:58700,quoc:45100,eleito:true},
-  ];
-  document.getElementById("an-mdb-table").innerHTML=mdbRows.map(r=>`
-    <tr><td>${r.nome}</td><td>${r.ano}</td><td>${fmtN(r.votos)}</td>
-    <td>${fmtP(r.votos/r.quoc*100)}</td>
-    <td><span class="tag ${r.eleito?"tag-green":"tag-red"}">${r.eleito?"ELEITO":"NÃO ELEITO"}</span></td></tr>`
-  ).join("");
+  document.getElementById("an-mdb-table").innerHTML=(h.historico_eleitos||[]).map(r=>`
+    <tr>
+      <td>${r.nome}</td><td>${r.ano}</td><td>${fmtN(r.votos)}</td>
+      <td style="color:var(--cyan)">${r.pct.toFixed(1)}%</td>
+      <td><span class="tag tag-green">ELEITO</span></td>
+    </tr>`).join("");
 }
 
-function renderAnCausas(data){
-  const causas = data.causas_detalhadas||{};
+function renderAnCausas(d){
+  const causas = d.causas_detalhadas||{};
   mkChart("chart-causas-aderencia","bar",{
     labels:["Fiscalização","Juventude","Meio Ambiente"],
     datasets:[{
-      label:"Aderência no eleitorado AM (%)",
-      data:[61,42,38],
+      label:"Aderência eleitorado AM (%)",
+      data:[
+        (causas["fiscalização"]||{}).aderencia_eleitorado_am_pct||61,
+        (causas["juventude"]||{}).aderencia_eleitorado_am_pct||42,
+        (causas["meio ambiente"]||{}).aderencia_eleitorado_am_pct||38,
+      ],
       backgroundColor:["rgba(61,220,132,.75)","rgba(45,212,191,.75)","rgba(155,127,232,.7)"],
       borderRadius:2,borderSkipped:false
     }]
   },{scales:{y:{grid:{color:"var(--border)"},max:100,ticks:{callback:v=>v+"%"}},x:{grid:{display:false}}}});
 
   const keys=["fiscalização","juventude","meio ambiente"];
+  const cores={"fiscalização":"var(--green)","juventude":"var(--cyan)","meio ambiente":"var(--purple)"};
   document.getElementById("causas-detail").innerHTML=keys.map(k=>{
     const c=causas[k]||{};
     return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <strong style="font-size:12px;color:var(--text);text-transform:capitalize">${k}</strong>
-        <span class="tag tag-green">${c.aderencia_eleitorado_am_pct||"—"}% aderência</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:12.5px;color:${cores[k]||"var(--text)"};text-transform:capitalize">${k}</strong>
+        <span class="tag tag-green">${c.aderencia_eleitorado_am_pct||"—"}% aderência AM</span>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase">Segmento:</strong> ${c.segmento_principal||"—"}</div>
-      <div style="font-size:11px;color:var(--green);margin-bottom:2px">+ ${c.oportunidade||""}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:3px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;font-size:8.5px;letter-spacing:1px">Segmento-alvo</div>
+      <div style="font-size:11.5px;color:var(--text2);margin-bottom:8px">${c.segmento_principal||"—"}</div>
+      <div style="font-size:11px;color:var(--green);margin-bottom:3px">+ ${c.oportunidade||""}</div>
       <div style="font-size:11px;color:var(--orange)">! ${c.risco||""}</div>
     </div>`;
   }).join("");
+
+  // Painel de posicionamento estratégico das causas
+  const posEl=document.getElementById("causas-posicionamento");
+  if(posEl) posEl.innerHTML=`
+    <div class="insight-card" style="border-left-color:var(--green)"><strong style="color:var(--green)">Causa âncora — Fiscalização (61%):</strong> Maior apelo cross-campo. Atrai classe média, independentes e eleitores antipetistas sem afastar centro. Use como identidade principal e pitch de 30 segundos.</div>
+    <div class="insight-card" style="border-left-color:var(--cyan);margin-top:8px"><strong style="color:var(--cyan)">Causa de mobilização — Juventude (42%):</strong> Maior eleitorado do AM, sub-representado na ALEAM. Garante base de militância digital e presença em redes. Risco: comparecimento baixo — converter em cadastro é obrigatório.</div>
+    <div class="insight-card" style="border-left-color:var(--purple);margin-top:8px"><strong style="color:var(--purple)">Causa diferenciadora — Meio Ambiente (38%):</strong> Nenhum incumbent do centro tem pauta ecológica ativa. Diferencia sem conflito direto. Usar como gancho para mídia espontânea e parcerias com ONGs amazonenses.</div>`;
 }
 
-function renderAnAnalogos(data){
-  const ph=data.padroes_historicos||{};
-  const todos=ph.padroes_historicos||[];
-  document.getElementById("an-pct").textContent=fmtP(ph.pct_quociente_atual_projetado||0);
-  document.getElementById("an-lim").textContent=fmtP(ph.limiar_historico_eleicao_pct||57);
-  document.getElementById("an-eleitos-count").textContent=(ph.eleitos||[]).length;
+function renderAnAnalogos(d){
+  const todos = d.analogos_historicos||[];
+  const pc = d.projecao_cruzada||{};
+  document.getElementById("an-pct").textContent=(pc.pct_quociente_atual||0).toFixed(1)+"%";
+  document.getElementById("an-lim").textContent=(pc.limiar_historico||57).toFixed(1)+"%";
+  document.getElementById("an-eleitos-count").textContent=todos.filter(c=>c.eleito).length;
 
   mkChart("chart-analogos","bar",{
-    labels:todos.map(c=>c.candidato.split(" ")[0]),
+    labels:todos.map(c=>c.candidato.split(" ")[0]+" "+c.ano),
     datasets:[{
       data:todos.map(c=>c.pct_quociente),
-      backgroundColor:todos.map(c=>c.eleito?"rgba(61,220,132,.75)":"rgba(224,85,85,.55)"),
+      backgroundColor:todos.map(c=>c.eleito?"rgba(61,220,132,.75)":"rgba(224,85,85,.5)"),
       borderRadius:2,borderSkipped:false
     }]
-  },{scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:40,minRotation:40}}}});
+  },{
+    plugins:{legend:{display:false},
+      annotation:{annotations:{line1:{type:"line",yMin:pc.limiar_historico||57,yMax:pc.limiar_historico||57,borderColor:"rgba(224,85,85,.6)",borderWidth:1,borderDash:[4,4]}}}},
+    scales:{y:{grid:{color:"var(--border)"},ticks:{callback:v=>v+"%"}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:45,font:{size:9}}}}
+  });
 
-  document.getElementById("an-insights").innerHTML=(ph.insights||[]).map(i=>
-    `<div class="insight-card">${i}</div>`).join("");
+  // Insights estratégicos
+  const ins = d.insights_estrategicos||[];
+  const tipoTag={"PADRAO":"tag-blue","OPORTUNIDADE":"tag-green","RISCO":"tag-red","LICAO":"tag-cyan"};
+  document.getElementById("an-insights").innerHTML=ins.map(i=>`
+    <div class="alert-card info" style="margin-bottom:8px;cursor:default">
+      <div class="alert-card-header" style="padding:12px 14px">
+        <div>
+          <div style="margin-bottom:6px"><span class="tag ${tipoTag[i.tipo]||"tag-blue"}">${i.tipo}</span></div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:6px">${i.titulo}</div>
+          <div style="font-size:11.5px;color:var(--text2);line-height:1.65">${i.descricao}</div>
+          <div style="font-size:10.5px;color:var(--cyan);margin-top:8px;font-family:'JetBrains Mono',monospace">→ ${i.impacto}</div>
+        </div>
+      </div>
+    </div>`).join("");
 
-  document.getElementById("an-table").innerHTML=todos.map(c=>
-    `<tr><td>${c.candidato}</td><td>${c.partido}</td><td>${c.ano}</td>
-     <td>${fmtN(c.votos)}</td><td>${fmtP(c.pct_quociente)}</td>
-     <td><span class="tag ${c.eleito?"tag-green":"tag-red"}">${c.eleito?"ELEITO":"NÃO ELEITO"}</span></td></tr>`
-  ).join("");
+  document.getElementById("an-table").innerHTML=todos.map(c=>`
+    <tr>
+      <td style="font-weight:500">${c.candidato}</td>
+      <td>${c.partido}</td><td>${c.ano}</td>
+      <td>${fmtN(c.votos)}</td>
+      <td style="color:${c.eleito?"var(--green)":"var(--red)"}">${c.pct_quociente.toFixed(1)}%</td>
+      <td><span class="tag ${c.eleito?"tag-green":"tag-red"}">${c.eleito?"ELEITO":"NÃO ELEITO"}</span></td>
+    </tr>`).join("");
 }
 
 async function loadAnalogos(){
-  const [cruzado] = await Promise.all([
-    fetch("/api/candidato/analise-cruzada").then(r=>r.json()),
-  ]);
-  _anData = cruzado;
-  renderAnPerfil(cruzado);
-  // partido/causas/analogos renderizam quando a tab é clicada
+  _anData = await fetch("/api/candidato/analise-cruzada").then(r=>r.json());
+  renderAnPerfil(_anData);
 }
 
 // ──────────────────────────────────────────────
