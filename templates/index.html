@@ -2262,21 +2262,26 @@ async function uploadCSV(file){
     const r=await fetch("/api/upload/cadastros",{method:"POST",body:fd});
     const d=await r.json();
     if(d.ok){
-      document.getElementById("upload-status").innerHTML=` ${fmtN(d.validos)} cadastros importados · ${d.erros} erros`;
-      notify(` ${fmtN(d.validos)} cadastros importados com sucesso!`);
+      document.getElementById("upload-status").innerHTML=`${fmtN(d.validos)} cadastros importados · ${d.erros} com erro`;
+      notify(`${fmtN(d.validos)} cadastros importados com sucesso!`);
       loaded.clear();
       loadPage(currentPage);
       // preview
-      const text=await file.text();
-      const lines=text.trim().split("\n").slice(0,6);
-      const hdrs=lines[0].split(",");
-      document.getElementById("prev-head").innerHTML="<tr>"+hdrs.map(h=>`<th>${h.trim()}</th>`).join("")+"</tr>";
-      document.getElementById("prev-body").innerHTML=lines.slice(1).map(l=>"<tr>"+l.split(",").map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>").join("");
-      document.getElementById("prev-card").style.display="block";
-      document.getElementById("prev-count").textContent="primeiras 5 linhas";
+      try{
+        const text=await file.text();
+        const lines=text.trim().split("\n").slice(0,6);
+        const hdrs=lines[0].split(",");
+        document.getElementById("prev-head").innerHTML="<tr>"+hdrs.map(h=>`<th>${h.trim()}</th>`).join("")+"</tr>";
+        document.getElementById("prev-body").innerHTML=lines.slice(1).map(l=>"<tr>"+l.split(",").map(c=>`<td>${c.trim()}</td>`).join("")+"</tr>").join("");
+        document.getElementById("prev-card").style.display="block";
+        document.getElementById("prev-count").textContent="primeiras 5 linhas";
+      }catch(_){}
+    } else {
+      document.getElementById("upload-status").innerHTML="Erro: "+(d.detail||"falha no processamento");
+      notify("Erro ao importar: "+(d.detail||"verifique o arquivo"),"error");
     }
   }catch(e){
-    document.getElementById("upload-status").innerHTML=" Erro ao importar.";
+    document.getElementById("upload-status").innerHTML="Erro de conexão ao importar.";
     notify("Erro ao importar arquivo.","error");
   }
 }
@@ -2311,12 +2316,11 @@ async function uploadJSON(){
 
 async function loadImportStatus(){
   try{
-    const r=await fetch("/api/cadastro/analytics");
+    const r=await fetch("/api/cadastro/resumo");
     if(!r.ok) return;
     const d=await r.json();
-    const tot=d.total||0;
-    document.getElementById("imp-total").textContent=fmtN(tot);
-    document.getElementById("imp-bairros").textContent=d.bairros||"—";
+    document.getElementById("imp-total").textContent=fmtN(d.total_cadastros||0);
+    document.getElementById("imp-bairros").textContent=d.bairros_distintos||"—";
     document.getElementById("imp-api").textContent="Online";
   }catch(e){}
 }
