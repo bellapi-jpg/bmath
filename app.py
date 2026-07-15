@@ -107,6 +107,20 @@ def health():
     return {"ok": True}
 
 
+@app.get("/api/admin/session-info")
+def session_info(request: Request):
+    """Diagnóstico de sessão — mostra se o cookie está correto (não expõe senha)."""
+    token = request.cookies.get("qs_session", "")
+    has_password = bool(APP_PASSWORD)
+    token_ok = bool(token) and secrets.compare_digest(token, VALID_TOKEN) if has_password else True
+    return {
+        "autenticado": token_ok,
+        "tem_senha_configurada": has_password,
+        "usuario": APP_USER,
+        "cookie_presente": bool(token),
+    }
+
+
 # ── Login / Logout ─────────────────────────────────────────────────────────────
 
 _LOGIN_HTML = """<!DOCTYPE html>
@@ -173,7 +187,7 @@ async def login_submit(
             "qs_session", VALID_TOKEN,
             httponly=True, samesite="lax",
             max_age=60 * 60 * 24 * 30,   # 30 dias
-            secure=os.environ.get("DATABASE_URL", "") != "",  # secure só em prod
+            secure=False,  # lax+secure causa problemas em alguns proxies Railway
         )
         return resp
     error_html = '<div class="err">Usuário ou senha incorretos.</div>'
@@ -201,7 +215,11 @@ async def upload_cadastros(
     origem: str = "upload",
     db: Session = Depends(get_db)
 ):
-    content = await file.read()
+    try:
+        content = await file.read()
+    except Exception as e:
+        return JSONResponse({"ok": False, "detail": f"Erro ao ler arquivo: {e}"}, status_code=400)
+
     fname = (file.filename or "").lower()
     try:
         if fname.endswith(".xlsx") or fname.endswith(".xls"):
@@ -212,11 +230,15 @@ async def upload_cadastros(
             except Exception:
                 df = pd.read_csv(io.BytesIO(content), encoding="latin1")
     except Exception as e:
-        raise HTTPException(400, f"Erro ao ler arquivo: {e}")
+        return JSONResponse({"ok": False, "detail": f"Formato inválido: {e}"}, status_code=400)
 
-    ingestor = CadastroIngestion(db)
-    result = ingestor.ingest(df, file.filename, origem)
-    return {"ok": True, **result}
+    try:
+        ingestor = CadastroIngestion(db)
+        result = ingestor.ingest(df, file.filename or "upload.csv", origem)
+        return {"ok": True, **result}
+    except Exception as e:
+        print(f"[ERRO] upload_cadastros: {e}")
+        return JSONResponse({"ok": False, "detail": f"Erro ao salvar: {e}"}, status_code=500)
 
 
 @app.post("/api/upload/cadastros/json")
