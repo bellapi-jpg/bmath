@@ -104,7 +104,10 @@ async def startup():
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    import re
+    raw = os.environ.get("DATABASE_URL", "NAO_CONFIGURADA")
+    safe = re.sub(r':([^@/]{4,})@', ':***@', raw)
+    return {"ok": True, "db_url": safe}
 
 
 @app.get("/api/admin/session-info")
