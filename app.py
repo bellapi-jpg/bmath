@@ -39,7 +39,8 @@ from analytics.engine import (
 APP_USER     = os.environ.get("QUOLIS_USER", "quolis")
 APP_PASSWORD = os.environ.get("QUOLIS_PASSWORD", "")
 # Token de sessão: derivado de user+password+secret para invalidar ao trocar senha
-_SESSION_SECRET = os.environ.get("QUOLIS_SESSION_SECRET", secrets.token_hex(32))
+# Fallback fixo garante sessão estável entre restarts quando var não está definida
+_SESSION_SECRET = os.environ.get("QUOLIS_SESSION_SECRET", "qualis-static-secret-2026")
 
 def _make_session_token() -> str:
     raw = f"{APP_USER}:{APP_PASSWORD}:{_SESSION_SECRET}"
@@ -48,7 +49,7 @@ def _make_session_token() -> str:
 VALID_TOKEN = _make_session_token()
 
 # Rotas que NÃO precisam de autenticação
-_PUBLIC_PATHS = {"/auth/login", "/auth/logout", "/favicon.ico"}
+_PUBLIC_PATHS = {"/auth/login", "/auth/logout", "/favicon.ico", "/health"}
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
